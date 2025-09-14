@@ -1,0 +1,4468 @@
+/opt/spacemit/sysroot/
+├── bin
+│   ├── jemalloc-config
+│   ├── jemalloc.sh
+│   └── jeprof
+├── etc
+│   └── rpc
+├── include
+│   ├── jemalloc
+│   │   └── jemalloc.h
+│   ├── mimalloc.h
+│   ├── mimalloc-new-delete.h
+│   ├── mimalloc-override.h
+│   ├── omp.h
+│   ├── ompt.h
+│   ├── ompt-multiplex.h
+│   ├── omp-tools.h
+│   └── ompx.h
+├── lib
+│   ├── cmake
+│   │   └── openmp
+│   │       └── FindOpenMPTarget.cmake
+│   ├── gcc -> /home/ci/gcc_linux_install/lib/gcc
+│   ├── ld-linux-riscv64-lp64d.so.1
+│   ├── ldscripts
+│   │   ├── elf32briscv_ilp32f.x
+│   │   ├── elf32briscv_ilp32f.xbn
+│   │   ├── elf32briscv_ilp32f.xc
+│   │   ├── elf32briscv_ilp32f.xce
+│   │   ├── elf32briscv_ilp32f.xcer
+│   │   ├── elf32briscv_ilp32f.xd
+│   │   ├── elf32briscv_ilp32f.xdc
+│   │   ├── elf32briscv_ilp32f.xdce
+│   │   ├── elf32briscv_ilp32f.xdcer
+│   │   ├── elf32briscv_ilp32f.xde
+│   │   ├── elf32briscv_ilp32f.xder
+│   │   ├── elf32briscv_ilp32f.xdw
+│   │   ├── elf32briscv_ilp32f.xdwe
+│   │   ├── elf32briscv_ilp32f.xdwer
+│   │   ├── elf32briscv_ilp32f.xe
+│   │   ├── elf32briscv_ilp32f.xer
+│   │   ├── elf32briscv_ilp32f.xn
+│   │   ├── elf32briscv_ilp32f.xr
+│   │   ├── elf32briscv_ilp32f.xs
+│   │   ├── elf32briscv_ilp32f.xsc
+│   │   ├── elf32briscv_ilp32f.xsce
+│   │   ├── elf32briscv_ilp32f.xscer
+│   │   ├── elf32briscv_ilp32f.xse
+│   │   ├── elf32briscv_ilp32f.xser
+│   │   ├── elf32briscv_ilp32f.xsw
+│   │   ├── elf32briscv_ilp32f.xswe
+│   │   ├── elf32briscv_ilp32f.xswer
+│   │   ├── elf32briscv_ilp32f.xu
+│   │   ├── elf32briscv_ilp32f.xw
+│   │   ├── elf32briscv_ilp32f.xwe
+│   │   ├── elf32briscv_ilp32f.xwer
+│   │   ├── elf32briscv_ilp32.x
+│   │   ├── elf32briscv_ilp32.xbn
+│   │   ├── elf32briscv_ilp32.xc
+│   │   ├── elf32briscv_ilp32.xce
+│   │   ├── elf32briscv_ilp32.xcer
+│   │   ├── elf32briscv_ilp32.xd
+│   │   ├── elf32briscv_ilp32.xdc
+│   │   ├── elf32briscv_ilp32.xdce
+│   │   ├── elf32briscv_ilp32.xdcer
+│   │   ├── elf32briscv_ilp32.xde
+│   │   ├── elf32briscv_ilp32.xder
+│   │   ├── elf32briscv_ilp32.xdw
+│   │   ├── elf32briscv_ilp32.xdwe
+│   │   ├── elf32briscv_ilp32.xdwer
+│   │   ├── elf32briscv_ilp32.xe
+│   │   ├── elf32briscv_ilp32.xer
+│   │   ├── elf32briscv_ilp32.xn
+│   │   ├── elf32briscv_ilp32.xr
+│   │   ├── elf32briscv_ilp32.xs
+│   │   ├── elf32briscv_ilp32.xsc
+│   │   ├── elf32briscv_ilp32.xsce
+│   │   ├── elf32briscv_ilp32.xscer
+│   │   ├── elf32briscv_ilp32.xse
+│   │   ├── elf32briscv_ilp32.xser
+│   │   ├── elf32briscv_ilp32.xsw
+│   │   ├── elf32briscv_ilp32.xswe
+│   │   ├── elf32briscv_ilp32.xswer
+│   │   ├── elf32briscv_ilp32.xu
+│   │   ├── elf32briscv_ilp32.xw
+│   │   ├── elf32briscv_ilp32.xwe
+│   │   ├── elf32briscv_ilp32.xwer
+│   │   ├── elf32briscv.x
+│   │   ├── elf32briscv.xbn
+│   │   ├── elf32briscv.xc
+│   │   ├── elf32briscv.xce
+│   │   ├── elf32briscv.xcer
+│   │   ├── elf32briscv.xd
+│   │   ├── elf32briscv.xdc
+│   │   ├── elf32briscv.xdce
+│   │   ├── elf32briscv.xdcer
+│   │   ├── elf32briscv.xde
+│   │   ├── elf32briscv.xder
+│   │   ├── elf32briscv.xdw
+│   │   ├── elf32briscv.xdwe
+│   │   ├── elf32briscv.xdwer
+│   │   ├── elf32briscv.xe
+│   │   ├── elf32briscv.xer
+│   │   ├── elf32briscv.xn
+│   │   ├── elf32briscv.xr
+│   │   ├── elf32briscv.xs
+│   │   ├── elf32briscv.xsc
+│   │   ├── elf32briscv.xsce
+│   │   ├── elf32briscv.xscer
+│   │   ├── elf32briscv.xse
+│   │   ├── elf32briscv.xser
+│   │   ├── elf32briscv.xsw
+│   │   ├── elf32briscv.xswe
+│   │   ├── elf32briscv.xswer
+│   │   ├── elf32briscv.xu
+│   │   ├── elf32briscv.xw
+│   │   ├── elf32briscv.xwe
+│   │   ├── elf32briscv.xwer
+│   │   ├── elf32lriscv_ilp32f.x
+│   │   ├── elf32lriscv_ilp32f.xbn
+│   │   ├── elf32lriscv_ilp32f.xc
+│   │   ├── elf32lriscv_ilp32f.xce
+│   │   ├── elf32lriscv_ilp32f.xcer
+│   │   ├── elf32lriscv_ilp32f.xd
+│   │   ├── elf32lriscv_ilp32f.xdc
+│   │   ├── elf32lriscv_ilp32f.xdce
+│   │   ├── elf32lriscv_ilp32f.xdcer
+│   │   ├── elf32lriscv_ilp32f.xde
+│   │   ├── elf32lriscv_ilp32f.xder
+│   │   ├── elf32lriscv_ilp32f.xdw
+│   │   ├── elf32lriscv_ilp32f.xdwe
+│   │   ├── elf32lriscv_ilp32f.xdwer
+│   │   ├── elf32lriscv_ilp32f.xe
+│   │   ├── elf32lriscv_ilp32f.xer
+│   │   ├── elf32lriscv_ilp32f.xn
+│   │   ├── elf32lriscv_ilp32f.xr
+│   │   ├── elf32lriscv_ilp32f.xs
+│   │   ├── elf32lriscv_ilp32f.xsc
+│   │   ├── elf32lriscv_ilp32f.xsce
+│   │   ├── elf32lriscv_ilp32f.xscer
+│   │   ├── elf32lriscv_ilp32f.xse
+│   │   ├── elf32lriscv_ilp32f.xser
+│   │   ├── elf32lriscv_ilp32f.xsw
+│   │   ├── elf32lriscv_ilp32f.xswe
+│   │   ├── elf32lriscv_ilp32f.xswer
+│   │   ├── elf32lriscv_ilp32f.xu
+│   │   ├── elf32lriscv_ilp32f.xw
+│   │   ├── elf32lriscv_ilp32f.xwe
+│   │   ├── elf32lriscv_ilp32f.xwer
+│   │   ├── elf32lriscv_ilp32.x
+│   │   ├── elf32lriscv_ilp32.xbn
+│   │   ├── elf32lriscv_ilp32.xc
+│   │   ├── elf32lriscv_ilp32.xce
+│   │   ├── elf32lriscv_ilp32.xcer
+│   │   ├── elf32lriscv_ilp32.xd
+│   │   ├── elf32lriscv_ilp32.xdc
+│   │   ├── elf32lriscv_ilp32.xdce
+│   │   ├── elf32lriscv_ilp32.xdcer
+│   │   ├── elf32lriscv_ilp32.xde
+│   │   ├── elf32lriscv_ilp32.xder
+│   │   ├── elf32lriscv_ilp32.xdw
+│   │   ├── elf32lriscv_ilp32.xdwe
+│   │   ├── elf32lriscv_ilp32.xdwer
+│   │   ├── elf32lriscv_ilp32.xe
+│   │   ├── elf32lriscv_ilp32.xer
+│   │   ├── elf32lriscv_ilp32.xn
+│   │   ├── elf32lriscv_ilp32.xr
+│   │   ├── elf32lriscv_ilp32.xs
+│   │   ├── elf32lriscv_ilp32.xsc
+│   │   ├── elf32lriscv_ilp32.xsce
+│   │   ├── elf32lriscv_ilp32.xscer
+│   │   ├── elf32lriscv_ilp32.xse
+│   │   ├── elf32lriscv_ilp32.xser
+│   │   ├── elf32lriscv_ilp32.xsw
+│   │   ├── elf32lriscv_ilp32.xswe
+│   │   ├── elf32lriscv_ilp32.xswer
+│   │   ├── elf32lriscv_ilp32.xu
+│   │   ├── elf32lriscv_ilp32.xw
+│   │   ├── elf32lriscv_ilp32.xwe
+│   │   ├── elf32lriscv_ilp32.xwer
+│   │   ├── elf32lriscv.x
+│   │   ├── elf32lriscv.xbn
+│   │   ├── elf32lriscv.xc
+│   │   ├── elf32lriscv.xce
+│   │   ├── elf32lriscv.xcer
+│   │   ├── elf32lriscv.xd
+│   │   ├── elf32lriscv.xdc
+│   │   ├── elf32lriscv.xdce
+│   │   ├── elf32lriscv.xdcer
+│   │   ├── elf32lriscv.xde
+│   │   ├── elf32lriscv.xder
+│   │   ├── elf32lriscv.xdw
+│   │   ├── elf32lriscv.xdwe
+│   │   ├── elf32lriscv.xdwer
+│   │   ├── elf32lriscv.xe
+│   │   ├── elf32lriscv.xer
+│   │   ├── elf32lriscv.xn
+│   │   ├── elf32lriscv.xr
+│   │   ├── elf32lriscv.xs
+│   │   ├── elf32lriscv.xsc
+│   │   ├── elf32lriscv.xsce
+│   │   ├── elf32lriscv.xscer
+│   │   ├── elf32lriscv.xse
+│   │   ├── elf32lriscv.xser
+│   │   ├── elf32lriscv.xsw
+│   │   ├── elf32lriscv.xswe
+│   │   ├── elf32lriscv.xswer
+│   │   ├── elf32lriscv.xu
+│   │   ├── elf32lriscv.xw
+│   │   ├── elf32lriscv.xwe
+│   │   ├── elf32lriscv.xwer
+│   │   ├── elf64briscv_lp64f.x
+│   │   ├── elf64briscv_lp64f.xbn
+│   │   ├── elf64briscv_lp64f.xc
+│   │   ├── elf64briscv_lp64f.xce
+│   │   ├── elf64briscv_lp64f.xcer
+│   │   ├── elf64briscv_lp64f.xd
+│   │   ├── elf64briscv_lp64f.xdc
+│   │   ├── elf64briscv_lp64f.xdce
+│   │   ├── elf64briscv_lp64f.xdcer
+│   │   ├── elf64briscv_lp64f.xde
+│   │   ├── elf64briscv_lp64f.xder
+│   │   ├── elf64briscv_lp64f.xdw
+│   │   ├── elf64briscv_lp64f.xdwe
+│   │   ├── elf64briscv_lp64f.xdwer
+│   │   ├── elf64briscv_lp64f.xe
+│   │   ├── elf64briscv_lp64f.xer
+│   │   ├── elf64briscv_lp64f.xn
+│   │   ├── elf64briscv_lp64f.xr
+│   │   ├── elf64briscv_lp64f.xs
+│   │   ├── elf64briscv_lp64f.xsc
+│   │   ├── elf64briscv_lp64f.xsce
+│   │   ├── elf64briscv_lp64f.xscer
+│   │   ├── elf64briscv_lp64f.xse
+│   │   ├── elf64briscv_lp64f.xser
+│   │   ├── elf64briscv_lp64f.xsw
+│   │   ├── elf64briscv_lp64f.xswe
+│   │   ├── elf64briscv_lp64f.xswer
+│   │   ├── elf64briscv_lp64f.xu
+│   │   ├── elf64briscv_lp64f.xw
+│   │   ├── elf64briscv_lp64f.xwe
+│   │   ├── elf64briscv_lp64f.xwer
+│   │   ├── elf64briscv_lp64.x
+│   │   ├── elf64briscv_lp64.xbn
+│   │   ├── elf64briscv_lp64.xc
+│   │   ├── elf64briscv_lp64.xce
+│   │   ├── elf64briscv_lp64.xcer
+│   │   ├── elf64briscv_lp64.xd
+│   │   ├── elf64briscv_lp64.xdc
+│   │   ├── elf64briscv_lp64.xdce
+│   │   ├── elf64briscv_lp64.xdcer
+│   │   ├── elf64briscv_lp64.xde
+│   │   ├── elf64briscv_lp64.xder
+│   │   ├── elf64briscv_lp64.xdw
+│   │   ├── elf64briscv_lp64.xdwe
+│   │   ├── elf64briscv_lp64.xdwer
+│   │   ├── elf64briscv_lp64.xe
+│   │   ├── elf64briscv_lp64.xer
+│   │   ├── elf64briscv_lp64.xn
+│   │   ├── elf64briscv_lp64.xr
+│   │   ├── elf64briscv_lp64.xs
+│   │   ├── elf64briscv_lp64.xsc
+│   │   ├── elf64briscv_lp64.xsce
+│   │   ├── elf64briscv_lp64.xscer
+│   │   ├── elf64briscv_lp64.xse
+│   │   ├── elf64briscv_lp64.xser
+│   │   ├── elf64briscv_lp64.xsw
+│   │   ├── elf64briscv_lp64.xswe
+│   │   ├── elf64briscv_lp64.xswer
+│   │   ├── elf64briscv_lp64.xu
+│   │   ├── elf64briscv_lp64.xw
+│   │   ├── elf64briscv_lp64.xwe
+│   │   ├── elf64briscv_lp64.xwer
+│   │   ├── elf64briscv.x
+│   │   ├── elf64briscv.xbn
+│   │   ├── elf64briscv.xc
+│   │   ├── elf64briscv.xce
+│   │   ├── elf64briscv.xcer
+│   │   ├── elf64briscv.xd
+│   │   ├── elf64briscv.xdc
+│   │   ├── elf64briscv.xdce
+│   │   ├── elf64briscv.xdcer
+│   │   ├── elf64briscv.xde
+│   │   ├── elf64briscv.xder
+│   │   ├── elf64briscv.xdw
+│   │   ├── elf64briscv.xdwe
+│   │   ├── elf64briscv.xdwer
+│   │   ├── elf64briscv.xe
+│   │   ├── elf64briscv.xer
+│   │   ├── elf64briscv.xn
+│   │   ├── elf64briscv.xr
+│   │   ├── elf64briscv.xs
+│   │   ├── elf64briscv.xsc
+│   │   ├── elf64briscv.xsce
+│   │   ├── elf64briscv.xscer
+│   │   ├── elf64briscv.xse
+│   │   ├── elf64briscv.xser
+│   │   ├── elf64briscv.xsw
+│   │   ├── elf64briscv.xswe
+│   │   ├── elf64briscv.xswer
+│   │   ├── elf64briscv.xu
+│   │   ├── elf64briscv.xw
+│   │   ├── elf64briscv.xwe
+│   │   ├── elf64briscv.xwer
+│   │   ├── elf64lriscv_lp64f.x
+│   │   ├── elf64lriscv_lp64f.xbn
+│   │   ├── elf64lriscv_lp64f.xc
+│   │   ├── elf64lriscv_lp64f.xce
+│   │   ├── elf64lriscv_lp64f.xcer
+│   │   ├── elf64lriscv_lp64f.xd
+│   │   ├── elf64lriscv_lp64f.xdc
+│   │   ├── elf64lriscv_lp64f.xdce
+│   │   ├── elf64lriscv_lp64f.xdcer
+│   │   ├── elf64lriscv_lp64f.xde
+│   │   ├── elf64lriscv_lp64f.xder
+│   │   ├── elf64lriscv_lp64f.xdw
+│   │   ├── elf64lriscv_lp64f.xdwe
+│   │   ├── elf64lriscv_lp64f.xdwer
+│   │   ├── elf64lriscv_lp64f.xe
+│   │   ├── elf64lriscv_lp64f.xer
+│   │   ├── elf64lriscv_lp64f.xn
+│   │   ├── elf64lriscv_lp64f.xr
+│   │   ├── elf64lriscv_lp64f.xs
+│   │   ├── elf64lriscv_lp64f.xsc
+│   │   ├── elf64lriscv_lp64f.xsce
+│   │   ├── elf64lriscv_lp64f.xscer
+│   │   ├── elf64lriscv_lp64f.xse
+│   │   ├── elf64lriscv_lp64f.xser
+│   │   ├── elf64lriscv_lp64f.xsw
+│   │   ├── elf64lriscv_lp64f.xswe
+│   │   ├── elf64lriscv_lp64f.xswer
+│   │   ├── elf64lriscv_lp64f.xu
+│   │   ├── elf64lriscv_lp64f.xw
+│   │   ├── elf64lriscv_lp64f.xwe
+│   │   ├── elf64lriscv_lp64f.xwer
+│   │   ├── elf64lriscv_lp64.x
+│   │   ├── elf64lriscv_lp64.xbn
+│   │   ├── elf64lriscv_lp64.xc
+│   │   ├── elf64lriscv_lp64.xce
+│   │   ├── elf64lriscv_lp64.xcer
+│   │   ├── elf64lriscv_lp64.xd
+│   │   ├── elf64lriscv_lp64.xdc
+│   │   ├── elf64lriscv_lp64.xdce
+│   │   ├── elf64lriscv_lp64.xdcer
+│   │   ├── elf64lriscv_lp64.xde
+│   │   ├── elf64lriscv_lp64.xder
+│   │   ├── elf64lriscv_lp64.xdw
+│   │   ├── elf64lriscv_lp64.xdwe
+│   │   ├── elf64lriscv_lp64.xdwer
+│   │   ├── elf64lriscv_lp64.xe
+│   │   ├── elf64lriscv_lp64.xer
+│   │   ├── elf64lriscv_lp64.xn
+│   │   ├── elf64lriscv_lp64.xr
+│   │   ├── elf64lriscv_lp64.xs
+│   │   ├── elf64lriscv_lp64.xsc
+│   │   ├── elf64lriscv_lp64.xsce
+│   │   ├── elf64lriscv_lp64.xscer
+│   │   ├── elf64lriscv_lp64.xse
+│   │   ├── elf64lriscv_lp64.xser
+│   │   ├── elf64lriscv_lp64.xsw
+│   │   ├── elf64lriscv_lp64.xswe
+│   │   ├── elf64lriscv_lp64.xswer
+│   │   ├── elf64lriscv_lp64.xu
+│   │   ├── elf64lriscv_lp64.xw
+│   │   ├── elf64lriscv_lp64.xwe
+│   │   ├── elf64lriscv_lp64.xwer
+│   │   ├── elf64lriscv.x
+│   │   ├── elf64lriscv.xbn
+│   │   ├── elf64lriscv.xc
+│   │   ├── elf64lriscv.xce
+│   │   ├── elf64lriscv.xcer
+│   │   ├── elf64lriscv.xd
+│   │   ├── elf64lriscv.xdc
+│   │   ├── elf64lriscv.xdce
+│   │   ├── elf64lriscv.xdcer
+│   │   ├── elf64lriscv.xde
+│   │   ├── elf64lriscv.xder
+│   │   ├── elf64lriscv.xdw
+│   │   ├── elf64lriscv.xdwe
+│   │   ├── elf64lriscv.xdwer
+│   │   ├── elf64lriscv.xe
+│   │   ├── elf64lriscv.xer
+│   │   ├── elf64lriscv.xn
+│   │   ├── elf64lriscv.xr
+│   │   ├── elf64lriscv.xs
+│   │   ├── elf64lriscv.xsc
+│   │   ├── elf64lriscv.xsce
+│   │   ├── elf64lriscv.xscer
+│   │   ├── elf64lriscv.xse
+│   │   ├── elf64lriscv.xser
+│   │   ├── elf64lriscv.xsw
+│   │   ├── elf64lriscv.xswe
+│   │   ├── elf64lriscv.xswer
+│   │   ├── elf64lriscv.xu
+│   │   ├── elf64lriscv.xw
+│   │   ├── elf64lriscv.xwe
+│   │   ├── elf64lriscv.xwer
+│   │   └── stamp
+│   ├── libanl.so.1
+│   ├── libarcher.so
+│   ├── libarcher_static.a
+│   ├── libasan.a
+│   ├── libasan.la
+│   ├── libasan_preinit.o
+│   ├── libasan.so -> libasan.so.8.0.0
+│   ├── libasan.so.8 -> libasan.so.8.0.0
+│   ├── libasan.so.8.0.0
+│   ├── libatomic.a
+│   ├── libatomic.la
+│   ├── libatomic.so -> libatomic.so.1.2.0
+│   ├── libatomic.so.1 -> libatomic.so.1.2.0
+│   ├── libatomic.so.1.2.0
+│   ├── libBrokenLocale.so.1
+│   ├── libc++.a
+│   ├── libc++abi.a
+│   ├── libc++abi.so
+│   ├── libc++abi.so.1
+│   ├── libc++abi.so.1.0
+│   ├── libc++experimental.a
+│   ├── libc_malloc_debug.so.0
+│   ├── libc++.modules.json
+│   ├── libcrypt.a
+│   ├── libcrypt.la
+│   ├── libcrypt.so -> libcrypt.so.1.1.0
+│   ├── libcrypt.so.1 -> libcrypt.so.1.1.0
+│   ├── libcrypt.so.1.1.0
+│   ├── libc++.so
+│   ├── libc++.so.1
+│   ├── libc++.so.1.0
+│   ├── libc.so.6
+│   ├── libdl.so.2
+│   ├── libgcc_s.so
+│   ├── libgcc_s.so.1
+│   ├── libgfortran.a
+│   ├── libgfortran.la
+│   ├── libgfortran.so -> libgfortran.so.5.0.0
+│   ├── libgfortran.so.5 -> libgfortran.so.5.0.0
+│   ├── libgfortran.so.5.0.0
+│   ├── libgfortran.spec
+│   ├── libgomp.a -> libomp.a
+│   ├── libgomp.la
+│   ├── libgomp.so -> libomp.so
+│   ├── libgomp.so.1 -> libgomp.so.1.0.0
+│   ├── libgomp.so.1.0.0
+│   ├── libgomp.spec
+│   ├── libiomp5.a -> libomp.a
+│   ├── libiomp5.so -> libomp.so
+│   ├── libitm.a
+│   ├── libitm.la
+│   ├── libitm.so -> libitm.so.1.0.0
+│   ├── libitm.so.1 -> libitm.so.1.0.0
+│   ├── libitm.so.1.0.0
+│   ├── libitm.spec
+│   ├── libjemalloc.a
+│   ├── libjemalloc_pic.a
+│   ├── libjemalloc.so -> libjemalloc.so.2
+│   ├── libjemalloc.so.2
+│   ├── liblsan.a
+│   ├── liblsan.la
+│   ├── liblsan_preinit.o
+│   ├── liblsan.so -> liblsan.so.0.0.0
+│   ├── liblsan.so.0 -> liblsan.so.0.0.0
+│   ├── liblsan.so.0.0.0
+│   ├── libmemusage.so
+│   ├── libm.so.6
+│   ├── libnsl.so.1
+│   ├── libnss_compat.so.2
+│   ├── libnss_db.so.2
+│   ├── libnss_dns.so.2
+│   ├── libnss_files.so.2
+│   ├── libnss_hesiod.so.2
+│   ├── libomp.a
+│   ├── libompd.so
+│   ├── libomp.so
+│   ├── libowcrypt.a -> libcrypt.a
+│   ├── libowcrypt.so -> libcrypt.so
+│   ├── libowcrypt.so.1 -> libcrypt.so.1
+│   ├── libpcprofile.so
+│   ├── libpthread.so.0
+│   ├── libresolv.so.2
+│   ├── librt.so.1
+│   ├── libsanitizer.spec
+│   ├── libstdc++.a
+│   ├── libstdc++exp.a
+│   ├── libstdc++exp.la
+│   ├── libstdc++fs.a
+│   ├── libstdc++fs.la
+│   ├── libstdc++.la
+│   ├── libstdc++.so -> libstdc++.so.6.0.33
+│   ├── libstdc++.so.6 -> libstdc++.so.6.0.33
+│   ├── libstdc++.so.6.0.33
+│   ├── libstdc++.so.6.0.33-gdb.py
+│   ├── libsupc++.a
+│   ├── libsupc++.la
+│   ├── libthread_db.so.1
+│   ├── libtsan.a
+│   ├── libtsan.la
+│   ├── libtsan_preinit.o
+│   ├── libtsan.so -> libtsan.so.2.0.0
+│   ├── libtsan.so.2 -> libtsan.so.2.0.0
+│   ├── libtsan.so.2.0.0
+│   ├── libubsan.a
+│   ├── libubsan.la
+│   ├── libubsan.so -> libubsan.so.1.0.0
+│   ├── libubsan.so.1 -> libubsan.so.1.0.0
+│   ├── libubsan.so.1.0.0
+│   ├── libutil.so.1
+│   ├── libxcrypt.a -> libcrypt.a
+│   ├── libxcrypt.so -> libcrypt.so
+│   ├── pkgconfig
+│   │   ├── jemalloc.pc
+│   │   ├── libcrypt.pc -> libxcrypt.pc
+│   │   └── libxcrypt.pc
+│   └── riscv64-linux-gnu
+├── lib64
+│   ├── cmake
+│   │   └── mimalloc
+│   │       ├── mimalloc.cmake
+│   │       ├── mimalloc-config.cmake
+│   │       ├── mimalloc-config-version.cmake
+│   │       └── mimalloc-release.cmake
+│   ├── libmimalloc.a
+│   ├── libmimalloc.so -> libmimalloc.so.2
+│   ├── libmimalloc.so.2 -> libmimalloc.so.2.1
+│   ├── libmimalloc.so.2.1
+│   ├── mimalloc.o
+│   └── pkgconfig
+│       └── mimalloc.pc
+├── sbin
+│   ├── ldconfig
+│   └── sln
+├── share
+│   ├── doc
+│   │   └── jemalloc
+│   │       └── jemalloc.html
+│   └── man
+│       ├── man3
+│       │   ├── crypt.3
+│       │   ├── crypt_checksalt.3
+│       │   ├── crypt_gensalt.3
+│       │   ├── crypt_gensalt_ra.3
+│       │   ├── crypt_gensalt_rn.3
+│       │   ├── crypt_preferred_method.3
+│       │   ├── crypt_r.3
+│       │   ├── crypt_ra.3
+│       │   ├── crypt_rn.3
+│       │   └── jemalloc.3
+│       └── man5
+│           └── crypt.5
+├── usr
+│   ├── bin
+│   │   ├── gencat
+│   │   ├── getconf
+│   │   ├── getent
+│   │   ├── iconv
+│   │   ├── ldd
+│   │   ├── ld.so -> ../../lib/ld-linux-riscv64-lp64d.so.1
+│   │   ├── locale
+│   │   ├── localedef
+│   │   ├── makedb
+│   │   ├── mtrace
+│   │   ├── pcprofiledump
+│   │   ├── pldd
+│   │   ├── sotruss
+│   │   ├── sprof
+│   │   ├── tzselect
+│   │   ├── xtrace
+│   │   └── zdump
+│   ├── include
+│   │   ├── aio.h
+│   │   ├── aliases.h
+│   │   ├── alloca.h
+│   │   ├── a.out.h
+│   │   ├── argp.h
+│   │   ├── argz.h
+│   │   ├── ar.h
+│   │   ├── arpa
+│   │   │   ├── ftp.h
+│   │   │   ├── inet.h
+│   │   │   ├── nameser_compat.h
+│   │   │   ├── nameser.h
+│   │   │   ├── telnet.h
+│   │   │   └── tftp.h
+│   │   ├── asm
+│   │   │   ├── auxvec.h
+│   │   │   ├── bitsperlong.h
+│   │   │   ├── bpf_perf_event.h
+│   │   │   ├── byteorder.h
+│   │   │   ├── elf.h
+│   │   │   ├── errno.h
+│   │   │   ├── fcntl.h
+│   │   │   ├── hwcap.h
+│   │   │   ├── hwprobe.h
+│   │   │   ├── ioctl.h
+│   │   │   ├── ioctls.h
+│   │   │   ├── ipcbuf.h
+│   │   │   ├── kvm.h
+│   │   │   ├── mman.h
+│   │   │   ├── msgbuf.h
+│   │   │   ├── param.h
+│   │   │   ├── perf_regs.h
+│   │   │   ├── poll.h
+│   │   │   ├── posix_types.h
+│   │   │   ├── ptrace.h
+│   │   │   ├── resource.h
+│   │   │   ├── sembuf.h
+│   │   │   ├── setup.h
+│   │   │   ├── shmbuf.h
+│   │   │   ├── sigcontext.h
+│   │   │   ├── siginfo.h
+│   │   │   ├── signal.h
+│   │   │   ├── socket.h
+│   │   │   ├── sockios.h
+│   │   │   ├── statfs.h
+│   │   │   ├── stat.h
+│   │   │   ├── swab.h
+│   │   │   ├── termbits.h
+│   │   │   ├── termios.h
+│   │   │   ├── types.h
+│   │   │   ├── ucontext.h
+│   │   │   └── unistd.h
+│   │   ├── asm-generic
+│   │   │   ├── auxvec.h
+│   │   │   ├── bitsperlong.h
+│   │   │   ├── bpf_perf_event.h
+│   │   │   ├── errno-base.h
+│   │   │   ├── errno.h
+│   │   │   ├── fcntl.h
+│   │   │   ├── hugetlb_encode.h
+│   │   │   ├── int-l64.h
+│   │   │   ├── int-ll64.h
+│   │   │   ├── ioctl.h
+│   │   │   ├── ioctls.h
+│   │   │   ├── ipcbuf.h
+│   │   │   ├── kvm_para.h
+│   │   │   ├── mman-common.h
+│   │   │   ├── mman.h
+│   │   │   ├── msgbuf.h
+│   │   │   ├── param.h
+│   │   │   ├── poll.h
+│   │   │   ├── posix_types.h
+│   │   │   ├── resource.h
+│   │   │   ├── sembuf.h
+│   │   │   ├── setup.h
+│   │   │   ├── shmbuf.h
+│   │   │   ├── siginfo.h
+│   │   │   ├── signal-defs.h
+│   │   │   ├── signal.h
+│   │   │   ├── socket.h
+│   │   │   ├── sockios.h
+│   │   │   ├── statfs.h
+│   │   │   ├── stat.h
+│   │   │   ├── swab.h
+│   │   │   ├── termbits-common.h
+│   │   │   ├── termbits.h
+│   │   │   ├── termios.h
+│   │   │   ├── types.h
+│   │   │   ├── ucontext.h
+│   │   │   └── unistd.h
+│   │   ├── assert.h
+│   │   ├── bits
+│   │   │   ├── a.out.h
+│   │   │   ├── argp-ldbl.h
+│   │   │   ├── atomic_wide_counter.h
+│   │   │   ├── byteswap.h
+│   │   │   ├── cmathcalls.h
+│   │   │   ├── confname.h
+│   │   │   ├── cpu-set.h
+│   │   │   ├── dirent_ext.h
+│   │   │   ├── dirent.h
+│   │   │   ├── dlfcn.h
+│   │   │   ├── dl_find_object.h
+│   │   │   ├── elfclass.h
+│   │   │   ├── endian.h
+│   │   │   ├── endianness.h
+│   │   │   ├── environments.h
+│   │   │   ├── epoll.h
+│   │   │   ├── err-ldbl.h
+│   │   │   ├── errno.h
+│   │   │   ├── error.h
+│   │   │   ├── error-ldbl.h
+│   │   │   ├── eventfd.h
+│   │   │   ├── fcntl2.h
+│   │   │   ├── fcntl.h
+│   │   │   ├── fcntl-linux.h
+│   │   │   ├── fenv.h
+│   │   │   ├── floatn-common.h
+│   │   │   ├── floatn.h
+│   │   │   ├── flt-eval-method.h
+│   │   │   ├── fp-fast.h
+│   │   │   ├── fp-logb.h
+│   │   │   ├── getopt_core.h
+│   │   │   ├── getopt_ext.h
+│   │   │   ├── getopt_posix.h
+│   │   │   ├── hwcap.h
+│   │   │   ├── indirect-return.h
+│   │   │   ├── in.h
+│   │   │   ├── initspin.h
+│   │   │   ├── inotify.h
+│   │   │   ├── ioctls.h
+│   │   │   ├── ioctl-types.h
+│   │   │   ├── ipc.h
+│   │   │   ├── ipc-perm.h
+│   │   │   ├── ipctypes.h
+│   │   │   ├── iscanonical.h
+│   │   │   ├── libc-header-start.h
+│   │   │   ├── libm-simd-decl-stubs.h
+│   │   │   ├── link.h
+│   │   │   ├── link_lavcurrent.h
+│   │   │   ├── locale.h
+│   │   │   ├── local_lim.h
+│   │   │   ├── long-double.h
+│   │   │   ├── mathcalls.h
+│   │   │   ├── mathcalls-helper-functions.h
+│   │   │   ├── mathcalls-narrow.h
+│   │   │   ├── mathdef.h
+│   │   │   ├── math-vector.h
+│   │   │   ├── mman_ext.h
+│   │   │   ├── mman.h
+│   │   │   ├── mman-linux.h
+│   │   │   ├── mman-map-flags-generic.h
+│   │   │   ├── mman-shared.h
+│   │   │   ├── monetary-ldbl.h
+│   │   │   ├── mqueue2.h
+│   │   │   ├── mqueue.h
+│   │   │   ├── msq.h
+│   │   │   ├── netdb.h
+│   │   │   ├── param.h
+│   │   │   ├── poll2.h
+│   │   │   ├── poll.h
+│   │   │   ├── posix1_lim.h
+│   │   │   ├── posix2_lim.h
+│   │   │   ├── posix_opt.h
+│   │   │   ├── printf-ldbl.h
+│   │   │   ├── procfs-extra.h
+│   │   │   ├── procfs.h
+│   │   │   ├── procfs-id.h
+│   │   │   ├── procfs-prregset.h
+│   │   │   ├── pthread_stack_min-dynamic.h
+│   │   │   ├── pthread_stack_min.h
+│   │   │   ├── pthreadtypes-arch.h
+│   │   │   ├── pthreadtypes.h
+│   │   │   ├── ptrace-shared.h
+│   │   │   ├── resource.h
+│   │   │   ├── rseq.h
+│   │   │   ├── sched.h
+│   │   │   ├── select2.h
+│   │   │   ├── select-decl.h
+│   │   │   ├── select.h
+│   │   │   ├── semaphore.h
+│   │   │   ├── sem.h
+│   │   │   ├── setjmp2.h
+│   │   │   ├── setjmp.h
+│   │   │   ├── shm.h
+│   │   │   ├── shmlba.h
+│   │   │   ├── sigaction.h
+│   │   │   ├── sigcontext.h
+│   │   │   ├── sigevent-consts.h
+│   │   │   ├── siginfo-arch.h
+│   │   │   ├── siginfo-consts-arch.h
+│   │   │   ├── siginfo-consts.h
+│   │   │   ├── signal_ext.h
+│   │   │   ├── signalfd.h
+│   │   │   ├── signum-arch.h
+│   │   │   ├── signum-generic.h
+│   │   │   ├── sigstack.h
+│   │   │   ├── sigstksz.h
+│   │   │   ├── sigthread.h
+│   │   │   ├── sockaddr.h
+│   │   │   ├── socket2.h
+│   │   │   ├── socket-constants.h
+│   │   │   ├── socket.h
+│   │   │   ├── socket_type.h
+│   │   │   ├── spawn_ext.h
+│   │   │   ├── ss_flags.h
+│   │   │   ├── stab.def
+│   │   │   ├── statfs.h
+│   │   │   ├── stat.h
+│   │   │   ├── statvfs.h
+│   │   │   ├── statx-generic.h
+│   │   │   ├── statx.h
+│   │   │   ├── stdint-intn.h
+│   │   │   ├── stdint-least.h
+│   │   │   ├── stdint-uintn.h
+│   │   │   ├── stdio2-decl.h
+│   │   │   ├── stdio2.h
+│   │   │   ├── stdio.h
+│   │   │   ├── stdio-ldbl.h
+│   │   │   ├── stdio_lim.h
+│   │   │   ├── stdlib-bsearch.h
+│   │   │   ├── stdlib-float.h
+│   │   │   ├── stdlib.h
+│   │   │   ├── stdlib-ldbl.h
+│   │   │   ├── string_fortified.h
+│   │   │   ├── strings_fortified.h
+│   │   │   ├── struct_mutex.h
+│   │   │   ├── struct_rwlock.h
+│   │   │   ├── struct_stat.h
+│   │   │   ├── struct_stat_time64_helper.h
+│   │   │   ├── syscall.h
+│   │   │   ├── syslog-decl.h
+│   │   │   ├── syslog.h
+│   │   │   ├── syslog-ldbl.h
+│   │   │   ├── syslog-path.h
+│   │   │   ├── sysmacros.h
+│   │   │   ├── termios-baud.h
+│   │   │   ├── termios-c_cc.h
+│   │   │   ├── termios-c_cflag.h
+│   │   │   ├── termios-c_iflag.h
+│   │   │   ├── termios-c_lflag.h
+│   │   │   ├── termios-c_oflag.h
+│   │   │   ├── termios.h
+│   │   │   ├── termios-misc.h
+│   │   │   ├── termios-struct.h
+│   │   │   ├── termios-tcflow.h
+│   │   │   ├── thread-shared-types.h
+│   │   │   ├── time64.h
+│   │   │   ├── time.h
+│   │   │   ├── timerfd.h
+│   │   │   ├── timesize.h
+│   │   │   ├── timex.h
+│   │   │   ├── types
+│   │   │   │   ├── clockid_t.h
+│   │   │   │   ├── clock_t.h
+│   │   │   │   ├── cookie_io_functions_t.h
+│   │   │   │   ├── error_t.h
+│   │   │   │   ├── __FILE.h
+│   │   │   │   ├── FILE.h
+│   │   │   │   ├── __fpos64_t.h
+│   │   │   │   ├── __fpos_t.h
+│   │   │   │   ├── idtype_t.h
+│   │   │   │   ├── __locale_t.h
+│   │   │   │   ├── locale_t.h
+│   │   │   │   ├── __mbstate_t.h
+│   │   │   │   ├── mbstate_t.h
+│   │   │   │   ├── res_state.h
+│   │   │   │   ├── sig_atomic_t.h
+│   │   │   │   ├── sigevent_t.h
+│   │   │   │   ├── siginfo_t.h
+│   │   │   │   ├── __sigset_t.h
+│   │   │   │   ├── sigset_t.h
+│   │   │   │   ├── __sigval_t.h
+│   │   │   │   ├── sigval_t.h
+│   │   │   │   ├── stack_t.h
+│   │   │   │   ├── struct_FILE.h
+│   │   │   │   ├── struct_iovec.h
+│   │   │   │   ├── struct_itimerspec.h
+│   │   │   │   ├── struct___jmp_buf_tag.h
+│   │   │   │   ├── struct_msqid64_ds.h
+│   │   │   │   ├── struct_msqid64_ds_helper.h
+│   │   │   │   ├── struct_msqid_ds.h
+│   │   │   │   ├── struct_osockaddr.h
+│   │   │   │   ├── struct_rusage.h
+│   │   │   │   ├── struct_sched_param.h
+│   │   │   │   ├── struct_semid64_ds.h
+│   │   │   │   ├── struct_semid64_ds_helper.h
+│   │   │   │   ├── struct_semid_ds.h
+│   │   │   │   ├── struct_shmid64_ds.h
+│   │   │   │   ├── struct_shmid64_ds_helper.h
+│   │   │   │   ├── struct_shmid_ds.h
+│   │   │   │   ├── struct_sigstack.h
+│   │   │   │   ├── struct_statx.h
+│   │   │   │   ├── struct_statx_timestamp.h
+│   │   │   │   ├── struct_timeb.h
+│   │   │   │   ├── struct_timespec.h
+│   │   │   │   ├── struct_timeval.h
+│   │   │   │   ├── struct_tm.h
+│   │   │   │   ├── timer_t.h
+│   │   │   │   ├── time_t.h
+│   │   │   │   └── wint_t.h
+│   │   │   ├── types.h
+│   │   │   ├── typesizes.h
+│   │   │   ├── uintn-identity.h
+│   │   │   ├── uio-ext.h
+│   │   │   ├── uio_lim.h
+│   │   │   ├── unistd-decl.h
+│   │   │   ├── unistd_ext.h
+│   │   │   ├── unistd.h
+│   │   │   ├── utmp.h
+│   │   │   ├── utmpx.h
+│   │   │   ├── utsname.h
+│   │   │   ├── waitflags.h
+│   │   │   ├── waitstatus.h
+│   │   │   ├── wchar2-decl.h
+│   │   │   ├── wchar2.h
+│   │   │   ├── wchar.h
+│   │   │   ├── wchar-ldbl.h
+│   │   │   ├── wctype-wchar.h
+│   │   │   ├── wordsize.h
+│   │   │   └── xopen_lim.h
+│   │   ├── byteswap.h
+│   │   ├── complex.h
+│   │   ├── cpio.h
+│   │   ├── crypt.h
+│   │   ├── ctype.h
+│   │   ├── dirent.h
+│   │   ├── dlfcn.h
+│   │   ├── drm
+│   │   │   ├── amdgpu_drm.h
+│   │   │   ├── armada_drm.h
+│   │   │   ├── drm_fourcc.h
+│   │   │   ├── drm.h
+│   │   │   ├── drm_mode.h
+│   │   │   ├── drm_sarea.h
+│   │   │   ├── etnaviv_drm.h
+│   │   │   ├── exynos_drm.h
+│   │   │   ├── habanalabs_accel.h
+│   │   │   ├── i915_drm.h
+│   │   │   ├── ivpu_accel.h
+│   │   │   ├── lima_drm.h
+│   │   │   ├── msm_drm.h
+│   │   │   ├── nouveau_drm.h
+│   │   │   ├── omap_drm.h
+│   │   │   ├── panfrost_drm.h
+│   │   │   ├── qaic_accel.h
+│   │   │   ├── qxl_drm.h
+│   │   │   ├── radeon_drm.h
+│   │   │   ├── tegra_drm.h
+│   │   │   ├── v3d_drm.h
+│   │   │   ├── vc4_drm.h
+│   │   │   ├── vgem_drm.h
+│   │   │   ├── virtgpu_drm.h
+│   │   │   └── vmwgfx_drm.h
+│   │   ├── elf.h
+│   │   ├── endian.h
+│   │   ├── envz.h
+│   │   ├── err.h
+│   │   ├── errno.h
+│   │   ├── error.h
+│   │   ├── execinfo.h
+│   │   ├── fcntl.h
+│   │   ├── features.h
+│   │   ├── features-time64.h
+│   │   ├── fenv.h
+│   │   ├── finclude
+│   │   │   └── math-vector-fortran.h
+│   │   ├── fmtmsg.h
+│   │   ├── fnmatch.h
+│   │   ├── fpu_control.h
+│   │   ├── fstab.h
+│   │   ├── fts.h
+│   │   ├── ftw.h
+│   │   ├── gconv.h
+│   │   ├── getopt.h
+│   │   ├── glob.h
+│   │   ├── gnu
+│   │   │   ├── libc-version.h
+│   │   │   ├── lib-names.h
+│   │   │   ├── lib-names-lp64d.h
+│   │   │   ├── stubs.h
+│   │   │   └── stubs-lp64d.h
+│   │   ├── gnu-versions.h
+│   │   ├── grp.h
+│   │   ├── gshadow.h
+│   │   ├── iconv.h
+│   │   ├── ieee754.h
+│   │   ├── ifaddrs.h
+│   │   ├── inttypes.h
+│   │   ├── langinfo.h
+│   │   ├── lastlog.h
+│   │   ├── libdrm
+│   │   ├── libgen.h
+│   │   ├── libintl.h
+│   │   ├── libv4l2
+│   │   ├── libv4l2.h
+│   │   ├── libv4l-plugin.h
+│   │   ├── limits.h
+│   │   ├── link.h
+│   │   ├── linux
+│   │   │   ├── acct.h
+│   │   │   ├── acrn.h
+│   │   │   ├── adb.h
+│   │   │   ├── adfs_fs.h
+│   │   │   ├── affs_hardblocks.h
+│   │   │   ├── agpgart.h
+│   │   │   ├── aio_abi.h
+│   │   │   ├── am437x-vpfe.h
+│   │   │   ├── amt.h
+│   │   │   ├── android
+│   │   │   │   ├── binderfs.h
+│   │   │   │   └── binder.h
+│   │   │   ├── apm_bios.h
+│   │   │   ├── arcfb.h
+│   │   │   ├── arm_sdei.h
+│   │   │   ├── aspeed-lpc-ctrl.h
+│   │   │   ├── aspeed-p2a-ctrl.h
+│   │   │   ├── aspeed-video.h
+│   │   │   ├── atalk.h
+│   │   │   ├── atmapi.h
+│   │   │   ├── atmarp.h
+│   │   │   ├── atmbr2684.h
+│   │   │   ├── atmclip.h
+│   │   │   ├── atmdev.h
+│   │   │   ├── atm_eni.h
+│   │   │   ├── atm.h
+│   │   │   ├── atm_he.h
+│   │   │   ├── atm_idt77105.h
+│   │   │   ├── atmioc.h
+│   │   │   ├── atmlec.h
+│   │   │   ├── atmmpc.h
+│   │   │   ├── atm_nicstar.h
+│   │   │   ├── atmppp.h
+│   │   │   ├── atmsap.h
+│   │   │   ├── atmsvc.h
+│   │   │   ├── atm_tcp.h
+│   │   │   ├── atm_zatm.h
+│   │   │   ├── audit.h
+│   │   │   ├── auto_dev-ioctl.h
+│   │   │   ├── auto_fs4.h
+│   │   │   ├── auto_fs.h
+│   │   │   ├── auxvec.h
+│   │   │   ├── ax25.h
+│   │   │   ├── batadv_packet.h
+│   │   │   ├── batman_adv.h
+│   │   │   ├── baycom.h
+│   │   │   ├── bcm933xx_hcs.h
+│   │   │   ├── bfs_fs.h
+│   │   │   ├── binfmts.h
+│   │   │   ├── blkpg.h
+│   │   │   ├── blktrace_api.h
+│   │   │   ├── blkzoned.h
+│   │   │   ├── bpf_common.h
+│   │   │   ├── bpf.h
+│   │   │   ├── bpfilter.h
+│   │   │   ├── bpf_perf_event.h
+│   │   │   ├── bpqether.h
+│   │   │   ├── bsg.h
+│   │   │   ├── bt-bmc.h
+│   │   │   ├── btf.h
+│   │   │   ├── btrfs.h
+│   │   │   ├── btrfs_tree.h
+│   │   │   ├── byteorder
+│   │   │   │   ├── big_endian.h
+│   │   │   │   └── little_endian.h
+│   │   │   ├── cachefiles.h
+│   │   │   ├── caif
+│   │   │   │   ├── caif_socket.h
+│   │   │   │   └── if_caif.h
+│   │   │   ├── can
+│   │   │   │   ├── bcm.h
+│   │   │   │   ├── error.h
+│   │   │   │   ├── gw.h
+│   │   │   │   ├── isotp.h
+│   │   │   │   ├── j1939.h
+│   │   │   │   ├── netlink.h
+│   │   │   │   ├── raw.h
+│   │   │   │   └── vxcan.h
+│   │   │   ├── can.h
+│   │   │   ├── capability.h
+│   │   │   ├── capi.h
+│   │   │   ├── cciss_defs.h
+│   │   │   ├── cciss_ioctl.h
+│   │   │   ├── ccs.h
+│   │   │   ├── cdrom.h
+│   │   │   ├── cec-funcs.h
+│   │   │   ├── cec.h
+│   │   │   ├── cfm_bridge.h
+│   │   │   ├── cgroupstats.h
+│   │   │   ├── chio.h
+│   │   │   ├── cifs
+│   │   │   │   ├── cifs_mount.h
+│   │   │   │   └── cifs_netlink.h
+│   │   │   ├── close_range.h
+│   │   │   ├── cn_proc.h
+│   │   │   ├── coda.h
+│   │   │   ├── coff.h
+│   │   │   ├── comedi.h
+│   │   │   ├── connector.h
+│   │   │   ├── const.h
+│   │   │   ├── coresight-stm.h
+│   │   │   ├── counter.h
+│   │   │   ├── cramfs_fs.h
+│   │   │   ├── cryptouser.h
+│   │   │   ├── cuda.h
+│   │   │   ├── cxl_mem.h
+│   │   │   ├── cyclades.h
+│   │   │   ├── cycx_cfm.h
+│   │   │   ├── dcbnl.h
+│   │   │   ├── dccp.h
+│   │   │   ├── devlink.h
+│   │   │   ├── dlmconstants.h
+│   │   │   ├── dlm_device.h
+│   │   │   ├── dlm.h
+│   │   │   ├── dlm_plock.h
+│   │   │   ├── dma-buf.h
+│   │   │   ├── dma-heap.h
+│   │   │   ├── dm-ioctl.h
+│   │   │   ├── dm-log-userspace.h
+│   │   │   ├── dns_resolver.h
+│   │   │   ├── dqblk_xfs.h
+│   │   │   ├── dvb
+│   │   │   │   ├── audio.h
+│   │   │   │   ├── ca.h
+│   │   │   │   ├── dmx.h
+│   │   │   │   ├── frontend.h
+│   │   │   │   ├── net.h
+│   │   │   │   ├── osd.h
+│   │   │   │   ├── version.h
+│   │   │   │   └── video.h
+│   │   │   ├── dw100.h
+│   │   │   ├── edd.h
+│   │   │   ├── efs_fs_sb.h
+│   │   │   ├── elf-em.h
+│   │   │   ├── elf-fdpic.h
+│   │   │   ├── elf.h
+│   │   │   ├── errno.h
+│   │   │   ├── errqueue.h
+│   │   │   ├── erspan.h
+│   │   │   ├── ethtool.h
+│   │   │   ├── ethtool_netlink.h
+│   │   │   ├── eventfd.h
+│   │   │   ├── eventpoll.h
+│   │   │   ├── ext4.h
+│   │   │   ├── f2fs.h
+│   │   │   ├── fadvise.h
+│   │   │   ├── falloc.h
+│   │   │   ├── fanotify.h
+│   │   │   ├── fb.h
+│   │   │   ├── fcntl.h
+│   │   │   ├── fd.h
+│   │   │   ├── fdreg.h
+│   │   │   ├── fib_rules.h
+│   │   │   ├── fiemap.h
+│   │   │   ├── filter.h
+│   │   │   ├── firewire-cdev.h
+│   │   │   ├── firewire-constants.h
+│   │   │   ├── fou.h
+│   │   │   ├── fpga-dfl.h
+│   │   │   ├── fscrypt.h
+│   │   │   ├── fs.h
+│   │   │   ├── fsi.h
+│   │   │   ├── fsl_hypervisor.h
+│   │   │   ├── fsl_mc.h
+│   │   │   ├── fsmap.h
+│   │   │   ├── fsverity.h
+│   │   │   ├── fuse.h
+│   │   │   ├── futex.h
+│   │   │   ├── gameport.h
+│   │   │   ├── genetlink.h
+│   │   │   ├── gen_stats.h
+│   │   │   ├── genwqe
+│   │   │   │   └── genwqe_card.h
+│   │   │   ├── gfs2_ondisk.h
+│   │   │   ├── gpio.h
+│   │   │   ├── gsmmux.h
+│   │   │   ├── gtp.h
+│   │   │   ├── handshake.h
+│   │   │   ├── hash_info.h
+│   │   │   ├── hdlc
+│   │   │   │   └── ioctl.h
+│   │   │   ├── hdlcdrv.h
+│   │   │   ├── hdlc.h
+│   │   │   ├── hdreg.h
+│   │   │   ├── hiddev.h
+│   │   │   ├── hid.h
+│   │   │   ├── hidraw.h
+│   │   │   ├── hpet.h
+│   │   │   ├── hsi
+│   │   │   │   ├── cs-protocol.h
+│   │   │   │   └── hsi_char.h
+│   │   │   ├── hsr_netlink.h
+│   │   │   ├── hw_breakpoint.h
+│   │   │   ├── hyperv.h
+│   │   │   ├── i2c-dev.h
+│   │   │   ├── i2c.h
+│   │   │   ├── i2o-dev.h
+│   │   │   ├── i8k.h
+│   │   │   ├── icmp.h
+│   │   │   ├── icmpv6.h
+│   │   │   ├── idxd.h
+│   │   │   ├── if_addr.h
+│   │   │   ├── if_addrlabel.h
+│   │   │   ├── if_alg.h
+│   │   │   ├── if_arcnet.h
+│   │   │   ├── if_arp.h
+│   │   │   ├── if_bonding.h
+│   │   │   ├── if_bridge.h
+│   │   │   ├── if_cablemodem.h
+│   │   │   ├── ife.h
+│   │   │   ├── if_eql.h
+│   │   │   ├── if_ether.h
+│   │   │   ├── if_fc.h
+│   │   │   ├── if_fddi.h
+│   │   │   ├── if.h
+│   │   │   ├── if_hippi.h
+│   │   │   ├── if_infiniband.h
+│   │   │   ├── if_link.h
+│   │   │   ├── if_ltalk.h
+│   │   │   ├── if_macsec.h
+│   │   │   ├── if_packet.h
+│   │   │   ├── if_phonet.h
+│   │   │   ├── if_plip.h
+│   │   │   ├── if_ppp.h
+│   │   │   ├── if_pppol2tp.h
+│   │   │   ├── if_pppox.h
+│   │   │   ├── if_slip.h
+│   │   │   ├── if_team.h
+│   │   │   ├── if_tun.h
+│   │   │   ├── if_tunnel.h
+│   │   │   ├── if_vlan.h
+│   │   │   ├── if_x25.h
+│   │   │   ├── if_xdp.h
+│   │   │   ├── igmp.h
+│   │   │   ├── iio
+│   │   │   │   ├── buffer.h
+│   │   │   │   ├── events.h
+│   │   │   │   └── types.h
+│   │   │   ├── ila.h
+│   │   │   ├── in6.h
+│   │   │   ├── inet_diag.h
+│   │   │   ├── in.h
+│   │   │   ├── inotify.h
+│   │   │   ├── input-event-codes.h
+│   │   │   ├── input.h
+│   │   │   ├── in_route.h
+│   │   │   ├── ioam6_genl.h
+│   │   │   ├── ioam6.h
+│   │   │   ├── ioam6_iptunnel.h
+│   │   │   ├── ioctl.h
+│   │   │   ├── iommufd.h
+│   │   │   ├── iommu.h
+│   │   │   ├── ioprio.h
+│   │   │   ├── io_uring.h
+│   │   │   ├── ip6_tunnel.h
+│   │   │   ├── ipc.h
+│   │   │   ├── ip.h
+│   │   │   ├── ipmi_bmc.h
+│   │   │   ├── ipmi.h
+│   │   │   ├── ipmi_msgdefs.h
+│   │   │   ├── ipmi_ssif_bmc.h
+│   │   │   ├── ipsec.h
+│   │   │   ├── ipv6.h
+│   │   │   ├── ipv6_route.h
+│   │   │   ├── ip_vs.h
+│   │   │   ├── irqnr.h
+│   │   │   ├── isdn
+│   │   │   │   └── capicmd.h
+│   │   │   ├── iso_fs.h
+│   │   │   ├── isst_if.h
+│   │   │   ├── ivtvfb.h
+│   │   │   ├── ivtv.h
+│   │   │   ├── jffs2.h
+│   │   │   ├── joystick.h
+│   │   │   ├── kcm.h
+│   │   │   ├── kcmp.h
+│   │   │   ├── kcov.h
+│   │   │   ├── kdev_t.h
+│   │   │   ├── kd.h
+│   │   │   ├── kernelcapi.h
+│   │   │   ├── kernel.h
+│   │   │   ├── kernel-page-flags.h
+│   │   │   ├── kexec.h
+│   │   │   ├── keyboard.h
+│   │   │   ├── keyctl.h
+│   │   │   ├── kfd_ioctl.h
+│   │   │   ├── kfd_sysfs.h
+│   │   │   ├── kvm.h
+│   │   │   ├── l2tp.h
+│   │   │   ├── landlock.h
+│   │   │   ├── libc-compat.h
+│   │   │   ├── limits.h
+│   │   │   ├── lirc.h
+│   │   │   ├── llc.h
+│   │   │   ├── loadpin.h
+│   │   │   ├── loop.h
+│   │   │   ├── lp.h
+│   │   │   ├── lwtunnel.h
+│   │   │   ├── magic.h
+│   │   │   ├── major.h
+│   │   │   ├── map_to_14segment.h
+│   │   │   ├── map_to_7segment.h
+│   │   │   ├── matroxfb.h
+│   │   │   ├── max2175.h
+│   │   │   ├── mctp.h
+│   │   │   ├── mdio.h
+│   │   │   ├── media-bus-format.h
+│   │   │   ├── media.h
+│   │   │   ├── mei.h
+│   │   │   ├── mei_uuid.h
+│   │   │   ├── membarrier.h
+│   │   │   ├── memfd.h
+│   │   │   ├── mempolicy.h
+│   │   │   ├── mii.h
+│   │   │   ├── minix_fs.h
+│   │   │   ├── misc
+│   │   │   │   └── bcm_vk.h
+│   │   │   ├── mman.h
+│   │   │   ├── mmc
+│   │   │   │   └── ioctl.h
+│   │   │   ├── mmtimer.h
+│   │   │   ├── module.h
+│   │   │   ├── mount.h
+│   │   │   ├── mpls.h
+│   │   │   ├── mpls_iptunnel.h
+│   │   │   ├── mptcp.h
+│   │   │   ├── mqueue.h
+│   │   │   ├── mroute6.h
+│   │   │   ├── mroute.h
+│   │   │   ├── mrp_bridge.h
+│   │   │   ├── msdos_fs.h
+│   │   │   ├── msg.h
+│   │   │   ├── mtio.h
+│   │   │   ├── nbd.h
+│   │   │   ├── nbd-netlink.h
+│   │   │   ├── ncsi.h
+│   │   │   ├── ndctl.h
+│   │   │   ├── neighbour.h
+│   │   │   ├── netconf.h
+│   │   │   ├── netdev.h
+│   │   │   ├── netdevice.h
+│   │   │   ├── net_dropmon.h
+│   │   │   ├── netfilter
+│   │   │   │   ├── ipset
+│   │   │   │   │   ├── ip_set_bitmap.h
+│   │   │   │   │   ├── ip_set.h
+│   │   │   │   │   ├── ip_set_hash.h
+│   │   │   │   │   └── ip_set_list.h
+│   │   │   │   ├── nf_conntrack_common.h
+│   │   │   │   ├── nf_conntrack_ftp.h
+│   │   │   │   ├── nf_conntrack_sctp.h
+│   │   │   │   ├── nf_conntrack_tcp.h
+│   │   │   │   ├── nf_conntrack_tuple_common.h
+│   │   │   │   ├── nf_log.h
+│   │   │   │   ├── nf_nat.h
+│   │   │   │   ├── nfnetlink_acct.h
+│   │   │   │   ├── nfnetlink_compat.h
+│   │   │   │   ├── nfnetlink_conntrack.h
+│   │   │   │   ├── nfnetlink_cthelper.h
+│   │   │   │   ├── nfnetlink_cttimeout.h
+│   │   │   │   ├── nfnetlink.h
+│   │   │   │   ├── nfnetlink_hook.h
+│   │   │   │   ├── nfnetlink_log.h
+│   │   │   │   ├── nfnetlink_osf.h
+│   │   │   │   ├── nfnetlink_queue.h
+│   │   │   │   ├── nf_synproxy.h
+│   │   │   │   ├── nf_tables_compat.h
+│   │   │   │   ├── nf_tables.h
+│   │   │   │   ├── x_tables.h
+│   │   │   │   ├── xt_addrtype.h
+│   │   │   │   ├── xt_AUDIT.h
+│   │   │   │   ├── xt_bpf.h
+│   │   │   │   ├── xt_cgroup.h
+│   │   │   │   ├── xt_CHECKSUM.h
+│   │   │   │   ├── xt_CLASSIFY.h
+│   │   │   │   ├── xt_cluster.h
+│   │   │   │   ├── xt_comment.h
+│   │   │   │   ├── xt_connbytes.h
+│   │   │   │   ├── xt_connlabel.h
+│   │   │   │   ├── xt_connlimit.h
+│   │   │   │   ├── xt_connmark.h
+│   │   │   │   ├── xt_CONNMARK.h
+│   │   │   │   ├── xt_CONNSECMARK.h
+│   │   │   │   ├── xt_conntrack.h
+│   │   │   │   ├── xt_cpu.h
+│   │   │   │   ├── xt_CT.h
+│   │   │   │   ├── xt_dccp.h
+│   │   │   │   ├── xt_devgroup.h
+│   │   │   │   ├── xt_dscp.h
+│   │   │   │   ├── xt_DSCP.h
+│   │   │   │   ├── xt_ecn.h
+│   │   │   │   ├── xt_esp.h
+│   │   │   │   ├── xt_hashlimit.h
+│   │   │   │   ├── xt_helper.h
+│   │   │   │   ├── xt_HMARK.h
+│   │   │   │   ├── xt_IDLETIMER.h
+│   │   │   │   ├── xt_ipcomp.h
+│   │   │   │   ├── xt_iprange.h
+│   │   │   │   ├── xt_ipvs.h
+│   │   │   │   ├── xt_l2tp.h
+│   │   │   │   ├── xt_LED.h
+│   │   │   │   ├── xt_length.h
+│   │   │   │   ├── xt_limit.h
+│   │   │   │   ├── xt_LOG.h
+│   │   │   │   ├── xt_mac.h
+│   │   │   │   ├── xt_mark.h
+│   │   │   │   ├── xt_MARK.h
+│   │   │   │   ├── xt_multiport.h
+│   │   │   │   ├── xt_nfacct.h
+│   │   │   │   ├── xt_NFLOG.h
+│   │   │   │   ├── xt_NFQUEUE.h
+│   │   │   │   ├── xt_osf.h
+│   │   │   │   ├── xt_owner.h
+│   │   │   │   ├── xt_physdev.h
+│   │   │   │   ├── xt_pkttype.h
+│   │   │   │   ├── xt_policy.h
+│   │   │   │   ├── xt_quota.h
+│   │   │   │   ├── xt_rateest.h
+│   │   │   │   ├── xt_RATEEST.h
+│   │   │   │   ├── xt_realm.h
+│   │   │   │   ├── xt_recent.h
+│   │   │   │   ├── xt_rpfilter.h
+│   │   │   │   ├── xt_sctp.h
+│   │   │   │   ├── xt_SECMARK.h
+│   │   │   │   ├── xt_set.h
+│   │   │   │   ├── xt_socket.h
+│   │   │   │   ├── xt_state.h
+│   │   │   │   ├── xt_statistic.h
+│   │   │   │   ├── xt_string.h
+│   │   │   │   ├── xt_SYNPROXY.h
+│   │   │   │   ├── xt_tcpmss.h
+│   │   │   │   ├── xt_TCPMSS.h
+│   │   │   │   ├── xt_TCPOPTSTRIP.h
+│   │   │   │   ├── xt_tcpudp.h
+│   │   │   │   ├── xt_TEE.h
+│   │   │   │   ├── xt_time.h
+│   │   │   │   ├── xt_TPROXY.h
+│   │   │   │   └── xt_u32.h
+│   │   │   ├── netfilter_arp
+│   │   │   │   ├── arp_tables.h
+│   │   │   │   └── arpt_mangle.h
+│   │   │   ├── netfilter_arp.h
+│   │   │   ├── netfilter_bridge
+│   │   │   │   ├── ebt_802_3.h
+│   │   │   │   ├── ebtables.h
+│   │   │   │   ├── ebt_among.h
+│   │   │   │   ├── ebt_arp.h
+│   │   │   │   ├── ebt_arpreply.h
+│   │   │   │   ├── ebt_ip6.h
+│   │   │   │   ├── ebt_ip.h
+│   │   │   │   ├── ebt_limit.h
+│   │   │   │   ├── ebt_log.h
+│   │   │   │   ├── ebt_mark_m.h
+│   │   │   │   ├── ebt_mark_t.h
+│   │   │   │   ├── ebt_nat.h
+│   │   │   │   ├── ebt_nflog.h
+│   │   │   │   ├── ebt_pkttype.h
+│   │   │   │   ├── ebt_redirect.h
+│   │   │   │   ├── ebt_stp.h
+│   │   │   │   └── ebt_vlan.h
+│   │   │   ├── netfilter_bridge.h
+│   │   │   ├── netfilter.h
+│   │   │   ├── netfilter_ipv4
+│   │   │   │   ├── ip_tables.h
+│   │   │   │   ├── ipt_ah.h
+│   │   │   │   ├── ipt_CLUSTERIP.h
+│   │   │   │   ├── ipt_ecn.h
+│   │   │   │   ├── ipt_ECN.h
+│   │   │   │   ├── ipt_LOG.h
+│   │   │   │   ├── ipt_REJECT.h
+│   │   │   │   ├── ipt_ttl.h
+│   │   │   │   └── ipt_TTL.h
+│   │   │   ├── netfilter_ipv4.h
+│   │   │   ├── netfilter_ipv6
+│   │   │   │   ├── ip6_tables.h
+│   │   │   │   ├── ip6t_ah.h
+│   │   │   │   ├── ip6t_frag.h
+│   │   │   │   ├── ip6t_hl.h
+│   │   │   │   ├── ip6t_HL.h
+│   │   │   │   ├── ip6t_ipv6header.h
+│   │   │   │   ├── ip6t_LOG.h
+│   │   │   │   ├── ip6t_mh.h
+│   │   │   │   ├── ip6t_NPT.h
+│   │   │   │   ├── ip6t_opts.h
+│   │   │   │   ├── ip6t_REJECT.h
+│   │   │   │   ├── ip6t_rt.h
+│   │   │   │   └── ip6t_srh.h
+│   │   │   ├── netfilter_ipv6.h
+│   │   │   ├── net.h
+│   │   │   ├── netlink_diag.h
+│   │   │   ├── netlink.h
+│   │   │   ├── net_namespace.h
+│   │   │   ├── netrom.h
+│   │   │   ├── net_tstamp.h
+│   │   │   ├── nexthop.h
+│   │   │   ├── nfc.h
+│   │   │   ├── nfs2.h
+│   │   │   ├── nfs3.h
+│   │   │   ├── nfs4.h
+│   │   │   ├── nfs4_mount.h
+│   │   │   ├── nfsacl.h
+│   │   │   ├── nfsd
+│   │   │   │   ├── cld.h
+│   │   │   │   ├── debug.h
+│   │   │   │   ├── export.h
+│   │   │   │   └── stats.h
+│   │   │   ├── nfs_fs.h
+│   │   │   ├── nfs.h
+│   │   │   ├── nfs_idmap.h
+│   │   │   ├── nfs_mount.h
+│   │   │   ├── nilfs2_api.h
+│   │   │   ├── nilfs2_ondisk.h
+│   │   │   ├── nitro_enclaves.h
+│   │   │   ├── nl80211.h
+│   │   │   ├── nl80211-vnd-intel.h
+│   │   │   ├── nsfs.h
+│   │   │   ├── nubus.h
+│   │   │   ├── nvme_ioctl.h
+│   │   │   ├── nvram.h
+│   │   │   ├── omap3isp.h
+│   │   │   ├── omapfb.h
+│   │   │   ├── oom.h
+│   │   │   ├── openat2.h
+│   │   │   ├── openvswitch.h
+│   │   │   ├── packet_diag.h
+│   │   │   ├── param.h
+│   │   │   ├── parport.h
+│   │   │   ├── patchkey.h
+│   │   │   ├── pci.h
+│   │   │   ├── pci_regs.h
+│   │   │   ├── pcitest.h
+│   │   │   ├── perf_event.h
+│   │   │   ├── personality.h
+│   │   │   ├── pfkeyv2.h
+│   │   │   ├── pfrut.h
+│   │   │   ├── pg.h
+│   │   │   ├── phantom.h
+│   │   │   ├── phonet.h
+│   │   │   ├── pidfd.h
+│   │   │   ├── pktcdvd.h
+│   │   │   ├── pkt_cls.h
+│   │   │   ├── pkt_sched.h
+│   │   │   ├── pmu.h
+│   │   │   ├── poll.h
+│   │   │   ├── posix_acl.h
+│   │   │   ├── posix_acl_xattr.h
+│   │   │   ├── posix_types.h
+│   │   │   ├── ppdev.h
+│   │   │   ├── ppp-comp.h
+│   │   │   ├── ppp_defs.h
+│   │   │   ├── ppp-ioctl.h
+│   │   │   ├── pps.h
+│   │   │   ├── prctl.h
+│   │   │   ├── pr.h
+│   │   │   ├── psample.h
+│   │   │   ├── psci.h
+│   │   │   ├── psp-dbc.h
+│   │   │   ├── psp-sev.h
+│   │   │   ├── ptp_clock.h
+│   │   │   ├── ptrace.h
+│   │   │   ├── qemu_fw_cfg.h
+│   │   │   ├── qnx4_fs.h
+│   │   │   ├── qnxtypes.h
+│   │   │   ├── qrtr.h
+│   │   │   ├── quota.h
+│   │   │   ├── radeonfb.h
+│   │   │   ├── raid
+│   │   │   │   ├── md_p.h
+│   │   │   │   └── md_u.h
+│   │   │   ├── random.h
+│   │   │   ├── rds.h
+│   │   │   ├── reboot.h
+│   │   │   ├── reiserfs_fs.h
+│   │   │   ├── reiserfs_xattr.h
+│   │   │   ├── remoteproc_cdev.h
+│   │   │   ├── resource.h
+│   │   │   ├── rfkill.h
+│   │   │   ├── rio_cm_cdev.h
+│   │   │   ├── rio_mport_cdev.h
+│   │   │   ├── rkisp1-config.h
+│   │   │   ├── romfs_fs.h
+│   │   │   ├── rose.h
+│   │   │   ├── route.h
+│   │   │   ├── rpl.h
+│   │   │   ├── rpl_iptunnel.h
+│   │   │   ├── rpmsg.h
+│   │   │   ├── rpmsg_types.h
+│   │   │   ├── rseq.h
+│   │   │   ├── rtc.h
+│   │   │   ├── rtnetlink.h
+│   │   │   ├── rxrpc.h
+│   │   │   ├── scc.h
+│   │   │   ├── sched
+│   │   │   │   └── types.h
+│   │   │   ├── sched.h
+│   │   │   ├── scif_ioctl.h
+│   │   │   ├── screen_info.h
+│   │   │   ├── sctp.h
+│   │   │   ├── seccomp.h
+│   │   │   ├── securebits.h
+│   │   │   ├── sed-opal.h
+│   │   │   ├── seg6_genl.h
+│   │   │   ├── seg6.h
+│   │   │   ├── seg6_hmac.h
+│   │   │   ├── seg6_iptunnel.h
+│   │   │   ├── seg6_local.h
+│   │   │   ├── selinux_netlink.h
+│   │   │   ├── sem.h
+│   │   │   ├── serial_core.h
+│   │   │   ├── serial.h
+│   │   │   ├── serial_reg.h
+│   │   │   ├── serio.h
+│   │   │   ├── sev-guest.h
+│   │   │   ├── shm.h
+│   │   │   ├── signalfd.h
+│   │   │   ├── signal.h
+│   │   │   ├── smc_diag.h
+│   │   │   ├── smc.h
+│   │   │   ├── smiapp.h
+│   │   │   ├── snmp.h
+│   │   │   ├── sock_diag.h
+│   │   │   ├── socket.h
+│   │   │   ├── sockios.h
+│   │   │   ├── sonet.h
+│   │   │   ├── sonypi.h
+│   │   │   ├── soundcard.h
+│   │   │   ├── sound.h
+│   │   │   ├── spi
+│   │   │   │   ├── spidev.h
+│   │   │   │   └── spi.h
+│   │   │   ├── stat.h
+│   │   │   ├── stddef.h
+│   │   │   ├── stm.h
+│   │   │   ├── string.h
+│   │   │   ├── sunrpc
+│   │   │   │   └── debug.h
+│   │   │   ├── surface_aggregator
+│   │   │   │   ├── cdev.h
+│   │   │   │   └── dtx.h
+│   │   │   ├── suspend_ioctls.h
+│   │   │   ├── swab.h
+│   │   │   ├── switchtec_ioctl.h
+│   │   │   ├── sync_file.h
+│   │   │   ├── synclink.h
+│   │   │   ├── sysctl.h
+│   │   │   ├── sysinfo.h
+│   │   │   ├── target_core_user.h
+│   │   │   ├── taskstats.h
+│   │   │   ├── tc_act
+│   │   │   │   ├── tc_bpf.h
+│   │   │   │   ├── tc_connmark.h
+│   │   │   │   ├── tc_csum.h
+│   │   │   │   ├── tc_ct.h
+│   │   │   │   ├── tc_ctinfo.h
+│   │   │   │   ├── tc_defact.h
+│   │   │   │   ├── tc_gact.h
+│   │   │   │   ├── tc_gate.h
+│   │   │   │   ├── tc_ife.h
+│   │   │   │   ├── tc_ipt.h
+│   │   │   │   ├── tc_mirred.h
+│   │   │   │   ├── tc_mpls.h
+│   │   │   │   ├── tc_nat.h
+│   │   │   │   ├── tc_pedit.h
+│   │   │   │   ├── tc_sample.h
+│   │   │   │   ├── tc_skbedit.h
+│   │   │   │   ├── tc_skbmod.h
+│   │   │   │   ├── tc_tunnel_key.h
+│   │   │   │   └── tc_vlan.h
+│   │   │   ├── tc_ematch
+│   │   │   │   ├── tc_em_cmp.h
+│   │   │   │   ├── tc_em_ipt.h
+│   │   │   │   ├── tc_em_meta.h
+│   │   │   │   ├── tc_em_nbyte.h
+│   │   │   │   └── tc_em_text.h
+│   │   │   ├── tcp.h
+│   │   │   ├── tcp_metrics.h
+│   │   │   ├── tdx-guest.h
+│   │   │   ├── tee.h
+│   │   │   ├── termios.h
+│   │   │   ├── thermal.h
+│   │   │   ├── time.h
+│   │   │   ├── timerfd.h
+│   │   │   ├── times.h
+│   │   │   ├── time_types.h
+│   │   │   ├── timex.h
+│   │   │   ├── tiocl.h
+│   │   │   ├── tipc_config.h
+│   │   │   ├── tipc.h
+│   │   │   ├── tipc_netlink.h
+│   │   │   ├── tipc_sockets_diag.h
+│   │   │   ├── tls.h
+│   │   │   ├── toshiba.h
+│   │   │   ├── tps6594_pfsm.h
+│   │   │   ├── tty_flags.h
+│   │   │   ├── tty.h
+│   │   │   ├── types.h
+│   │   │   ├── ublk_cmd.h
+│   │   │   ├── udf_fs_i.h
+│   │   │   ├── udmabuf.h
+│   │   │   ├── udp.h
+│   │   │   ├── uhid.h
+│   │   │   ├── uinput.h
+│   │   │   ├── uio.h
+│   │   │   ├── uleds.h
+│   │   │   ├── ultrasound.h
+│   │   │   ├── um_timetravel.h
+│   │   │   ├── un.h
+│   │   │   ├── unistd.h
+│   │   │   ├── unix_diag.h
+│   │   │   ├── usb
+│   │   │   │   ├── audio.h
+│   │   │   │   ├── cdc.h
+│   │   │   │   ├── cdc-wdm.h
+│   │   │   │   ├── ch11.h
+│   │   │   │   ├── ch9.h
+│   │   │   │   ├── charger.h
+│   │   │   │   ├── functionfs.h
+│   │   │   │   ├── gadgetfs.h
+│   │   │   │   ├── g_printer.h
+│   │   │   │   ├── g_uvc.h
+│   │   │   │   ├── midi.h
+│   │   │   │   ├── raw_gadget.h
+│   │   │   │   ├── tmc.h
+│   │   │   │   └── video.h
+│   │   │   ├── usbdevice_fs.h
+│   │   │   ├── usbip.h
+│   │   │   ├── user_events.h
+│   │   │   ├── userfaultfd.h
+│   │   │   ├── userio.h
+│   │   │   ├── utime.h
+│   │   │   ├── utsname.h
+│   │   │   ├── uuid.h
+│   │   │   ├── uvcvideo.h
+│   │   │   ├── v4l2-common.h
+│   │   │   ├── v4l2-controls.h
+│   │   │   ├── v4l2-dv-timings.h
+│   │   │   ├── v4l2-mediabus.h
+│   │   │   ├── v4l2-subdev.h
+│   │   │   ├── vbox_err.h
+│   │   │   ├── vboxguest.h
+│   │   │   ├── vbox_vmmdev_types.h
+│   │   │   ├── vdpa.h
+│   │   │   ├── vduse.h
+│   │   │   ├── version.h
+│   │   │   ├── veth.h
+│   │   │   ├── vfio_ccw.h
+│   │   │   ├── vfio.h
+│   │   │   ├── vfio_zdev.h
+│   │   │   ├── vhost.h
+│   │   │   ├── vhost_types.h
+│   │   │   ├── videodev2.h
+│   │   │   ├── virtio_9p.h
+│   │   │   ├── virtio_balloon.h
+│   │   │   ├── virtio_blk.h
+│   │   │   ├── virtio_bt.h
+│   │   │   ├── virtio_config.h
+│   │   │   ├── virtio_console.h
+│   │   │   ├── virtio_crypto.h
+│   │   │   ├── virtio_fs.h
+│   │   │   ├── virtio_gpio.h
+│   │   │   ├── virtio_gpu.h
+│   │   │   ├── virtio_i2c.h
+│   │   │   ├── virtio_ids.h
+│   │   │   ├── virtio_input.h
+│   │   │   ├── virtio_iommu.h
+│   │   │   ├── virtio_mem.h
+│   │   │   ├── virtio_mmio.h
+│   │   │   ├── virtio_net.h
+│   │   │   ├── virtio_pcidev.h
+│   │   │   ├── virtio_pci.h
+│   │   │   ├── virtio_pmem.h
+│   │   │   ├── virtio_ring.h
+│   │   │   ├── virtio_rng.h
+│   │   │   ├── virtio_scmi.h
+│   │   │   ├── virtio_scsi.h
+│   │   │   ├── virtio_snd.h
+│   │   │   ├── virtio_types.h
+│   │   │   ├── virtio_vsock.h
+│   │   │   ├── vmcore.h
+│   │   │   ├── vm_sockets_diag.h
+│   │   │   ├── vm_sockets.h
+│   │   │   ├── vsockmon.h
+│   │   │   ├── vt.h
+│   │   │   ├── vtpm_proxy.h
+│   │   │   ├── wait.h
+│   │   │   ├── watchdog.h
+│   │   │   ├── watch_queue.h
+│   │   │   ├── wireguard.h
+│   │   │   ├── wireless.h
+│   │   │   ├── wmi.h
+│   │   │   ├── wwan.h
+│   │   │   ├── x25.h
+│   │   │   ├── xattr.h
+│   │   │   ├── xdp_diag.h
+│   │   │   ├── xfrm.h
+│   │   │   ├── xilinx-v4l2-controls.h
+│   │   │   ├── zorro.h
+│   │   │   └── zorro_ids.h
+│   │   ├── locale.h
+│   │   ├── malloc.h
+│   │   ├── math.h
+│   │   ├── mcheck.h
+│   │   ├── memory.h
+│   │   ├── misc
+│   │   │   ├── cxl.h
+│   │   │   ├── fastrpc.h
+│   │   │   ├── ocxl.h
+│   │   │   ├── pvpanic.h
+│   │   │   ├── uacce
+│   │   │   │   ├── hisi_qm.h
+│   │   │   │   └── uacce.h
+│   │   │   └── xilinx_sdfec.h
+│   │   ├── mntent.h
+│   │   ├── monetary.h
+│   │   ├── mqueue.h
+│   │   ├── mtd
+│   │   │   ├── inftl-user.h
+│   │   │   ├── mtd-abi.h
+│   │   │   ├── mtd-user.h
+│   │   │   ├── nftl-user.h
+│   │   │   └── ubi-user.h
+│   │   ├── net
+│   │   │   ├── ethernet.h
+│   │   │   ├── if_arp.h
+│   │   │   ├── if.h
+│   │   │   ├── if_packet.h
+│   │   │   ├── if_ppp.h
+│   │   │   ├── if_shaper.h
+│   │   │   ├── if_slip.h
+│   │   │   ├── ppp-comp.h
+│   │   │   ├── ppp_defs.h
+│   │   │   └── route.h
+│   │   ├── netash
+│   │   │   └── ash.h
+│   │   ├── netatalk
+│   │   │   └── at.h
+│   │   ├── netax25
+│   │   │   └── ax25.h
+│   │   ├── netdb.h
+│   │   ├── neteconet
+│   │   │   └── ec.h
+│   │   ├── netinet
+│   │   │   ├── ether.h
+│   │   │   ├── icmp6.h
+│   │   │   ├── if_ether.h
+│   │   │   ├── if_fddi.h
+│   │   │   ├── if_tr.h
+│   │   │   ├── igmp.h
+│   │   │   ├── in.h
+│   │   │   ├── in_systm.h
+│   │   │   ├── ip6.h
+│   │   │   ├── ip.h
+│   │   │   ├── ip_icmp.h
+│   │   │   ├── tcp.h
+│   │   │   └── udp.h
+│   │   ├── netipx
+│   │   │   └── ipx.h
+│   │   ├── netiucv
+│   │   │   └── iucv.h
+│   │   ├── netpacket
+│   │   │   └── packet.h
+│   │   ├── netrom
+│   │   │   └── netrom.h
+│   │   ├── netrose
+│   │   │   └── rose.h
+│   │   ├── nfs
+│   │   │   └── nfs.h
+│   │   ├── nl_types.h
+│   │   ├── nss.h
+│   │   ├── obstack.h
+│   │   ├── opencv4
+│   │   │   └── opencv2
+│   │   │       ├── alphamat.hpp
+│   │   │       ├── aruco
+│   │   │       │   ├── charuco.hpp
+│   │   │       │   └── dictionary.hpp
+│   │   │       ├── aruco.hpp
+│   │   │       ├── barcode.hpp
+│   │   │       ├── bgsegm.hpp
+│   │   │       ├── bioinspired
+│   │   │       │   ├── bioinspired.hpp
+│   │   │       │   ├── retinafasttonemapping.hpp
+│   │   │       │   ├── retina.hpp
+│   │   │       │   └── transientareassegmentationmodule.hpp
+│   │   │       ├── bioinspired.hpp
+│   │   │       ├── calib3d
+│   │   │       │   ├── calib3d_c.h
+│   │   │       │   └── calib3d.hpp
+│   │   │       ├── calib3d.hpp
+│   │   │       ├── ccalib
+│   │   │       │   ├── multicalib.hpp
+│   │   │       │   ├── omnidir.hpp
+│   │   │       │   └── randpattern.hpp
+│   │   │       ├── ccalib.hpp
+│   │   │       ├── core
+│   │   │       │   ├── affine.hpp
+│   │   │       │   ├── async.hpp
+│   │   │       │   ├── base.hpp
+│   │   │       │   ├── bindings_utils.hpp
+│   │   │       │   ├── bufferpool.hpp
+│   │   │       │   ├── check.hpp
+│   │   │       │   ├── core_c.h
+│   │   │       │   ├── core.hpp
+│   │   │       │   ├── cuda
+│   │   │       │   │   ├── block.hpp
+│   │   │       │   │   ├── border_interpolate.hpp
+│   │   │       │   │   ├── color.hpp
+│   │   │       │   │   ├── common.hpp
+│   │   │       │   │   ├── datamov_utils.hpp
+│   │   │       │   │   ├── detail
+│   │   │       │   │   │   ├── color_detail.hpp
+│   │   │       │   │   │   ├── reduce.hpp
+│   │   │       │   │   │   ├── reduce_key_val.hpp
+│   │   │       │   │   │   ├── transform_detail.hpp
+│   │   │       │   │   │   ├── type_traits_detail.hpp
+│   │   │       │   │   │   └── vec_distance_detail.hpp
+│   │   │       │   │   ├── dynamic_smem.hpp
+│   │   │       │   │   ├── emulation.hpp
+│   │   │       │   │   ├── filters.hpp
+│   │   │       │   │   ├── funcattrib.hpp
+│   │   │       │   │   ├── functional.hpp
+│   │   │       │   │   ├── limits.hpp
+│   │   │       │   │   ├── reduce.hpp
+│   │   │       │   │   ├── saturate_cast.hpp
+│   │   │       │   │   ├── scan.hpp
+│   │   │       │   │   ├── simd_functions.hpp
+│   │   │       │   │   ├── transform.hpp
+│   │   │       │   │   ├── type_traits.hpp
+│   │   │       │   │   ├── utility.hpp
+│   │   │       │   │   ├── vec_distance.hpp
+│   │   │       │   │   ├── vec_math.hpp
+│   │   │       │   │   ├── vec_traits.hpp
+│   │   │       │   │   ├── warp.hpp
+│   │   │       │   │   ├── warp_reduce.hpp
+│   │   │       │   │   └── warp_shuffle.hpp
+│   │   │       │   ├── cuda.hpp
+│   │   │       │   ├── cuda.inl.hpp
+│   │   │       │   ├── cuda_stream_accessor.hpp
+│   │   │       │   ├── cuda_types.hpp
+│   │   │       │   ├── cv_cpu_dispatch.h
+│   │   │       │   ├── cv_cpu_helper.h
+│   │   │       │   ├── cvdef.h
+│   │   │       │   ├── cvstd.hpp
+│   │   │       │   ├── cvstd.inl.hpp
+│   │   │       │   ├── cvstd_wrapper.hpp
+│   │   │       │   ├── detail
+│   │   │       │   │   ├── async_promise.hpp
+│   │   │       │   │   ├── dispatch_helper.impl.hpp
+│   │   │       │   │   └── exception_ptr.hpp
+│   │   │       │   ├── directx.hpp
+│   │   │       │   ├── dualquaternion.hpp
+│   │   │       │   ├── dualquaternion.inl.hpp
+│   │   │       │   ├── eigen.hpp
+│   │   │       │   ├── fast_math.hpp
+│   │   │       │   ├── hal
+│   │   │       │   │   ├── hal.hpp
+│   │   │       │   │   ├── interface.h
+│   │   │       │   │   ├── intrin_avx512.hpp
+│   │   │       │   │   ├── intrin_avx.hpp
+│   │   │       │   │   ├── intrin_cpp.hpp
+│   │   │       │   │   ├── intrin_forward.hpp
+│   │   │       │   │   ├── intrin.hpp
+│   │   │       │   │   ├── intrin_msa.hpp
+│   │   │       │   │   ├── intrin_neon.hpp
+│   │   │       │   │   ├── intrin_rvv071.hpp
+│   │   │       │   │   ├── intrin_rvv.hpp
+│   │   │       │   │   ├── intrin_sse_em.hpp
+│   │   │       │   │   ├── intrin_sse.hpp
+│   │   │       │   │   ├── intrin_vsx.hpp
+│   │   │       │   │   ├── intrin_wasm.hpp
+│   │   │       │   │   ├── msa_macros.h
+│   │   │       │   │   └── simd_utils.impl.hpp
+│   │   │       │   ├── mat.hpp
+│   │   │       │   ├── mat.inl.hpp
+│   │   │       │   ├── matx.hpp
+│   │   │       │   ├── neon_utils.hpp
+│   │   │       │   ├── ocl_genbase.hpp
+│   │   │       │   ├── ocl.hpp
+│   │   │       │   ├── opencl
+│   │   │       │   │   ├── ocl_defs.hpp
+│   │   │       │   │   ├── opencl_info.hpp
+│   │   │       │   │   ├── opencl_svm.hpp
+│   │   │       │   │   └── runtime
+│   │   │       │   │       ├── autogenerated
+│   │   │       │   │       │   ├── opencl_clblas.hpp
+│   │   │       │   │       │   ├── opencl_clfft.hpp
+│   │   │       │   │       │   ├── opencl_core.hpp
+│   │   │       │   │       │   ├── opencl_core_wrappers.hpp
+│   │   │       │   │       │   ├── opencl_gl.hpp
+│   │   │       │   │       │   └── opencl_gl_wrappers.hpp
+│   │   │       │   │       ├── opencl_clblas.hpp
+│   │   │       │   │       ├── opencl_clfft.hpp
+│   │   │       │   │       ├── opencl_core.hpp
+│   │   │       │   │       ├── opencl_core_wrappers.hpp
+│   │   │       │   │       ├── opencl_gl.hpp
+│   │   │       │   │       ├── opencl_gl_wrappers.hpp
+│   │   │       │   │       ├── opencl_svm_20.hpp
+│   │   │       │   │       ├── opencl_svm_definitions.hpp
+│   │   │       │   │       └── opencl_svm_hsa_extension.hpp
+│   │   │       │   ├── opengl.hpp
+│   │   │       │   ├── operations.hpp
+│   │   │       │   ├── optim.hpp
+│   │   │       │   ├── ovx.hpp
+│   │   │       │   ├── parallel
+│   │   │       │   │   ├── backend
+│   │   │       │   │   │   ├── parallel_for.openmp.hpp
+│   │   │       │   │   │   └── parallel_for.tbb.hpp
+│   │   │       │   │   └── parallel_backend.hpp
+│   │   │       │   ├── persistence.hpp
+│   │   │       │   ├── quaternion.hpp
+│   │   │       │   ├── quaternion.inl.hpp
+│   │   │       │   ├── saturate.hpp
+│   │   │       │   ├── simd_intrinsics.hpp
+│   │   │       │   ├── softfloat.hpp
+│   │   │       │   ├── sse_utils.hpp
+│   │   │       │   ├── traits.hpp
+│   │   │       │   ├── types_c.h
+│   │   │       │   ├── types.hpp
+│   │   │       │   ├── utility.hpp
+│   │   │       │   ├── utils
+│   │   │       │   │   ├── allocator_stats.hpp
+│   │   │       │   │   ├── allocator_stats.impl.hpp
+│   │   │       │   │   ├── filesystem.hpp
+│   │   │       │   │   ├── fp_control_utils.hpp
+│   │   │       │   │   ├── instrumentation.hpp
+│   │   │       │   │   ├── logger.defines.hpp
+│   │   │       │   │   ├── logger.hpp
+│   │   │       │   │   ├── logtag.hpp
+│   │   │       │   │   ├── tls.hpp
+│   │   │       │   │   └── trace.hpp
+│   │   │       │   ├── va_intel.hpp
+│   │   │       │   ├── version.hpp
+│   │   │       │   └── vsx_utils.hpp
+│   │   │       ├── core_detect.hpp
+│   │   │       ├── core.hpp
+│   │   │       ├── cvv
+│   │   │       │   ├── call_meta_data.hpp
+│   │   │       │   ├── cvv.hpp
+│   │   │       │   ├── debug_mode.hpp
+│   │   │       │   ├── dmatch.hpp
+│   │   │       │   ├── filter.hpp
+│   │   │       │   ├── final_show.hpp
+│   │   │       │   └── show_image.hpp
+│   │   │       ├── cvv.hpp
+│   │   │       ├── datasets
+│   │   │       │   ├── ar_hmdb.hpp
+│   │   │       │   ├── ar_sports.hpp
+│   │   │       │   ├── dataset.hpp
+│   │   │       │   ├── fr_adience.hpp
+│   │   │       │   ├── fr_lfw.hpp
+│   │   │       │   ├── gr_chalearn.hpp
+│   │   │       │   ├── gr_skig.hpp
+│   │   │       │   ├── hpe_humaneva.hpp
+│   │   │       │   ├── hpe_parse.hpp
+│   │   │       │   ├── ir_affine.hpp
+│   │   │       │   ├── ir_robot.hpp
+│   │   │       │   ├── is_bsds.hpp
+│   │   │       │   ├── is_weizmann.hpp
+│   │   │       │   ├── msm_epfl.hpp
+│   │   │       │   ├── msm_middlebury.hpp
+│   │   │       │   ├── or_imagenet.hpp
+│   │   │       │   ├── or_mnist.hpp
+│   │   │       │   ├── or_pascal.hpp
+│   │   │       │   ├── or_sun.hpp
+│   │   │       │   ├── pd_caltech.hpp
+│   │   │       │   ├── pd_inria.hpp
+│   │   │       │   ├── slam_kitti.hpp
+│   │   │       │   ├── slam_tumindoor.hpp
+│   │   │       │   ├── sr_bsds.hpp
+│   │   │       │   ├── sr_div2k.hpp
+│   │   │       │   ├── sr_general100.hpp
+│   │   │       │   ├── track_alov.hpp
+│   │   │       │   ├── track_vot.hpp
+│   │   │       │   ├── tr_chars.hpp
+│   │   │       │   ├── tr_icdar.hpp
+│   │   │       │   ├── tr_svt.hpp
+│   │   │       │   └── util.hpp
+│   │   │       ├── dnn
+│   │   │       │   ├── all_layers.hpp
+│   │   │       │   ├── dict.hpp
+│   │   │       │   ├── dnn.hpp
+│   │   │       │   ├── dnn.inl.hpp
+│   │   │       │   ├── layer.details.hpp
+│   │   │       │   ├── layer.hpp
+│   │   │       │   ├── shape_utils.hpp
+│   │   │       │   ├── utils
+│   │   │       │   │   ├── debug_utils.hpp
+│   │   │       │   │   └── inference_engine.hpp
+│   │   │       │   └── version.hpp
+│   │   │       ├── dnn.hpp
+│   │   │       ├── dnn_superres.hpp
+│   │   │       ├── dpm.hpp
+│   │   │       ├── face
+│   │   │       │   ├── bif.hpp
+│   │   │       │   ├── face_alignment.hpp
+│   │   │       │   ├── facemarkAAM.hpp
+│   │   │       │   ├── facemark.hpp
+│   │   │       │   ├── facemarkLBF.hpp
+│   │   │       │   ├── facemark_train.hpp
+│   │   │       │   ├── facerec.hpp
+│   │   │       │   ├── mace.hpp
+│   │   │       │   └── predict_collector.hpp
+│   │   │       ├── face.hpp
+│   │   │       ├── features2d
+│   │   │       │   ├── features2d.hpp
+│   │   │       │   └── hal
+│   │   │       │       └── interface.h
+│   │   │       ├── features2d.hpp
+│   │   │       ├── flann
+│   │   │       │   ├── all_indices.h
+│   │   │       │   ├── allocator.h
+│   │   │       │   ├── any.h
+│   │   │       │   ├── autotuned_index.h
+│   │   │       │   ├── composite_index.h
+│   │   │       │   ├── config.h
+│   │   │       │   ├── defines.h
+│   │   │       │   ├── dist.h
+│   │   │       │   ├── dummy.h
+│   │   │       │   ├── dynamic_bitset.h
+│   │   │       │   ├── flann_base.hpp
+│   │   │       │   ├── flann.hpp
+│   │   │       │   ├── general.h
+│   │   │       │   ├── ground_truth.h
+│   │   │       │   ├── hdf5.h
+│   │   │       │   ├── heap.h
+│   │   │       │   ├── hierarchical_clustering_index.h
+│   │   │       │   ├── index_testing.h
+│   │   │       │   ├── kdtree_index.h
+│   │   │       │   ├── kdtree_single_index.h
+│   │   │       │   ├── kmeans_index.h
+│   │   │       │   ├── linear_index.h
+│   │   │       │   ├── logger.h
+│   │   │       │   ├── lsh_index.h
+│   │   │       │   ├── lsh_table.h
+│   │   │       │   ├── matrix.h
+│   │   │       │   ├── miniflann.hpp
+│   │   │       │   ├── nn_index.h
+│   │   │       │   ├── object_factory.h
+│   │   │       │   ├── params.h
+│   │   │       │   ├── random.h
+│   │   │       │   ├── result_set.h
+│   │   │       │   ├── sampling.h
+│   │   │       │   ├── saving.h
+│   │   │       │   ├── simplex_downhill.h
+│   │   │       │   └── timer.h
+│   │   │       ├── flann.hpp
+│   │   │       ├── freetype.hpp
+│   │   │       ├── fuzzy
+│   │   │       │   ├── fuzzy_F0_math.hpp
+│   │   │       │   ├── fuzzy_F1_math.hpp
+│   │   │       │   ├── fuzzy_image.hpp
+│   │   │       │   └── types.hpp
+│   │   │       ├── fuzzy.hpp
+│   │   │       ├── hdf
+│   │   │       │   └── hdf5.hpp
+│   │   │       ├── hdf.hpp
+│   │   │       ├── hfs.hpp
+│   │   │       ├── highgui
+│   │   │       │   ├── highgui_c.h
+│   │   │       │   └── highgui.hpp
+│   │   │       ├── highgui.hpp
+│   │   │       ├── imgcodecs
+│   │   │       │   ├── imgcodecs_c.h
+│   │   │       │   ├── imgcodecs.hpp
+│   │   │       │   ├── ios.h
+│   │   │       │   ├── legacy
+│   │   │       │   │   └── constants_c.h
+│   │   │       │   └── macosx.h
+│   │   │       ├── imgcodecs.hpp
+│   │   │       ├── img_hash
+│   │   │       │   ├── average_hash.hpp
+│   │   │       │   ├── block_mean_hash.hpp
+│   │   │       │   ├── color_moment_hash.hpp
+│   │   │       │   ├── img_hash_base.hpp
+│   │   │       │   ├── marr_hildreth_hash.hpp
+│   │   │       │   ├── phash.hpp
+│   │   │       │   └── radial_variance_hash.hpp
+│   │   │       ├── img_hash.hpp
+│   │   │       ├── imgproc
+│   │   │       │   ├── bindings.hpp
+│   │   │       │   ├── detail
+│   │   │       │   │   └── gcgraph.hpp
+│   │   │       │   ├── hal
+│   │   │       │   │   ├── hal.hpp
+│   │   │       │   │   └── interface.h
+│   │   │       │   ├── imgproc_c.h
+│   │   │       │   ├── imgproc.hpp
+│   │   │       │   ├── segmentation.hpp
+│   │   │       │   └── types_c.h
+│   │   │       ├── imgproc.hpp
+│   │   │       ├── intensity_transform.hpp
+│   │   │       ├── line_descriptor
+│   │   │       │   └── descriptor.hpp
+│   │   │       ├── line_descriptor.hpp
+│   │   │       ├── mcc
+│   │   │       │   ├── ccm.hpp
+│   │   │       │   ├── checker_detector.hpp
+│   │   │       │   └── checker_model.hpp
+│   │   │       ├── mcc.hpp
+│   │   │       ├── ml
+│   │   │       │   ├── ml.hpp
+│   │   │       │   └── ml.inl.hpp
+│   │   │       ├── ml.hpp
+│   │   │       ├── objdetect
+│   │   │       │   ├── detection_based_tracker.hpp
+│   │   │       │   ├── face.hpp
+│   │   │       │   └── objdetect.hpp
+│   │   │       ├── objdetect.hpp
+│   │   │       ├── opencv.hpp
+│   │   │       ├── opencv_modules.hpp
+│   │   │       ├── optflow
+│   │   │       │   ├── motempl.hpp
+│   │   │       │   ├── pcaflow.hpp
+│   │   │       │   ├── rlofflow.hpp
+│   │   │       │   └── sparse_matching_gpc.hpp
+│   │   │       ├── optflow.hpp
+│   │   │       ├── phase_unwrapping
+│   │   │       │   ├── histogramphaseunwrapping.hpp
+│   │   │       │   └── phase_unwrapping.hpp
+│   │   │       ├── phase_unwrapping.hpp
+│   │   │       ├── photo
+│   │   │       │   ├── cuda.hpp
+│   │   │       │   ├── legacy
+│   │   │       │   │   └── constants_c.h
+│   │   │       │   └── photo.hpp
+│   │   │       ├── photo.hpp
+│   │   │       ├── plot.hpp
+│   │   │       ├── quality
+│   │   │       │   ├── qualitybase.hpp
+│   │   │       │   ├── qualitybrisque.hpp
+│   │   │       │   ├── qualitygmsd.hpp
+│   │   │       │   ├── qualitymse.hpp
+│   │   │       │   ├── qualitypsnr.hpp
+│   │   │       │   ├── qualityssim.hpp
+│   │   │       │   └── quality_utils.hpp
+│   │   │       ├── quality.hpp
+│   │   │       ├── rapid.hpp
+│   │   │       ├── reg
+│   │   │       │   ├── mapaffine.hpp
+│   │   │       │   ├── map.hpp
+│   │   │       │   ├── mappergradaffine.hpp
+│   │   │       │   ├── mappergradeuclid.hpp
+│   │   │       │   ├── mappergradproj.hpp
+│   │   │       │   ├── mappergradshift.hpp
+│   │   │       │   ├── mappergradsimilar.hpp
+│   │   │       │   ├── mapper.hpp
+│   │   │       │   ├── mapperpyramid.hpp
+│   │   │       │   ├── mapprojec.hpp
+│   │   │       │   └── mapshift.hpp
+│   │   │       ├── rgbd
+│   │   │       │   ├── colored_kinfu.hpp
+│   │   │       │   ├── depth.hpp
+│   │   │       │   ├── detail
+│   │   │       │   │   └── pose_graph.hpp
+│   │   │       │   ├── dynafu.hpp
+│   │   │       │   ├── intrinsics.hpp
+│   │   │       │   ├── kinfu.hpp
+│   │   │       │   ├── large_kinfu.hpp
+│   │   │       │   ├── linemod.hpp
+│   │   │       │   └── volume.hpp
+│   │   │       ├── rgbd.hpp
+│   │   │       ├── saliency
+│   │   │       │   ├── saliencyBaseClasses.hpp
+│   │   │       │   └── saliencySpecializedClasses.hpp
+│   │   │       ├── saliency.hpp
+│   │   │       ├── shape
+│   │   │       │   ├── emdL1.hpp
+│   │   │       │   ├── hist_cost.hpp
+│   │   │       │   ├── shape_distance.hpp
+│   │   │       │   ├── shape.hpp
+│   │   │       │   └── shape_transformer.hpp
+│   │   │       ├── shape.hpp
+│   │   │       ├── stereo
+│   │   │       │   ├── descriptor.hpp
+│   │   │       │   ├── quasi_dense_stereo.hpp
+│   │   │       │   └── stereo.hpp
+│   │   │       ├── stereo.hpp
+│   │   │       ├── stitching
+│   │   │       │   ├── detail
+│   │   │       │   │   ├── autocalib.hpp
+│   │   │       │   │   ├── blenders.hpp
+│   │   │       │   │   ├── camera.hpp
+│   │   │       │   │   ├── exposure_compensate.hpp
+│   │   │       │   │   ├── matchers.hpp
+│   │   │       │   │   ├── motion_estimators.hpp
+│   │   │       │   │   ├── seam_finders.hpp
+│   │   │       │   │   ├── timelapsers.hpp
+│   │   │       │   │   ├── util.hpp
+│   │   │       │   │   ├── util_inl.hpp
+│   │   │       │   │   ├── warpers.hpp
+│   │   │       │   │   └── warpers_inl.hpp
+│   │   │       │   └── warpers.hpp
+│   │   │       ├── stitching.hpp
+│   │   │       ├── structured_light
+│   │   │       │   ├── graycodepattern.hpp
+│   │   │       │   ├── sinusoidalpattern.hpp
+│   │   │       │   └── structured_light.hpp
+│   │   │       ├── structured_light.hpp
+│   │   │       ├── superres
+│   │   │       │   └── optical_flow.hpp
+│   │   │       ├── superres.hpp
+│   │   │       ├── surface_matching
+│   │   │       │   ├── icp.hpp
+│   │   │       │   ├── pose_3d.hpp
+│   │   │       │   ├── ppf_helpers.hpp
+│   │   │       │   ├── ppf_match_3d.hpp
+│   │   │       │   └── t_hash_int.hpp
+│   │   │       ├── surface_matching.hpp
+│   │   │       ├── text
+│   │   │       │   ├── erfilter.hpp
+│   │   │       │   ├── ocr.hpp
+│   │   │       │   ├── swt_text_detection.hpp
+│   │   │       │   └── textDetector.hpp
+│   │   │       ├── text.hpp
+│   │   │       ├── tracking
+│   │   │       │   ├── feature.hpp
+│   │   │       │   ├── kalman_filters.hpp
+│   │   │       │   ├── onlineBoosting.hpp
+│   │   │       │   ├── tldDataset.hpp
+│   │   │       │   ├── tracking_by_matching.hpp
+│   │   │       │   ├── tracking.hpp
+│   │   │       │   ├── tracking_internals.hpp
+│   │   │       │   └── tracking_legacy.hpp
+│   │   │       ├── tracking.hpp
+│   │   │       ├── video
+│   │   │       │   ├── background_segm.hpp
+│   │   │       │   ├── detail
+│   │   │       │   │   └── tracking.detail.hpp
+│   │   │       │   ├── legacy
+│   │   │       │   │   └── constants_c.h
+│   │   │       │   ├── tracking.hpp
+│   │   │       │   └── video.hpp
+│   │   │       ├── video.hpp
+│   │   │       ├── videoio
+│   │   │       │   ├── cap_ios.h
+│   │   │       │   ├── legacy
+│   │   │       │   │   └── constants_c.h
+│   │   │       │   ├── registry.hpp
+│   │   │       │   ├── videoio_c.h
+│   │   │       │   └── videoio.hpp
+│   │   │       ├── videoio.hpp
+│   │   │       ├── videostab
+│   │   │       │   ├── deblurring.hpp
+│   │   │       │   ├── fast_marching.hpp
+│   │   │       │   ├── fast_marching_inl.hpp
+│   │   │       │   ├── frame_source.hpp
+│   │   │       │   ├── global_motion.hpp
+│   │   │       │   ├── inpainting.hpp
+│   │   │       │   ├── log.hpp
+│   │   │       │   ├── motion_core.hpp
+│   │   │       │   ├── motion_stabilizing.hpp
+│   │   │       │   ├── optical_flow.hpp
+│   │   │       │   ├── outlier_rejection.hpp
+│   │   │       │   ├── ring_buffer.hpp
+│   │   │       │   ├── stabilizer.hpp
+│   │   │       │   └── wobble_suppression.hpp
+│   │   │       ├── videostab.hpp
+│   │   │       ├── viz
+│   │   │       │   ├── types.hpp
+│   │   │       │   ├── viz3d.hpp
+│   │   │       │   ├── vizcore.hpp
+│   │   │       │   ├── widget_accessor.hpp
+│   │   │       │   └── widgets.hpp
+│   │   │       ├── viz.hpp
+│   │   │       ├── wechat_qrcode.hpp
+│   │   │       ├── ximgproc
+│   │   │       │   ├── brightedges.hpp
+│   │   │       │   ├── color_match.hpp
+│   │   │       │   ├── deriche_filter.hpp
+│   │   │       │   ├── disparity_filter.hpp
+│   │   │       │   ├── edgeboxes.hpp
+│   │   │       │   ├── edge_drawing.hpp
+│   │   │       │   ├── edge_filter.hpp
+│   │   │       │   ├── edgepreserving_filter.hpp
+│   │   │       │   ├── estimated_covariance.hpp
+│   │   │       │   ├── fast_hough_transform.hpp
+│   │   │       │   ├── fast_line_detector.hpp
+│   │   │       │   ├── fourier_descriptors.hpp
+│   │   │       │   ├── lsc.hpp
+│   │   │       │   ├── paillou_filter.hpp
+│   │   │       │   ├── peilin.hpp
+│   │   │       │   ├── radon_transform.hpp
+│   │   │       │   ├── ridgefilter.hpp
+│   │   │       │   ├── run_length_morphology.hpp
+│   │   │       │   ├── scansegment.hpp
+│   │   │       │   ├── seeds.hpp
+│   │   │       │   ├── segmentation.hpp
+│   │   │       │   ├── slic.hpp
+│   │   │       │   ├── sparse_match_interpolator.hpp
+│   │   │       │   ├── structured_edge_detection.hpp
+│   │   │       │   └── weighted_median_filter.hpp
+│   │   │       ├── ximgproc.hpp
+│   │   │       ├── xobjdetect.hpp
+│   │   │       ├── xphoto
+│   │   │       │   ├── bm3d_image_denoising.hpp
+│   │   │       │   ├── dct_image_denoising.hpp
+│   │   │       │   ├── inpainting.hpp
+│   │   │       │   ├── oilpainting.hpp
+│   │   │       │   ├── tonemap.hpp
+│   │   │       │   └── white_balance.hpp
+│   │   │       └── xphoto.hpp
+│   │   ├── paths.h
+│   │   ├── poll.h
+│   │   ├── printf.h
+│   │   ├── proc_service.h
+│   │   ├── protocols
+│   │   │   ├── routed.h
+│   │   │   ├── rwhod.h
+│   │   │   ├── talkd.h
+│   │   │   └── timed.h
+│   │   ├── pthread.h
+│   │   ├── pty.h
+│   │   ├── pwd.h
+│   │   ├── rdma
+│   │   │   ├── bnxt_re-abi.h
+│   │   │   ├── cxgb4-abi.h
+│   │   │   ├── efa-abi.h
+│   │   │   ├── erdma-abi.h
+│   │   │   ├── hfi
+│   │   │   │   ├── hfi1_ioctl.h
+│   │   │   │   └── hfi1_user.h
+│   │   │   ├── hns-abi.h
+│   │   │   ├── ib_user_ioctl_cmds.h
+│   │   │   ├── ib_user_ioctl_verbs.h
+│   │   │   ├── ib_user_mad.h
+│   │   │   ├── ib_user_sa.h
+│   │   │   ├── ib_user_verbs.h
+│   │   │   ├── irdma-abi.h
+│   │   │   ├── mana-abi.h
+│   │   │   ├── mlx4-abi.h
+│   │   │   ├── mlx5-abi.h
+│   │   │   ├── mlx5_user_ioctl_cmds.h
+│   │   │   ├── mlx5_user_ioctl_verbs.h
+│   │   │   ├── mthca-abi.h
+│   │   │   ├── ocrdma-abi.h
+│   │   │   ├── qedr-abi.h
+│   │   │   ├── rdma_netlink.h
+│   │   │   ├── rdma_user_cm.h
+│   │   │   ├── rdma_user_ioctl_cmds.h
+│   │   │   ├── rdma_user_ioctl.h
+│   │   │   ├── rdma_user_rxe.h
+│   │   │   ├── rvt-abi.h
+│   │   │   ├── siw-abi.h
+│   │   │   └── vmw_pvrdma-abi.h
+│   │   ├── re_comp.h
+│   │   ├── regex.h
+│   │   ├── regexp.h
+│   │   ├── resolv.h
+│   │   ├── riscv64-linux-gnu
+│   │   │   ├── libavcodec
+│   │   │   │   ├── ac3_parser.h
+│   │   │   │   ├── adts_parser.h
+│   │   │   │   ├── avcodec.h
+│   │   │   │   ├── avdct.h
+│   │   │   │   ├── avfft.h
+│   │   │   │   ├── bsf.h
+│   │   │   │   ├── codec_desc.h
+│   │   │   │   ├── codec.h
+│   │   │   │   ├── codec_id.h
+│   │   │   │   ├── codec_par.h
+│   │   │   │   ├── d3d11va.h
+│   │   │   │   ├── defs.h
+│   │   │   │   ├── dirac.h
+│   │   │   │   ├── dv_profile.h
+│   │   │   │   ├── dxva2.h
+│   │   │   │   ├── jni.h
+│   │   │   │   ├── mediacodec.h
+│   │   │   │   ├── packet.h
+│   │   │   │   ├── qsv.h
+│   │   │   │   ├── vdpau.h
+│   │   │   │   ├── version.h
+│   │   │   │   ├── version_major.h
+│   │   │   │   ├── videotoolbox.h
+│   │   │   │   ├── vorbis_parser.h
+│   │   │   │   └── xvmc.h
+│   │   │   ├── libavdevice
+│   │   │   │   ├── avdevice.h
+│   │   │   │   ├── version.h
+│   │   │   │   └── version_major.h
+│   │   │   ├── libavfilter
+│   │   │   │   ├── avfilter.h
+│   │   │   │   ├── buffersink.h
+│   │   │   │   ├── buffersrc.h
+│   │   │   │   ├── version.h
+│   │   │   │   └── version_major.h
+│   │   │   ├── libavformat
+│   │   │   │   ├── avformat.h
+│   │   │   │   ├── avio.h
+│   │   │   │   ├── version.h
+│   │   │   │   └── version_major.h
+│   │   │   ├── libavutil
+│   │   │   │   ├── adler32.h
+│   │   │   │   ├── aes_ctr.h
+│   │   │   │   ├── aes.h
+│   │   │   │   ├── ambient_viewing_environment.h
+│   │   │   │   ├── attributes.h
+│   │   │   │   ├── audio_fifo.h
+│   │   │   │   ├── avassert.h
+│   │   │   │   ├── avconfig.h
+│   │   │   │   ├── avstring.h
+│   │   │   │   ├── avutil.h
+│   │   │   │   ├── base64.h
+│   │   │   │   ├── blowfish.h
+│   │   │   │   ├── bprint.h
+│   │   │   │   ├── bswap.h
+│   │   │   │   ├── buffer.h
+│   │   │   │   ├── camellia.h
+│   │   │   │   ├── cast5.h
+│   │   │   │   ├── channel_layout.h
+│   │   │   │   ├── common.h
+│   │   │   │   ├── cpu.h
+│   │   │   │   ├── crc.h
+│   │   │   │   ├── csp.h
+│   │   │   │   ├── des.h
+│   │   │   │   ├── detection_bbox.h
+│   │   │   │   ├── dict.h
+│   │   │   │   ├── display.h
+│   │   │   │   ├── dovi_meta.h
+│   │   │   │   ├── downmix_info.h
+│   │   │   │   ├── encryption_info.h
+│   │   │   │   ├── error.h
+│   │   │   │   ├── eval.h
+│   │   │   │   ├── executor.h
+│   │   │   │   ├── ffversion.h
+│   │   │   │   ├── fifo.h
+│   │   │   │   ├── file.h
+│   │   │   │   ├── film_grain_params.h
+│   │   │   │   ├── frame.h
+│   │   │   │   ├── hash.h
+│   │   │   │   ├── hdr_dynamic_metadata.h
+│   │   │   │   ├── hdr_dynamic_vivid_metadata.h
+│   │   │   │   ├── hmac.h
+│   │   │   │   ├── hwcontext_cuda.h
+│   │   │   │   ├── hwcontext_d3d11va.h
+│   │   │   │   ├── hwcontext_drm.h
+│   │   │   │   ├── hwcontext_dxva2.h
+│   │   │   │   ├── hwcontext.h
+│   │   │   │   ├── hwcontext_mediacodec.h
+│   │   │   │   ├── hwcontext_opencl.h
+│   │   │   │   ├── hwcontext_qsv.h
+│   │   │   │   ├── hwcontext_vaapi.h
+│   │   │   │   ├── hwcontext_vdpau.h
+│   │   │   │   ├── hwcontext_videotoolbox.h
+│   │   │   │   ├── hwcontext_vulkan.h
+│   │   │   │   ├── imgutils.h
+│   │   │   │   ├── intfloat.h
+│   │   │   │   ├── intreadwrite.h
+│   │   │   │   ├── lfg.h
+│   │   │   │   ├── log.h
+│   │   │   │   ├── lzo.h
+│   │   │   │   ├── macros.h
+│   │   │   │   ├── mastering_display_metadata.h
+│   │   │   │   ├── mathematics.h
+│   │   │   │   ├── md5.h
+│   │   │   │   ├── mem.h
+│   │   │   │   ├── motion_vector.h
+│   │   │   │   ├── murmur3.h
+│   │   │   │   ├── opt.h
+│   │   │   │   ├── parseutils.h
+│   │   │   │   ├── pixdesc.h
+│   │   │   │   ├── pixelutils.h
+│   │   │   │   ├── pixfmt.h
+│   │   │   │   ├── random_seed.h
+│   │   │   │   ├── rational.h
+│   │   │   │   ├── rc4.h
+│   │   │   │   ├── replaygain.h
+│   │   │   │   ├── ripemd.h
+│   │   │   │   ├── samplefmt.h
+│   │   │   │   ├── sha512.h
+│   │   │   │   ├── sha.h
+│   │   │   │   ├── spherical.h
+│   │   │   │   ├── stereo3d.h
+│   │   │   │   ├── tea.h
+│   │   │   │   ├── threadmessage.h
+│   │   │   │   ├── timecode.h
+│   │   │   │   ├── time.h
+│   │   │   │   ├── timestamp.h
+│   │   │   │   ├── tree.h
+│   │   │   │   ├── twofish.h
+│   │   │   │   ├── tx.h
+│   │   │   │   ├── uuid.h
+│   │   │   │   ├── version.h
+│   │   │   │   ├── video_enc_params.h
+│   │   │   │   ├── video_hint.h
+│   │   │   │   └── xtea.h
+│   │   │   ├── libswresample
+│   │   │   │   ├── swresample.h
+│   │   │   │   ├── version.h
+│   │   │   │   └── version_major.h
+│   │   │   ├── libswscale
+│   │   │   │   ├── swscale.h
+│   │   │   │   ├── version.h
+│   │   │   │   └── version_major.h
+│   │   │   └── opencv4
+│   │   │       └── opencv2
+│   │   │           └── cvconfig.h
+│   │   ├── rpc
+│   │   │   └── netdb.h
+│   │   ├── sched.h
+│   │   ├── scsi
+│   │   │   ├── cxlflash_ioctl.h
+│   │   │   ├── fc
+│   │   │   │   ├── fc_els.h
+│   │   │   │   ├── fc_fs.h
+│   │   │   │   ├── fc_gs.h
+│   │   │   │   └── fc_ns.h
+│   │   │   ├── scsi_bsg_fc.h
+│   │   │   ├── scsi_bsg_mpi3mr.h
+│   │   │   ├── scsi_bsg_ufs.h
+│   │   │   ├── scsi.h
+│   │   │   ├── scsi_ioctl.h
+│   │   │   ├── scsi_netlink_fc.h
+│   │   │   ├── scsi_netlink.h
+│   │   │   └── sg.h
+│   │   ├── SDL2
+│   │   ├── search.h
+│   │   ├── semaphore.h
+│   │   ├── setjmp.h
+│   │   ├── sgtty.h
+│   │   ├── shadow.h
+│   │   ├── signal.h
+│   │   ├── sound
+│   │   │   ├── asequencer.h
+│   │   │   ├── asoc.h
+│   │   │   ├── asound_fm.h
+│   │   │   ├── asound.h
+│   │   │   ├── compress_offload.h
+│   │   │   ├── compress_params.h
+│   │   │   ├── emu10k1.h
+│   │   │   ├── firewire.h
+│   │   │   ├── hdsp.h
+│   │   │   ├── hdspm.h
+│   │   │   ├── intel
+│   │   │   │   └── avs
+│   │   │   │       └── tokens.h
+│   │   │   ├── sb16_csp.h
+│   │   │   ├── sfnt_info.h
+│   │   │   ├── skl-tplg-interface.h
+│   │   │   ├── snd_ar_tokens.h
+│   │   │   ├── snd_sst_tokens.h
+│   │   │   ├── sof
+│   │   │   │   ├── abi.h
+│   │   │   │   ├── fw.h
+│   │   │   │   ├── header.h
+│   │   │   │   └── tokens.h
+│   │   │   ├── tlv.h
+│   │   │   └── usb_stream.h
+│   │   ├── spawn.h
+│   │   ├── stab.h
+│   │   ├── stdbit.h
+│   │   ├── stdc-predef.h
+│   │   ├── stdint.h
+│   │   ├── stdio_ext.h
+│   │   ├── stdio.h
+│   │   ├── stdlib.h
+│   │   ├── string.h
+│   │   ├── strings.h
+│   │   ├── sys
+│   │   │   ├── acct.h
+│   │   │   ├── asm.h
+│   │   │   ├── auxv.h
+│   │   │   ├── bitypes.h
+│   │   │   ├── cachectl.h
+│   │   │   ├── cdefs.h
+│   │   │   ├── dir.h
+│   │   │   ├── epoll.h
+│   │   │   ├── errno.h
+│   │   │   ├── eventfd.h
+│   │   │   ├── fanotify.h
+│   │   │   ├── fcntl.h
+│   │   │   ├── file.h
+│   │   │   ├── fsuid.h
+│   │   │   ├── gmon.h
+│   │   │   ├── gmon_out.h
+│   │   │   ├── inotify.h
+│   │   │   ├── ioctl.h
+│   │   │   ├── ipc.h
+│   │   │   ├── kd.h
+│   │   │   ├── klog.h
+│   │   │   ├── mman.h
+│   │   │   ├── mount.h
+│   │   │   ├── msg.h
+│   │   │   ├── mtio.h
+│   │   │   ├── param.h
+│   │   │   ├── pci.h
+│   │   │   ├── personality.h
+│   │   │   ├── pidfd.h
+│   │   │   ├── poll.h
+│   │   │   ├── prctl.h
+│   │   │   ├── procfs.h
+│   │   │   ├── profil.h
+│   │   │   ├── ptrace.h
+│   │   │   ├── queue.h
+│   │   │   ├── quota.h
+│   │   │   ├── random.h
+│   │   │   ├── raw.h
+│   │   │   ├── reboot.h
+│   │   │   ├── resource.h
+│   │   │   ├── rseq.h
+│   │   │   ├── select.h
+│   │   │   ├── sem.h
+│   │   │   ├── sendfile.h
+│   │   │   ├── shm.h
+│   │   │   ├── signalfd.h
+│   │   │   ├── signal.h
+│   │   │   ├── single_threaded.h
+│   │   │   ├── socket.h
+│   │   │   ├── socketvar.h
+│   │   │   ├── soundcard.h
+│   │   │   ├── statfs.h
+│   │   │   ├── stat.h
+│   │   │   ├── statvfs.h
+│   │   │   ├── swap.h
+│   │   │   ├── syscall.h
+│   │   │   ├── sysinfo.h
+│   │   │   ├── syslog.h
+│   │   │   ├── sysmacros.h
+│   │   │   ├── termios.h
+│   │   │   ├── timeb.h
+│   │   │   ├── time.h
+│   │   │   ├── timerfd.h
+│   │   │   ├── times.h
+│   │   │   ├── timex.h
+│   │   │   ├── ttychars.h
+│   │   │   ├── ttydefaults.h
+│   │   │   ├── types.h
+│   │   │   ├── ucontext.h
+│   │   │   ├── uio.h
+│   │   │   ├── un.h
+│   │   │   ├── unistd.h
+│   │   │   ├── user.h
+│   │   │   ├── utsname.h
+│   │   │   ├── vfs.h
+│   │   │   ├── vlimit.h
+│   │   │   ├── vt.h
+│   │   │   ├── wait.h
+│   │   │   └── xattr.h
+│   │   ├── syscall.h
+│   │   ├── sysexits.h
+│   │   ├── syslog.h
+│   │   ├── tar.h
+│   │   ├── termio.h
+│   │   ├── termios.h
+│   │   ├── tgmath.h
+│   │   ├── thread_db.h
+│   │   ├── threads.h
+│   │   ├── time.h
+│   │   ├── ttyent.h
+│   │   ├── uchar.h
+│   │   ├── ucontext.h
+│   │   ├── ulimit.h
+│   │   ├── unistd.h
+│   │   ├── utime.h
+│   │   ├── utmp.h
+│   │   ├── utmpx.h
+│   │   ├── values.h
+│   │   ├── video
+│   │   │   ├── edid.h
+│   │   │   ├── sisfb.h
+│   │   │   └── uvesafb.h
+│   │   ├── wait.h
+│   │   ├── wchar.h
+│   │   ├── wctype.h
+│   │   ├── wordexp.h
+│   │   ├── x86_64-linux-gnu
+│   │   ├── xcrypt.h
+│   │   └── xen
+│   │       ├── evtchn.h
+│   │       ├── gntalloc.h
+│   │       ├── gntdev.h
+│   │       └── privcmd.h
+│   ├── lib
+│   │   ├── audit
+│   │   │   └── sotruss-lib.so
+│   │   ├── crt1.o
+│   │   ├── crti.o
+│   │   ├── crtn.o
+│   │   ├── gconv
+│   │   │   ├── ANSI_X3.110.so
+│   │   │   ├── ARMSCII-8.so
+│   │   │   ├── ASMO_449.so
+│   │   │   ├── BIG5HKSCS.so
+│   │   │   ├── BIG5.so
+│   │   │   ├── BRF.so
+│   │   │   ├── CP10007.so
+│   │   │   ├── CP1125.so
+│   │   │   ├── CP1250.so
+│   │   │   ├── CP1251.so
+│   │   │   ├── CP1252.so
+│   │   │   ├── CP1253.so
+│   │   │   ├── CP1254.so
+│   │   │   ├── CP1255.so
+│   │   │   ├── CP1256.so
+│   │   │   ├── CP1257.so
+│   │   │   ├── CP1258.so
+│   │   │   ├── CP737.so
+│   │   │   ├── CP770.so
+│   │   │   ├── CP771.so
+│   │   │   ├── CP772.so
+│   │   │   ├── CP773.so
+│   │   │   ├── CP774.so
+│   │   │   ├── CP775.so
+│   │   │   ├── CP932.so
+│   │   │   ├── CSN_369103.so
+│   │   │   ├── CWI.so
+│   │   │   ├── DEC-MCS.so
+│   │   │   ├── EBCDIC-AT-DE-A.so
+│   │   │   ├── EBCDIC-AT-DE.so
+│   │   │   ├── EBCDIC-CA-FR.so
+│   │   │   ├── EBCDIC-DK-NO-A.so
+│   │   │   ├── EBCDIC-DK-NO.so
+│   │   │   ├── EBCDIC-ES-A.so
+│   │   │   ├── EBCDIC-ES.so
+│   │   │   ├── EBCDIC-ES-S.so
+│   │   │   ├── EBCDIC-FI-SE-A.so
+│   │   │   ├── EBCDIC-FI-SE.so
+│   │   │   ├── EBCDIC-FR.so
+│   │   │   ├── EBCDIC-IS-FRISS.so
+│   │   │   ├── EBCDIC-IT.so
+│   │   │   ├── EBCDIC-PT.so
+│   │   │   ├── EBCDIC-UK.so
+│   │   │   ├── EBCDIC-US.so
+│   │   │   ├── ECMA-CYRILLIC.so
+│   │   │   ├── EUC-CN.so
+│   │   │   ├── EUC-JISX0213.so
+│   │   │   ├── EUC-JP-MS.so
+│   │   │   ├── EUC-JP.so
+│   │   │   ├── EUC-KR.so
+│   │   │   ├── EUC-TW.so
+│   │   │   ├── GB18030.so
+│   │   │   ├── GBBIG5.so
+│   │   │   ├── GBGBK.so
+│   │   │   ├── GBK.so
+│   │   │   ├── gconv-modules
+│   │   │   ├── gconv-modules.d
+│   │   │   │   └── gconv-modules-extra.conf
+│   │   │   ├── GEORGIAN-ACADEMY.so
+│   │   │   ├── GEORGIAN-PS.so
+│   │   │   ├── GOST_19768-74.so
+│   │   │   ├── GREEK7-OLD.so
+│   │   │   ├── GREEK7.so
+│   │   │   ├── GREEK-CCITT.so
+│   │   │   ├── HP-GREEK8.so
+│   │   │   ├── HP-ROMAN8.so
+│   │   │   ├── HP-ROMAN9.so
+│   │   │   ├── HP-THAI8.so
+│   │   │   ├── HP-TURKISH8.so
+│   │   │   ├── IBM037.so
+│   │   │   ├── IBM038.so
+│   │   │   ├── IBM1004.so
+│   │   │   ├── IBM1008_420.so
+│   │   │   ├── IBM1008.so
+│   │   │   ├── IBM1025.so
+│   │   │   ├── IBM1026.so
+│   │   │   ├── IBM1046.so
+│   │   │   ├── IBM1047.so
+│   │   │   ├── IBM1097.so
+│   │   │   ├── IBM1112.so
+│   │   │   ├── IBM1122.so
+│   │   │   ├── IBM1123.so
+│   │   │   ├── IBM1124.so
+│   │   │   ├── IBM1129.so
+│   │   │   ├── IBM1130.so
+│   │   │   ├── IBM1132.so
+│   │   │   ├── IBM1133.so
+│   │   │   ├── IBM1137.so
+│   │   │   ├── IBM1140.so
+│   │   │   ├── IBM1141.so
+│   │   │   ├── IBM1142.so
+│   │   │   ├── IBM1143.so
+│   │   │   ├── IBM1144.so
+│   │   │   ├── IBM1145.so
+│   │   │   ├── IBM1146.so
+│   │   │   ├── IBM1147.so
+│   │   │   ├── IBM1148.so
+│   │   │   ├── IBM1149.so
+│   │   │   ├── IBM1153.so
+│   │   │   ├── IBM1154.so
+│   │   │   ├── IBM1155.so
+│   │   │   ├── IBM1156.so
+│   │   │   ├── IBM1157.so
+│   │   │   ├── IBM1158.so
+│   │   │   ├── IBM1160.so
+│   │   │   ├── IBM1161.so
+│   │   │   ├── IBM1162.so
+│   │   │   ├── IBM1163.so
+│   │   │   ├── IBM1164.so
+│   │   │   ├── IBM1166.so
+│   │   │   ├── IBM1167.so
+│   │   │   ├── IBM12712.so
+│   │   │   ├── IBM1364.so
+│   │   │   ├── IBM1371.so
+│   │   │   ├── IBM1388.so
+│   │   │   ├── IBM1390.so
+│   │   │   ├── IBM1399.so
+│   │   │   ├── IBM16804.so
+│   │   │   ├── IBM256.so
+│   │   │   ├── IBM273.so
+│   │   │   ├── IBM274.so
+│   │   │   ├── IBM275.so
+│   │   │   ├── IBM277.so
+│   │   │   ├── IBM278.so
+│   │   │   ├── IBM280.so
+│   │   │   ├── IBM281.so
+│   │   │   ├── IBM284.so
+│   │   │   ├── IBM285.so
+│   │   │   ├── IBM290.so
+│   │   │   ├── IBM297.so
+│   │   │   ├── IBM420.so
+│   │   │   ├── IBM423.so
+│   │   │   ├── IBM424.so
+│   │   │   ├── IBM437.so
+│   │   │   ├── IBM4517.so
+│   │   │   ├── IBM4899.so
+│   │   │   ├── IBM4909.so
+│   │   │   ├── IBM4971.so
+│   │   │   ├── IBM500.so
+│   │   │   ├── IBM5347.so
+│   │   │   ├── IBM803.so
+│   │   │   ├── IBM850.so
+│   │   │   ├── IBM851.so
+│   │   │   ├── IBM852.so
+│   │   │   ├── IBM855.so
+│   │   │   ├── IBM856.so
+│   │   │   ├── IBM857.so
+│   │   │   ├── IBM858.so
+│   │   │   ├── IBM860.so
+│   │   │   ├── IBM861.so
+│   │   │   ├── IBM862.so
+│   │   │   ├── IBM863.so
+│   │   │   ├── IBM864.so
+│   │   │   ├── IBM865.so
+│   │   │   ├── IBM866NAV.so
+│   │   │   ├── IBM866.so
+│   │   │   ├── IBM868.so
+│   │   │   ├── IBM869.so
+│   │   │   ├── IBM870.so
+│   │   │   ├── IBM871.so
+│   │   │   ├── IBM874.so
+│   │   │   ├── IBM875.so
+│   │   │   ├── IBM880.so
+│   │   │   ├── IBM891.so
+│   │   │   ├── IBM901.so
+│   │   │   ├── IBM902.so
+│   │   │   ├── IBM9030.so
+│   │   │   ├── IBM903.so
+│   │   │   ├── IBM904.so
+│   │   │   ├── IBM905.so
+│   │   │   ├── IBM9066.so
+│   │   │   ├── IBM918.so
+│   │   │   ├── IBM921.so
+│   │   │   ├── IBM922.so
+│   │   │   ├── IBM930.so
+│   │   │   ├── IBM932.so
+│   │   │   ├── IBM933.so
+│   │   │   ├── IBM935.so
+│   │   │   ├── IBM937.so
+│   │   │   ├── IBM939.so
+│   │   │   ├── IBM943.so
+│   │   │   ├── IBM9448.so
+│   │   │   ├── IEC_P27-1.so
+│   │   │   ├── INIS-8.so
+│   │   │   ├── INIS-CYRILLIC.so
+│   │   │   ├── INIS.so
+│   │   │   ├── ISIRI-3342.so
+│   │   │   ├── ISO_10367-BOX.so
+│   │   │   ├── ISO_11548-1.so
+│   │   │   ├── ISO-2022-CN-EXT.so
+│   │   │   ├── ISO-2022-CN.so
+│   │   │   ├── ISO-2022-JP-3.so
+│   │   │   ├── ISO-2022-JP.so
+│   │   │   ├── ISO-2022-KR.so
+│   │   │   ├── ISO_2033.so
+│   │   │   ├── ISO_5427-EXT.so
+│   │   │   ├── ISO_5427.so
+│   │   │   ├── ISO_5428.so
+│   │   │   ├── ISO646.so
+│   │   │   ├── ISO_6937-2.so
+│   │   │   ├── ISO_6937.so
+│   │   │   ├── ISO8859-10.so
+│   │   │   ├── ISO8859-11.so
+│   │   │   ├── ISO8859-13.so
+│   │   │   ├── ISO8859-14.so
+│   │   │   ├── ISO8859-15.so
+│   │   │   ├── ISO8859-16.so
+│   │   │   ├── ISO8859-1.so
+│   │   │   ├── ISO8859-2.so
+│   │   │   ├── ISO8859-3.so
+│   │   │   ├── ISO8859-4.so
+│   │   │   ├── ISO8859-5.so
+│   │   │   ├── ISO8859-6.so
+│   │   │   ├── ISO8859-7.so
+│   │   │   ├── ISO8859-8.so
+│   │   │   ├── ISO8859-9E.so
+│   │   │   ├── ISO8859-9.so
+│   │   │   ├── ISO-IR-197.so
+│   │   │   ├── ISO-IR-209.so
+│   │   │   ├── JOHAB.so
+│   │   │   ├── KOI8-R.so
+│   │   │   ├── KOI8-RU.so
+│   │   │   ├── KOI-8.so
+│   │   │   ├── KOI8-T.so
+│   │   │   ├── KOI8-U.so
+│   │   │   ├── LATIN-GREEK-1.so
+│   │   │   ├── LATIN-GREEK.so
+│   │   │   ├── libCNS.so
+│   │   │   ├── libGB.so
+│   │   │   ├── libISOIR165.so
+│   │   │   ├── libJIS.so
+│   │   │   ├── libJISX0213.so
+│   │   │   ├── libKSC.so
+│   │   │   ├── MAC-CENTRALEUROPE.so
+│   │   │   ├── MACINTOSH.so
+│   │   │   ├── MAC-IS.so
+│   │   │   ├── MAC-SAMI.so
+│   │   │   ├── MAC-UK.so
+│   │   │   ├── MIK.so
+│   │   │   ├── NATS-DANO.so
+│   │   │   ├── NATS-SEFI.so
+│   │   │   ├── PT154.so
+│   │   │   ├── RK1048.so
+│   │   │   ├── SAMI-WS2.so
+│   │   │   ├── SHIFT_JISX0213.so
+│   │   │   ├── SJIS.so
+│   │   │   ├── T.61.so
+│   │   │   ├── TCVN5712-1.so
+│   │   │   ├── TIS-620.so
+│   │   │   ├── TSCII.so
+│   │   │   ├── UHC.so
+│   │   │   ├── UNICODE.so
+│   │   │   ├── UTF-16.so
+│   │   │   ├── UTF-32.so
+│   │   │   ├── UTF-7.so
+│   │   │   └── VISCII.so
+│   │   ├── gcrt1.o
+│   │   ├── grcrt1.o
+│   │   ├── libanl.a
+│   │   ├── libanl.so -> ../../lib/libanl.so.1
+│   │   ├── libBrokenLocale.a
+│   │   ├── libBrokenLocale.so -> ../../lib/libBrokenLocale.so.1
+│   │   ├── libc.a
+│   │   ├── libc_malloc_debug.so -> ../../lib/libc_malloc_debug.so.0
+│   │   ├── libc_nonshared.a
+│   │   ├── libc.so
+│   │   ├── libdl.a
+│   │   ├── libg.a
+│   │   ├── libm.a
+│   │   ├── libmcheck.a
+│   │   ├── libm.so -> ../../lib/libm.so.6
+│   │   ├── libnss_compat.so -> ../../lib/libnss_compat.so.2
+│   │   ├── libnss_db.so -> ../../lib/libnss_db.so.2
+│   │   ├── libnss_hesiod.so -> ../../lib/libnss_hesiod.so.2
+│   │   ├── libpthread.a
+│   │   ├── libresolv.a
+│   │   ├── libresolv.so -> ../../lib/libresolv.so.2
+│   │   ├── librt.a
+│   │   ├── libthread_db.so -> ../../lib/libthread_db.so.1
+│   │   ├── libutil.a
+│   │   ├── Mcrt1.o
+│   │   ├── pkgconfig
+│   │   ├── rcrt1.o
+│   │   ├── riscv64-linux-gnu
+│   │   │   ├── blas
+│   │   │   │   ├── libblas.so.3 -> libblas.so.3.12.0
+│   │   │   │   └── libblas.so.3.12.0
+│   │   │   ├── lapack
+│   │   │   │   ├── liblapack.so.3 -> liblapack.so.3.12.0
+│   │   │   │   └── liblapack.so.3.12.0
+│   │   │   ├── libaom.so.3 -> libaom.so.3.8.2
+│   │   │   ├── libaom.so.3.8.2
+│   │   │   ├── libatomic.so.1 -> libatomic.so.1.2.0
+│   │   │   ├── libatomic.so.1.2.0
+│   │   │   ├── libavcodec.a
+│   │   │   ├── libavcodec.pc
+│   │   │   ├── libavcodec.so -> libavcodec.so.60.31.102
+│   │   │   ├── libavcodec.so.60 -> libavcodec.so.60.31.102
+│   │   │   ├── libavcodec.so.60.31.102
+│   │   │   ├── libavdevice.pc
+│   │   │   ├── libavdevice.so -> libavdevice.so.60.3.100
+│   │   │   ├── libavdevice.so.60 -> libavdevice.so.60.3.100
+│   │   │   ├── libavdevice.so.60.3.100
+│   │   │   ├── libavfilter.pc
+│   │   │   ├── libavfilter.so -> libavfilter.so.9.12.100
+│   │   │   ├── libavfilter.so.9 -> libavfilter.so.9.12.100
+│   │   │   ├── libavfilter.so.9.12.100
+│   │   │   ├── libavformat.a
+│   │   │   ├── libavformat.pc
+│   │   │   ├── libavformat.so -> libavformat.so.60.16.100
+│   │   │   ├── libavformat.so.60 -> libavformat.so.60.16.100
+│   │   │   ├── libavformat.so.60.16.100
+│   │   │   ├── libavutil.a
+│   │   │   ├── libavutil.pc
+│   │   │   ├── libavutil.so -> libavutil.so.58.29.100
+│   │   │   ├── libavutil.so.58 -> libavutil.so.58.29.100
+│   │   │   ├── libavutil.so.58.29.100
+│   │   │   ├── libblas.so -> libblas.so.3
+│   │   │   ├── libblas.so.3 -> blas/libblas.so.3.12.0
+│   │   │   ├── libbsd.so.0 -> libbsd.so.0.12.1
+│   │   │   ├── libbsd.so.0.12.1
+│   │   │   ├── libbz2.so -> libbz2.so.1.0.4
+│   │   │   ├── libbz2.so.1 -> libbz2.so.1.0.4
+│   │   │   ├── libbz2.so.1.0 -> libbz2.so.1.0.4
+│   │   │   ├── libbz2.so.1.0.4
+│   │   │   ├── libcairo-gobject.so.2 -> libcairo-gobject.so.2.11800.0
+│   │   │   ├── libcairo-gobject.so.2.11800.0
+│   │   │   ├── libcairomm-1.16.so.1 -> libcairomm-1.16.so.1.4.0
+│   │   │   ├── libcairomm-1.16.so.1.4.0
+│   │   │   ├── libcairo-script-interpreter.so.2 -> libcairo-script-interpreter.so.2.11800.0
+│   │   │   ├── libcairo-script-interpreter.so.2.11800.0
+│   │   │   ├── libcairo.so.2 -> libcairo.so.2.11800.0
+│   │   │   ├── libcairo.so.2.11800.0
+│   │   │   ├── libcodec2.so.1.2
+│   │   │   ├── libdav1d.so.7 -> libdav1d.so.7.0.0
+│   │   │   ├── libdav1d.so.7.0.0
+│   │   │   ├── libdl.so.2
+│   │   │   ├── libdrm_amdgpu.so -> libdrm_amdgpu.so.1
+│   │   │   ├── libdrm_amdgpu.so.1 -> libdrm_amdgpu.so.1.123.0
+│   │   │   ├── libdrm_amdgpu.so.1.123.0
+│   │   │   ├── libdrm_nouveau.so -> libdrm_nouveau.so.2
+│   │   │   ├── libdrm_nouveau.so.2 -> libdrm_nouveau.so.2.123.0
+│   │   │   ├── libdrm_nouveau.so.2.123.0
+│   │   │   ├── libdrm_radeon.so -> libdrm_radeon.so.1
+│   │   │   ├── libdrm_radeon.so.1 -> libdrm_radeon.so.1.123.0
+│   │   │   ├── libdrm_radeon.so.1.123.0
+│   │   │   ├── libdrm.so -> libdrm.so.2
+│   │   │   ├── libdrm.so.2 -> libdrm.so.2.123.0
+│   │   │   ├── libdrm.so.2.123.0
+│   │   │   ├── libffi.a
+│   │   │   ├── libffi_pic.a
+│   │   │   ├── libffi.so -> libffi.so.8.1.4
+│   │   │   ├── libffi.so.8 -> libffi.so.8.1.4
+│   │   │   ├── libffi.so.8.1.4
+│   │   │   ├── libgcc_s.so.1
+│   │   │   ├── libgcrypt.so.20 -> libgcrypt.so.20.5.0
+│   │   │   ├── libgcrypt.so.20.5.0
+│   │   │   ├── libgfortran.so.5 -> libgfortran.so.5.0.0
+│   │   │   ├── libgfortran.so.5.0.0
+│   │   │   ├── libgio-2.0.so -> libgio-2.0.so.0
+│   │   │   ├── libgio-2.0.so.0 -> libgio-2.0.so.0.8000.0
+│   │   │   ├── libgio-2.0.so.0.8000.0
+│   │   │   ├── libgiomm-2.4.so.1 -> libgiomm-2.4.so.1.3.0
+│   │   │   ├── libgiomm-2.4.so.1.3.0
+│   │   │   ├── libgiomm-2.68.so.1 -> libgiomm-2.68.so.1.3.0
+│   │   │   ├── libgiomm-2.68.so.1.3.0
+│   │   │   ├── libGLdispatch.so.0 -> libGLdispatch.so.0.0.0
+│   │   │   ├── libGLdispatch.so.0.0.0
+│   │   │   ├── libglib-2.0.a
+│   │   │   ├── libglib-2.0.so -> libglib-2.0.so.0
+│   │   │   ├── libglib-2.0.so.0 -> libglib-2.0.so.0.8000.0
+│   │   │   ├── libglib-2.0.so.0.8000.0
+│   │   │   ├── libGL.so.1 -> libGL.so.1.7.0
+│   │   │   ├── libGL.so.1.7.0
+│   │   │   ├── libGLX_indirect.so.0 -> libGLX_mesa.so.0
+│   │   │   ├── libGLX_mesa.so.0 -> libGLX_mesa.so.0.0.0
+│   │   │   ├── libGLX_mesa.so.0.0.0
+│   │   │   ├── libGLX.so.0 -> libGLX.so.0.0.0
+│   │   │   ├── libGLX.so.0.0.0
+│   │   │   ├── libgmodule-2.0.so -> libgmodule-2.0.so.0
+│   │   │   ├── libgmodule-2.0.so.0 -> libgmodule-2.0.so.0.8000.0
+│   │   │   ├── libgmodule-2.0.so.0.8000.0
+│   │   │   ├── libgmp.so.10 -> libgmp.so.10.5.0
+│   │   │   ├── libgmp.so.10.5.0
+│   │   │   ├── libgnutls.so.30 -> libgnutls.so.30.37.1
+│   │   │   ├── libgnutls.so.30.37.1
+│   │   │   ├── libgobject-2.0.a
+│   │   │   ├── libgobject-2.0.so -> libgobject-2.0.so.0
+│   │   │   ├── libgobject-2.0.so.0 -> libgobject-2.0.so.0.8000.0
+│   │   │   ├── libgobject-2.0.so.0.8000.0
+│   │   │   ├── libgomp.so.1 -> libgomp.so.1.0.0
+│   │   │   ├── libgomp.so.1.0.0
+│   │   │   ├── libgsm.so.1 -> libgsm.so.1.0.19
+│   │   │   ├── libgsm.so.1.0.19
+│   │   │   ├── libhogweed.so.6 -> libhogweed.so.6.8
+│   │   │   ├── libhogweed.so.6.8
+│   │   │   ├── libidn2.so.0 -> libidn2.so.0.4.0
+│   │   │   ├── libidn2.so.0.4.0
+│   │   │   ├── libjbig2dec.so.0 -> libjbig2dec.so.0.0.0
+│   │   │   ├── libjbig2dec.so.0.0.0
+│   │   │   ├── libjbig.so -> libjbig.so.0
+│   │   │   ├── libjbig.so.0
+│   │   │   ├── libjpeg.so -> libjpeg.so.8
+│   │   │   ├── libjpeg.so.8 -> libjpeg.so.8.2.2
+│   │   │   ├── libjpeg.so.8.2.2
+│   │   │   ├── libjpegxr.so.0 -> libjpegxr.so.1.2
+│   │   │   ├── libjpegxr.so.1.2
+│   │   │   ├── libjxl.so.0.7 -> libjxl.so.0.7.0
+│   │   │   ├── libjxl.so.0.7.0
+│   │   │   ├── libjxl_threads.so.0.7 -> libjxl_threads.so.0.7.0
+│   │   │   ├── libjxl_threads.so.0.7.0
+│   │   │   ├── liblapack.so -> liblapack.so.3
+│   │   │   ├── liblapack.so.3 -> lapack/liblapack.so.3.12.0
+│   │   │   ├── liblzma.so -> liblzma.so.5.4.5
+│   │   │   ├── liblzma.so.5 -> liblzma.so.5.4.5
+│   │   │   ├── liblzma.so.5.4.5
+│   │   │   ├── libm17n-core.so.0 -> libm17n-core.so.0.4.2
+│   │   │   ├── libm17n-core.so.0.4.2
+│   │   │   ├── libm17n-flt.so.0 -> libm17n-flt.so.0.4.2
+│   │   │   ├── libm17n-flt.so.0.4.2
+│   │   │   ├── libm17n-gui.so.0 -> libm17n-gui.so.0.4.2
+│   │   │   ├── libm17n-gui.so.0.4.2
+│   │   │   ├── libm17n.so.0 -> libm17n.so.0.4.2
+│   │   │   ├── libm17n.so.0.4.2
+│   │   │   ├── libmad.so.0 -> libmad.so.0.2.1
+│   │   │   ├── libmad.so.0.2.1
+│   │   │   ├── libmagic.so.1 -> libmagic.so.1.0.0
+│   │   │   ├── libmagic.so.1.0.0
+│   │   │   ├── libmana.so.1 -> libmana.so.1.0.50.0
+│   │   │   ├── libmana.so.1.0.50.0
+│   │   │   ├── libmanette-0.2.so.0
+│   │   │   ├── libmarisa.so.0 -> libmarisa.so.0.0.0
+│   │   │   ├── libmarisa.so.0.0.0
+│   │   │   ├── libmarkdown.so.2 -> libmarkdown.so.2.2.7
+│   │   │   ├── libmarkdown.so.2.2.7
+│   │   │   ├── libmatroska.so.7 -> libmatroska.so.7.0.0
+│   │   │   ├── libmatroska.so.7.0.0
+│   │   │   ├── libmaxminddb.so.0 -> libmaxminddb.so.0.0.7
+│   │   │   ├── libmaxminddb.so.0.0.7
+│   │   │   ├── libmbedcrypto.so.2.28.8
+│   │   │   ├── libmbedcrypto.so.7 -> libmbedcrypto.so.2.28.8
+│   │   │   ├── libmbim-glib.so.4 -> libmbim-glib.so.4.8.0
+│   │   │   ├── libmbim-glib.so.4.8.0
+│   │   │   ├── libmca_common_monitoring.so.50 -> libmca_common_monitoring.so.50.20.0
+│   │   │   ├── libmca_common_monitoring.so.50.20.0
+│   │   │   ├── libmca_common_ofi.so.10 -> libmca_common_ofi.so.10.0.2
+│   │   │   ├── libmca_common_ofi.so.10.0.2
+│   │   │   ├── libmca_common_ompio.so.41 -> libmca_common_ompio.so.41.29.4
+│   │   │   ├── libmca_common_ompio.so.41.29.4
+│   │   │   ├── libmca_common_sm.so.40 -> libmca_common_sm.so.40.30.0
+│   │   │   ├── libmca_common_sm.so.40.30.0
+│   │   │   ├── libmca_common_verbs.so.40 -> libmca_common_verbs.so.40.30.0
+│   │   │   ├── libmca_common_verbs.so.40.30.0
+│   │   │   ├── libmd4c.so.0 -> libmd4c.so.0.4.8
+│   │   │   ├── libmd4c.so.0.4.8
+│   │   │   ├── libmd.so.0 -> libmd.so.0.1.0
+│   │   │   ├── libmd.so.0.1.0
+│   │   │   ├── libmediaart-2.0.so.0 -> libmediaart-2.0.so.0.906.0
+│   │   │   ├── libmediaart-2.0.so.0.906.0
+│   │   │   ├── libmemusage.so
+│   │   │   ├── libmenu.so.6 -> libmenu.so.6.4
+│   │   │   ├── libmenu.so.6.4
+│   │   │   ├── libmenuw.so.6 -> libmenuw.so.6.4
+│   │   │   ├── libmenuw.so.6.4
+│   │   │   ├── libmfhdfalt.so.0 -> libmfhdfalt.so.0.0.0
+│   │   │   ├── libmfhdfalt.so.0.0.0
+│   │   │   ├── libmhash.so.2 -> libmhash.so.2.0.1
+│   │   │   ├── libmhash.so.2.0.1
+│   │   │   ├── libminiupnpc.so.17
+│   │   │   ├── libminizip.so.1 -> libminizip.so.1.0.0
+│   │   │   ├── libminizip.so.1.0.0
+│   │   │   ├── libmjpegutils-2.1.so.0 -> libmjpegutils-2.1.so.0.0.0
+│   │   │   ├── libmjpegutils-2.1.so.0.0.0
+│   │   │   ├── libmlx4.so.1 -> libmlx4.so.1.0.50.0
+│   │   │   ├── libmlx4.so.1.0.50.0
+│   │   │   ├── libmlx5.so.1 -> libmlx5.so.1.24.50.0
+│   │   │   ├── libmlx5.so.1.24.50.0
+│   │   │   ├── libmm-glib.so.0 -> libmm-glib.so.0.10.0
+│   │   │   ├── libmm-glib.so.0.10.0
+│   │   │   ├── libmms.so.0 -> libmms.so.0.0.2
+│   │   │   ├── libmms.so.0.0.2
+│   │   │   ├── libmnl.so.0 -> libmnl.so.0.2.0
+│   │   │   ├── libmnl.so.0.2.0
+│   │   │   ├── libmodplug.so.1 -> libmodplug.so.1.0.0
+│   │   │   ├── libmodplug.so.1.0.0
+│   │   │   ├── libmount.so -> libmount.so.1.1.0
+│   │   │   ├── libmount.so.1 -> libmount.so.1.1.0
+│   │   │   ├── libmount.so.1.1.0
+│   │   │   ├── libmozjs-115.so.0 -> libmozjs-115.so.115.10.0
+│   │   │   ├── libmozjs-115.so.115.10.0
+│   │   │   ├── libmp3lame.so.0 -> libmp3lame.so.0.0.0
+│   │   │   ├── libmp3lame.so.0.0.0
+│   │   │   ├── libmpcdec.so.6 -> libmpcdec.so.6.1.0
+│   │   │   ├── libmpcdec.so.6.1.0
+│   │   │   ├── libmpc.so.3 -> libmpc.so.3.3.1
+│   │   │   ├── libmpc.so.3.3.1
+│   │   │   ├── libmpeg2convert.so.0 -> libmpeg2convert.so.0.0.0
+│   │   │   ├── libmpeg2convert.so.0.0.0
+│   │   │   ├── libmpeg2encpp-2.1.so.0 -> libmpeg2encpp-2.1.so.0.0.0
+│   │   │   ├── libmpeg2encpp-2.1.so.0.0.0
+│   │   │   ├── libmpeg2.so.0 -> libmpeg2.so.0.1.0
+│   │   │   ├── libmpeg2.so.0.1.0
+│   │   │   ├── libmpfr.so.6 -> libmpfr.so.6.2.1
+│   │   │   ├── libmpfr.so.6.2.1
+│   │   │   ├── libmpg123.so.0 -> libmpg123.so.0.48.2
+│   │   │   ├── libmpg123.so.0.48.2
+│   │   │   ├── libmpi_cxx.so.40 -> libmpi_cxx.so.40.30.1
+│   │   │   ├── libmpi_cxx.so.40.30.1
+│   │   │   ├── libmpi_java.so.40 -> libmpi_java.so.40.30.0
+│   │   │   ├── libmpi_java.so.40.30.0
+│   │   │   ├── libmpi_mpifh-gfortran.so.40 -> libmpi_mpifh-gfortran.so.40.30.0
+│   │   │   ├── libmpi_mpifh-gfortran.so.40.30.0
+│   │   │   ├── libmpi_mpifh.so.40 -> libmpi_mpifh.so.40.30.0
+│   │   │   ├── libmpi_mpifh.so.40.30.0
+│   │   │   ├── libmpi.so.40 -> libmpi.so.40.30.6
+│   │   │   ├── libmpi.so.40.30.6
+│   │   │   ├── libmpi_usempif08-gfortran.so.40 -> libmpi_usempif08-gfortran.so.40.30.0
+│   │   │   ├── libmpi_usempif08-gfortran.so.40.30.0
+│   │   │   ├── libmpi_usempif08.so.40 -> libmpi_usempif08.so.40.30.0
+│   │   │   ├── libmpi_usempif08.so.40.30.0
+│   │   │   ├── libmpi_usempi_ignore_tkr-gfortran.so.40 -> libmpi_usempi_ignore_tkr-gfortran.so.40.30.0
+│   │   │   ├── libmpi_usempi_ignore_tkr-gfortran.so.40.30.0
+│   │   │   ├── libmpi_usempi_ignore_tkr.so.40 -> libmpi_usempi_ignore_tkr.so.40.30.0
+│   │   │   ├── libmpi_usempi_ignore_tkr.so.40.30.0
+│   │   │   ├── libmplex2-2.1.so.0 -> libmplex2-2.1.so.0.0.0
+│   │   │   ├── libmplex2-2.1.so.0.0.0
+│   │   │   ├── libmsgraph-0.so.0.2.1
+│   │   │   ├── libmsgraph-0.so.1 -> libmsgraph-0.so.0.2.1
+│   │   │   ├── libm.so -> libm.so.6
+│   │   │   ├── libm.so.6
+│   │   │   ├── libmspub-0.1.so.1 -> libmspub-0.1.so.1.0.4
+│   │   │   ├── libmspub-0.1.so.1.0.4
+│   │   │   ├── libmtdev.so.1 -> libmtdev.so.1.0.0
+│   │   │   ├── libmtdev.so.1.0.0
+│   │   │   ├── libmtp.so.9 -> libmtp.so.9.4.0
+│   │   │   ├── libmtp.so.9.4.0
+│   │   │   ├── libmujs.so.3
+│   │   │   ├── libmunge.so.2 -> libmunge.so.2.0.0
+│   │   │   ├── libmunge.so.2.0.0
+│   │   │   ├── libmutter-14.so.0 -> libmutter-14.so.0.0.0
+│   │   │   ├── libmutter-14.so.0.0.0
+│   │   │   ├── libmwaw-0.3.so.3 -> libmwaw-0.3.so.3.0.22
+│   │   │   ├── libmwaw-0.3.so.3.0.22
+│   │   │   ├── libmysofa.so.1 -> libmysofa.so.1.3.2
+│   │   │   ├── libmysofa.so.1.3.2
+│   │   │   ├── libmysqlclient.so.21 -> libmysqlclient.so.21.2.40
+│   │   │   ├── libmysqlclient.so.21.2.40
+│   │   │   ├── libmythes-1.2.so.0 -> libmythes-1.2.so.0.0.0
+│   │   │   ├── libmythes-1.2.so.0.0.0
+│   │   │   ├── libnettle.so.8 -> libnettle.so.8.8
+│   │   │   ├── libnettle.so.8.8
+│   │   │   ├── libOpenCL.so.1 -> libOpenCL.so.1.0.0
+│   │   │   ├── libOpenCL.so.1.0.0
+│   │   │   ├── libopencv_alphamat.so -> libopencv_alphamat.so.406
+│   │   │   ├── libopencv_alphamat.so.406 -> libopencv_alphamat.so.4.6.0
+│   │   │   ├── libopencv_alphamat.so.4.6.0
+│   │   │   ├── libopencv_aruco.so -> libopencv_aruco.so.406
+│   │   │   ├── libopencv_aruco.so.406 -> libopencv_aruco.so.4.6.0
+│   │   │   ├── libopencv_aruco.so.4.6.0
+│   │   │   ├── libopencv_barcode.so -> libopencv_barcode.so.406
+│   │   │   ├── libopencv_barcode.so.406 -> libopencv_barcode.so.4.6.0
+│   │   │   ├── libopencv_barcode.so.4.6.0
+│   │   │   ├── libopencv_bgsegm.so -> libopencv_bgsegm.so.406
+│   │   │   ├── libopencv_bgsegm.so.406 -> libopencv_bgsegm.so.4.6.0
+│   │   │   ├── libopencv_bgsegm.so.4.6.0
+│   │   │   ├── libopencv_bioinspired.so -> libopencv_bioinspired.so.406
+│   │   │   ├── libopencv_bioinspired.so.406 -> libopencv_bioinspired.so.4.6.0
+│   │   │   ├── libopencv_bioinspired.so.4.6.0
+│   │   │   ├── libopencv_calib3d.a
+│   │   │   ├── libopencv_calib3d.so -> libopencv_calib3d.so.406
+│   │   │   ├── libopencv_calib3d.so.406 -> libopencv_calib3d.so.4.6.0
+│   │   │   ├── libopencv_calib3d.so.4.6.0
+│   │   │   ├── libopencv_ccalib.so -> libopencv_ccalib.so.406
+│   │   │   ├── libopencv_ccalib.so.406 -> libopencv_ccalib.so.4.6.0
+│   │   │   ├── libopencv_ccalib.so.4.6.0
+│   │   │   ├── libopencv_core.a
+│   │   │   ├── libopencv_core.so -> libopencv_core.so.406
+│   │   │   ├── libopencv_core.so.406 -> libopencv_core.so.4.6.0
+│   │   │   ├── libopencv_core.so.4.6.0
+│   │   │   ├── libopencv_cvv.so -> libopencv_cvv.so.406
+│   │   │   ├── libopencv_cvv.so.406 -> libopencv_cvv.so.4.6.0
+│   │   │   ├── libopencv_cvv.so.4.6.0
+│   │   │   ├── libopencv_datasets.so -> libopencv_datasets.so.406
+│   │   │   ├── libopencv_datasets.so.406 -> libopencv_datasets.so.4.6.0
+│   │   │   ├── libopencv_datasets.so.4.6.0
+│   │   │   ├── libopencv_dnn.a
+│   │   │   ├── libopencv_dnn_objdetect.so -> libopencv_dnn_objdetect.so.406
+│   │   │   ├── libopencv_dnn_objdetect.so.406 -> libopencv_dnn_objdetect.so.4.6.0
+│   │   │   ├── libopencv_dnn_objdetect.so.4.6.0
+│   │   │   ├── libopencv_dnn.so -> libopencv_dnn.so.406
+│   │   │   ├── libopencv_dnn.so.406 -> libopencv_dnn.so.4.6.0
+│   │   │   ├── libopencv_dnn.so.4.6.0
+│   │   │   ├── libopencv_dnn_superres.so -> libopencv_dnn_superres.so.406
+│   │   │   ├── libopencv_dnn_superres.so.406 -> libopencv_dnn_superres.so.4.6.0
+│   │   │   ├── libopencv_dnn_superres.so.4.6.0
+│   │   │   ├── libopencv_dpm.so -> libopencv_dpm.so.406
+│   │   │   ├── libopencv_dpm.so.406 -> libopencv_dpm.so.4.6.0
+│   │   │   ├── libopencv_dpm.so.4.6.0
+│   │   │   ├── libopencv_face.so -> libopencv_face.so.406
+│   │   │   ├── libopencv_face.so.406 -> libopencv_face.so.4.6.0
+│   │   │   ├── libopencv_face.so.4.6.0
+│   │   │   ├── libopencv_features2d.a
+│   │   │   ├── libopencv_features2d.so -> libopencv_features2d.so.406
+│   │   │   ├── libopencv_features2d.so.406 -> libopencv_features2d.so.4.6.0
+│   │   │   ├── libopencv_features2d.so.4.6.0
+│   │   │   ├── libopencv_flann.a
+│   │   │   ├── libopencv_flann.so -> libopencv_flann.so.406
+│   │   │   ├── libopencv_flann.so.406 -> libopencv_flann.so.4.6.0
+│   │   │   ├── libopencv_flann.so.4.6.0
+│   │   │   ├── libopencv_freetype.so -> libopencv_freetype.so.406
+│   │   │   ├── libopencv_freetype.so.406 -> libopencv_freetype.so.4.6.0
+│   │   │   ├── libopencv_freetype.so.4.6.0
+│   │   │   ├── libopencv_fuzzy.so -> libopencv_fuzzy.so.406
+│   │   │   ├── libopencv_fuzzy.so.406 -> libopencv_fuzzy.so.4.6.0
+│   │   │   ├── libopencv_fuzzy.so.4.6.0
+│   │   │   ├── libopencv_hdf.so -> libopencv_hdf.so.406
+│   │   │   ├── libopencv_hdf.so.406 -> libopencv_hdf.so.4.6.0
+│   │   │   ├── libopencv_hdf.so.4.6.0
+│   │   │   ├── libopencv_hfs.so -> libopencv_hfs.so.406
+│   │   │   ├── libopencv_hfs.so.406 -> libopencv_hfs.so.4.6.0
+│   │   │   ├── libopencv_hfs.so.4.6.0
+│   │   │   ├── libopencv_highgui.a
+│   │   │   ├── libopencv_highgui.so -> libopencv_highgui.so.406
+│   │   │   ├── libopencv_highgui.so.406 -> libopencv_highgui.so.4.6.0
+│   │   │   ├── libopencv_highgui.so.4.6.0
+│   │   │   ├── libopencv_imgcodecs.a
+│   │   │   ├── libopencv_imgcodecs.so -> libopencv_imgcodecs.so.406
+│   │   │   ├── libopencv_imgcodecs.so.406 -> libopencv_imgcodecs.so.4.6.0
+│   │   │   ├── libopencv_imgcodecs.so.4.6.0
+│   │   │   ├── libopencv_img_hash.so -> libopencv_img_hash.so.406
+│   │   │   ├── libopencv_img_hash.so.406 -> libopencv_img_hash.so.4.6.0
+│   │   │   ├── libopencv_img_hash.so.4.6.0
+│   │   │   ├── libopencv_imgproc.a
+│   │   │   ├── libopencv_imgproc.so -> libopencv_imgproc.so.406
+│   │   │   ├── libopencv_imgproc.so.406 -> libopencv_imgproc.so.4.6.0
+│   │   │   ├── libopencv_imgproc.so.4.6.0
+│   │   │   ├── libopencv_intensity_transform.so -> libopencv_intensity_transform.so.406
+│   │   │   ├── libopencv_intensity_transform.so.406 -> libopencv_intensity_transform.so.4.6.0
+│   │   │   ├── libopencv_intensity_transform.so.4.6.0
+│   │   │   ├── libopencv_line_descriptor.so -> libopencv_line_descriptor.so.406
+│   │   │   ├── libopencv_line_descriptor.so.406 -> libopencv_line_descriptor.so.4.6.0
+│   │   │   ├── libopencv_line_descriptor.so.4.6.0
+│   │   │   ├── libopencv_mcc.so -> libopencv_mcc.so.406
+│   │   │   ├── libopencv_mcc.so.406 -> libopencv_mcc.so.4.6.0
+│   │   │   ├── libopencv_mcc.so.4.6.0
+│   │   │   ├── libopencv_ml.a
+│   │   │   ├── libopencv_ml.so -> libopencv_ml.so.406
+│   │   │   ├── libopencv_ml.so.406 -> libopencv_ml.so.4.6.0
+│   │   │   ├── libopencv_ml.so.4.6.0
+│   │   │   ├── libopencv_objdetect.a
+│   │   │   ├── libopencv_objdetect.so -> libopencv_objdetect.so.406
+│   │   │   ├── libopencv_objdetect.so.406 -> libopencv_objdetect.so.4.6.0
+│   │   │   ├── libopencv_objdetect.so.4.6.0
+│   │   │   ├── libopencv_optflow.so -> libopencv_optflow.so.406
+│   │   │   ├── libopencv_optflow.so.406 -> libopencv_optflow.so.4.6.0
+│   │   │   ├── libopencv_optflow.so.4.6.0
+│   │   │   ├── libopencv_phase_unwrapping.so -> libopencv_phase_unwrapping.so.406
+│   │   │   ├── libopencv_phase_unwrapping.so.406 -> libopencv_phase_unwrapping.so.4.6.0
+│   │   │   ├── libopencv_phase_unwrapping.so.4.6.0
+│   │   │   ├── libopencv_photo.a
+│   │   │   ├── libopencv_photo.so -> libopencv_photo.so.406
+│   │   │   ├── libopencv_photo.so.406 -> libopencv_photo.so.4.6.0
+│   │   │   ├── libopencv_photo.so.4.6.0
+│   │   │   ├── libopencv_plot.so -> libopencv_plot.so.406
+│   │   │   ├── libopencv_plot.so.406 -> libopencv_plot.so.4.6.0
+│   │   │   ├── libopencv_plot.so.4.6.0
+│   │   │   ├── libopencv_quality.so -> libopencv_quality.so.406
+│   │   │   ├── libopencv_quality.so.406 -> libopencv_quality.so.4.6.0
+│   │   │   ├── libopencv_quality.so.4.6.0
+│   │   │   ├── libopencv_rapid.so -> libopencv_rapid.so.406
+│   │   │   ├── libopencv_rapid.so.406 -> libopencv_rapid.so.4.6.0
+│   │   │   ├── libopencv_rapid.so.4.6.0
+│   │   │   ├── libopencv_reg.so -> libopencv_reg.so.406
+│   │   │   ├── libopencv_reg.so.406 -> libopencv_reg.so.4.6.0
+│   │   │   ├── libopencv_reg.so.4.6.0
+│   │   │   ├── libopencv_rgbd.so -> libopencv_rgbd.so.406
+│   │   │   ├── libopencv_rgbd.so.406 -> libopencv_rgbd.so.4.6.0
+│   │   │   ├── libopencv_rgbd.so.4.6.0
+│   │   │   ├── libopencv_saliency.so -> libopencv_saliency.so.406
+│   │   │   ├── libopencv_saliency.so.406 -> libopencv_saliency.so.4.6.0
+│   │   │   ├── libopencv_saliency.so.4.6.0
+│   │   │   ├── libopencv_shape.so -> libopencv_shape.so.406
+│   │   │   ├── libopencv_shape.so.406 -> libopencv_shape.so.4.6.0
+│   │   │   ├── libopencv_shape.so.4.6.0
+│   │   │   ├── libopencv_stereo.so -> libopencv_stereo.so.406
+│   │   │   ├── libopencv_stereo.so.406 -> libopencv_stereo.so.4.6.0
+│   │   │   ├── libopencv_stereo.so.4.6.0
+│   │   │   ├── libopencv_stitching.a
+│   │   │   ├── libopencv_stitching.so -> libopencv_stitching.so.406
+│   │   │   ├── libopencv_stitching.so.406 -> libopencv_stitching.so.4.6.0
+│   │   │   ├── libopencv_stitching.so.4.6.0
+│   │   │   ├── libopencv_structured_light.so -> libopencv_structured_light.so.406
+│   │   │   ├── libopencv_structured_light.so.406 -> libopencv_structured_light.so.4.6.0
+│   │   │   ├── libopencv_structured_light.so.4.6.0
+│   │   │   ├── libopencv_superres.so -> libopencv_superres.so.406
+│   │   │   ├── libopencv_superres.so.406 -> libopencv_superres.so.4.6.0
+│   │   │   ├── libopencv_superres.so.4.6.0
+│   │   │   ├── libopencv_surface_matching.so -> libopencv_surface_matching.so.406
+│   │   │   ├── libopencv_surface_matching.so.406 -> libopencv_surface_matching.so.4.6.0
+│   │   │   ├── libopencv_surface_matching.so.4.6.0
+│   │   │   ├── libopencv_text.so -> libopencv_text.so.406
+│   │   │   ├── libopencv_text.so.406 -> libopencv_text.so.4.6.0
+│   │   │   ├── libopencv_text.so.4.6.0
+│   │   │   ├── libopencv_tracking.so -> libopencv_tracking.so.406
+│   │   │   ├── libopencv_tracking.so.406 -> libopencv_tracking.so.4.6.0
+│   │   │   ├── libopencv_tracking.so.4.6.0
+│   │   │   ├── libopencv_video.a
+│   │   │   ├── libopencv_videoio.a
+│   │   │   ├── libopencv_videoio.so -> libopencv_videoio.so.406
+│   │   │   ├── libopencv_videoio.so.406 -> libopencv_videoio.so.4.6.0
+│   │   │   ├── libopencv_videoio.so.4.6.0
+│   │   │   ├── libopencv_video.so -> libopencv_video.so.406
+│   │   │   ├── libopencv_video.so.406 -> libopencv_video.so.4.6.0
+│   │   │   ├── libopencv_video.so.4.6.0
+│   │   │   ├── libopencv_videostab.so -> libopencv_videostab.so.406
+│   │   │   ├── libopencv_videostab.so.406 -> libopencv_videostab.so.4.6.0
+│   │   │   ├── libopencv_videostab.so.4.6.0
+│   │   │   ├── libopencv_viz.so -> libopencv_viz.so.406
+│   │   │   ├── libopencv_viz.so.406 -> libopencv_viz.so.4.6.0
+│   │   │   ├── libopencv_viz.so.4.6.0
+│   │   │   ├── libopencv_wechat_qrcode.so -> libopencv_wechat_qrcode.so.406
+│   │   │   ├── libopencv_wechat_qrcode.so.406 -> libopencv_wechat_qrcode.so.4.6.0
+│   │   │   ├── libopencv_wechat_qrcode.so.4.6.0
+│   │   │   ├── libopencv_ximgproc.so -> libopencv_ximgproc.so.406
+│   │   │   ├── libopencv_ximgproc.so.406 -> libopencv_ximgproc.so.4.6.0
+│   │   │   ├── libopencv_ximgproc.so.4.6.0
+│   │   │   ├── libopencv_xobjdetect.so -> libopencv_xobjdetect.so.406
+│   │   │   ├── libopencv_xobjdetect.so.406 -> libopencv_xobjdetect.so.4.6.0
+│   │   │   ├── libopencv_xobjdetect.so.4.6.0
+│   │   │   ├── libopencv_xphoto.so -> libopencv_xphoto.so.406
+│   │   │   ├── libopencv_xphoto.so.406 -> libopencv_xphoto.so.4.6.0
+│   │   │   ├── libopencv_xphoto.so.4.6.0
+│   │   │   ├── libopenjp2.so -> libopenjp2.so.7
+│   │   │   ├── libopenjp2.so.2.5.0
+│   │   │   ├── libopenjp2.so.7 -> libopenjp2.so.2.5.0
+│   │   │   ├── libopusfile.so.0 -> libopusfile.so.0.4.5
+│   │   │   ├── libopusfile.so.0.4.5
+│   │   │   ├── libopus.so.0 -> libopus.so.0.9.0
+│   │   │   ├── libopus.so.0.9.0
+│   │   │   ├── libopusurl.so.0 -> libopusurl.so.0.4.5
+│   │   │   ├── libopusurl.so.0.4.5
+│   │   │   ├── libp11-kit.so.0 -> libp11-kit.so.0.3.1
+│   │   │   ├── libp11-kit.so.0.3.1
+│   │   │   ├── libpng16.so -> libpng16.so.16
+│   │   │   ├── libpng16.so.16 -> libpng16.so.16.43.0
+│   │   │   ├── libpng16.so.16.43.0
+│   │   │   ├── libpng.so -> libpng16.so
+│   │   │   ├── libpostproc.pc
+│   │   │   ├── libpostproc.so -> libpostproc.so.57.3.100
+│   │   │   ├── libpostproc.so.57 -> libpostproc.so.57.3.100
+│   │   │   ├── libpostproc.so.57.3.100
+│   │   │   ├── libpthread.so.0
+│   │   │   ├── librabbitmq.so.4 -> librabbitmq.so.4.5.0
+│   │   │   ├── librabbitmq.so.4.5.0
+│   │   │   ├── libSDL2-2.0.so -> libSDL2-2.0.so.0
+│   │   │   ├── libSDL2-2.0.so.0 -> libSDL2-2.0.so.0.3000.0
+│   │   │   ├── libSDL2-2.0.so.0.3000.0
+│   │   │   ├── libSDL2.so -> libSDL2-2.0.so.0.3000.0
+│   │   │   ├── libshine.so.3 -> libshine.so.3.0.1
+│   │   │   ├── libshine.so.3.0.1
+│   │   │   ├── libsnappy.so.1 -> libsnappy.so.1.1.10
+│   │   │   ├── libsnappy.so.1.1.10
+│   │   │   ├── libspeexdsp.so.1 -> libspeexdsp.so.1.5.2
+│   │   │   ├── libspeexdsp.so.1.5.2
+│   │   │   ├── libspeex.so.1 -> libspeex.so.1.5.2
+│   │   │   ├── libspeex.so.1.5.2
+│   │   │   ├── libsrt-gnutls.so.1.5 -> libsrt-gnutls.so.1.5.3
+│   │   │   ├── libsrt-gnutls.so.1.5.3
+│   │   │   ├── libsrtp2.so.1
+│   │   │   ├── libssh2.so.1 -> libssh2.so.1.0.1
+│   │   │   ├── libssh2.so.1.0.1
+│   │   │   ├── libssh-gcrypt.so.4 -> libssh-gcrypt.so.4.9.6
+│   │   │   ├── libssh-gcrypt.so.4.9.6
+│   │   │   ├── libssh.so.4 -> libssh.so.4.9.6
+│   │   │   ├── libssh.so.4.9.6
+│   │   │   ├── libswresample.pc
+│   │   │   ├── libswresample.so -> libswresample.so.4.12.100
+│   │   │   ├── libswresample.so.4 -> libswresample.so.4.12.100
+│   │   │   ├── libswresample.so.4.12.100
+│   │   │   ├── libswscale.pc
+│   │   │   ├── libswscale.so -> libswscale.so.7.5.100
+│   │   │   ├── libswscale.so.7 -> libswscale.so.7.5.100
+│   │   │   ├── libswscale.so.7.5.100
+│   │   │   ├── libtasn1.so.6 -> libtasn1.so.6.6.3
+│   │   │   ├── libtasn1.so.6.6.3
+│   │   │   ├── libtbb.so -> libtbb.so.12
+│   │   │   ├── libtbb.so.12 -> libtbb.so.12.11
+│   │   │   ├── libtbb.so.12.11
+│   │   │   ├── libtheoradec.so.1 -> libtheoradec.so.1.1.4
+│   │   │   ├── libtheoradec.so.1.1.4
+│   │   │   ├── libtheoraenc.so.1 -> libtheoraenc.so.1.1.2
+│   │   │   ├── libtheoraenc.so.1.1.2
+│   │   │   ├── libtiff.so -> libtiff.so.6.0.1
+│   │   │   ├── libtiff.so.6 -> libtiff.so.6.0.1
+│   │   │   ├── libtiff.so.6.0.1
+│   │   │   ├── libtiffxx.so -> libtiffxx.so.6.0.1
+│   │   │   ├── libtiffxx.so.6 -> libtiffxx.so.6.0.1
+│   │   │   ├── libtiffxx.so.6.0.1
+│   │   │   ├── libtwolame.so.0 -> libtwolame.so.0.0.0
+│   │   │   ├── libtwolame.so.0.0.0
+│   │   │   ├── libunistring.so.5 -> libunistring.so.5.0.0
+│   │   │   ├── libunistring.so.5.0.0
+│   │   │   ├── libv4l2.pc
+│   │   │   ├── libv4l2rds.so -> libv4l2rds.so.0
+│   │   │   ├── libv4l2rds.so.0 -> libv4l2rds.so.0.0.0
+│   │   │   ├── libv4l2rds.so.0.0.0
+│   │   │   ├── libv4l2.so -> libv4l2.so.0
+│   │   │   ├── libv4l2.so.0 -> libv4l2.so.0.0.0
+│   │   │   ├── libv4l2.so.0.0.0
+│   │   │   ├── libva-drm.so.2 -> libva-drm.so.2.2000.0
+│   │   │   ├── libva-drm.so.2.2000.0
+│   │   │   ├── libva.so.2 -> libva.so.2.2000.0
+│   │   │   ├── libva.so.2.2000.0
+│   │   │   ├── libva-wayland.so.2 -> libva-wayland.so.2.2000.0
+│   │   │   ├── libva-wayland.so.2.2000.0
+│   │   │   ├── libva-x11.so.2 -> libva-x11.so.2.2000.0
+│   │   │   ├── libva-x11.so.2.2000.0
+│   │   │   ├── libvdpau.so.1 -> libvdpau.so.1.0.0
+│   │   │   ├── libvdpau.so.1.0.0
+│   │   │   ├── libvorbisenc.so.2 -> libvorbisenc.so.2.0.12
+│   │   │   ├── libvorbisenc.so.2.0.12
+│   │   │   ├── libvorbisfile.so.3 -> libvorbisfile.so.3.3.8
+│   │   │   ├── libvorbisfile.so.3.3.8
+│   │   │   ├── libvorbis.so.0 -> libvorbis.so.0.4.9
+│   │   │   ├── libvorbis.so.0.4.9
+│   │   │   ├── libvpx.so.9 -> libvpx.so.9.0.0
+│   │   │   ├── libvpx.so.9.0 -> libvpx.so.9.0.0
+│   │   │   ├── libvpx.so.9.0.0
+│   │   │   ├── libwayland-client.so -> libwayland-client.so.0
+│   │   │   ├── libwayland-client.so.0 -> libwayland-client.so.0.23.0
+│   │   │   ├── libwayland-client.so.0.23.0
+│   │   │   ├── libwayland-egl.so -> libwayland-egl.so.1
+│   │   │   ├── libwayland-egl.so.1 -> libwayland-egl.so.1.23.0
+│   │   │   ├── libwayland-egl.so.1.23.0
+│   │   │   ├── libwebpdecoder.so -> libwebpdecoder.so.3
+│   │   │   ├── libwebpdecoder.so.3 -> libwebpdecoder.so.3.1.8
+│   │   │   ├── libwebpdecoder.so.3.1.8
+│   │   │   ├── libwebpdemux.so -> libwebpdemux.so.2
+│   │   │   ├── libwebpdemux.so.2 -> libwebpdemux.so.2.0.14
+│   │   │   ├── libwebpdemux.so.2.0.14
+│   │   │   ├── libwebpmux.so -> libwebpmux.so.3
+│   │   │   ├── libwebpmux.so.3 -> libwebpmux.so.3.0.13
+│   │   │   ├── libwebpmux.so.3.0.13
+│   │   │   ├── libwebp.so -> libwebp.so.7
+│   │   │   ├── libwebp.so.7 -> libwebp.so.7.1.8
+│   │   │   ├── libwebp.so.7.1.8
+│   │   │   ├── libX11.so -> libX11.so.6.4.0
+│   │   │   ├── libX11.so.6 -> libX11.so.6.4.0
+│   │   │   ├── libX11.so.6.4.0
+│   │   │   ├── libX11-xcb.so.1 -> libX11-xcb.so.1.0.0
+│   │   │   ├── libX11-xcb.so.1.0.0
+│   │   │   ├── libx264.so.164
+│   │   │   ├── libx265.so.199
+│   │   │   ├── libXau.so -> libXau.so.6.0.0
+│   │   │   ├── libXau.so.6 -> libXau.so.6.0.0
+│   │   │   ├── libXau.so.6.0.0
+│   │   │   ├── libxcb-composite.so.0 -> libxcb-composite.so.0.0.0
+│   │   │   ├── libxcb-composite.so.0.0.0
+│   │   │   ├── libxcb-cursor.so.0 -> libxcb-cursor.so.0.0.0
+│   │   │   ├── libxcb-cursor.so.0.0.0
+│   │   │   ├── libxcb-damage.so.0 -> libxcb-damage.so.0.0.0
+│   │   │   ├── libxcb-damage.so.0.0.0
+│   │   │   ├── libxcb-dri2.so.0 -> libxcb-dri2.so.0.0.0
+│   │   │   ├── libxcb-dri2.so.0.0.0
+│   │   │   ├── libxcb-dri3.so.0 -> libxcb-dri3.so.0.1.0
+│   │   │   ├── libxcb-dri3.so.0.1.0
+│   │   │   ├── libxcb-ewmh.so.2 -> libxcb-ewmh.so.2.0.0
+│   │   │   ├── libxcb-ewmh.so.2.0.0
+│   │   │   ├── libxcb-glx.so.0 -> libxcb-glx.so.0.0.0
+│   │   │   ├── libxcb-glx.so.0.0.0
+│   │   │   ├── libxcb-icccm.so.4 -> libxcb-icccm.so.4.0.0
+│   │   │   ├── libxcb-icccm.so.4.0.0
+│   │   │   ├── libxcb-image.so.0 -> libxcb-image.so.0.0.0
+│   │   │   ├── libxcb-image.so.0.0.0
+│   │   │   ├── libxcb-imdkit.so.1 -> libxcb-imdkit.so.1.0.6
+│   │   │   ├── libxcb-imdkit.so.1.0.6
+│   │   │   ├── libxcb-keysyms.so.1 -> libxcb-keysyms.so.1.0.0
+│   │   │   ├── libxcb-keysyms.so.1.0.0
+│   │   │   ├── libxcb-present.so.0 -> libxcb-present.so.0.0.0
+│   │   │   ├── libxcb-present.so.0.0.0
+│   │   │   ├── libxcb-randr.so.0 -> libxcb-randr.so.0.1.0
+│   │   │   ├── libxcb-randr.so.0.1.0
+│   │   │   ├── libxcb-render.so.0 -> libxcb-render.so.0.0.0
+│   │   │   ├── libxcb-render.so.0.0.0
+│   │   │   ├── libxcb-render-util.so.0 -> libxcb-render-util.so.0.0.0
+│   │   │   ├── libxcb-render-util.so.0.0.0
+│   │   │   ├── libxcb-res.so.0 -> libxcb-res.so.0.0.0
+│   │   │   ├── libxcb-res.so.0.0.0
+│   │   │   ├── libxcb-shape.so.0 -> libxcb-shape.so.0.0.0
+│   │   │   ├── libxcb-shape.so.0.0.0
+│   │   │   ├── libxcb-shm.so.0 -> libxcb-shm.so.0.0.0
+│   │   │   ├── libxcb-shm.so.0.0.0
+│   │   │   ├── libxcb.so -> libxcb.so.1.1.0
+│   │   │   ├── libxcb.so.1 -> libxcb.so.1.1.0
+│   │   │   ├── libxcb.so.1.1.0
+│   │   │   ├── libxcb-sync.so.1 -> libxcb-sync.so.1.0.0
+│   │   │   ├── libxcb-sync.so.1.0.0
+│   │   │   ├── libxcb-util.so.1 -> libxcb-util.so.1.0.0
+│   │   │   ├── libxcb-util.so.1.0.0
+│   │   │   ├── libxcb-xfixes.so.0 -> libxcb-xfixes.so.0.0.0
+│   │   │   ├── libxcb-xfixes.so.0.0.0
+│   │   │   ├── libxcb-xinerama.so.0 -> libxcb-xinerama.so.0.0.0
+│   │   │   ├── libxcb-xinerama.so.0.0.0
+│   │   │   ├── libxcb-xinput.so.0 -> libxcb-xinput.so.0.1.0
+│   │   │   ├── libxcb-xinput.so.0.1.0
+│   │   │   ├── libxcb-xkb.so.1 -> libxcb-xkb.so.1.0.0
+│   │   │   ├── libxcb-xkb.so.1.0.0
+│   │   │   ├── libxcb-xv.so.0 -> libxcb-xv.so.0.0.0
+│   │   │   ├── libxcb-xv.so.0.0.0
+│   │   │   ├── libXdmcp.so -> libXdmcp.so.6.0.0
+│   │   │   ├── libXdmcp.so.6 -> libXdmcp.so.6.0.0
+│   │   │   ├── libXdmcp.so.6.0.0
+│   │   │   ├── libXext.so -> libXext.so.6.4.0
+│   │   │   ├── libXext.so.6 -> libXext.so.6.4.0
+│   │   │   ├── libXext.so.6.4.0
+│   │   │   ├── libXfixes.so -> libXfixes.so.3.1.0
+│   │   │   ├── libXfixes.so.3 -> libXfixes.so.3.1.0
+│   │   │   ├── libXfixes.so.3.1.0
+│   │   │   ├── libxkbcommon.so -> libxkbcommon.so.0
+│   │   │   ├── libxkbcommon.so.0 -> libxkbcommon.so.0.0.0
+│   │   │   ├── libxkbcommon.so.0.0.0
+│   │   │   ├── libxkbcommon-x11.so.0 -> libxkbcommon-x11.so.0.0.0
+│   │   │   ├── libxkbcommon-x11.so.0.0.0
+│   │   │   ├── libxml2.so.2 -> libxml2.so.2.9.14
+│   │   │   ├── libxml2.so.2.9.14
+│   │   │   ├── libXrender.so -> libXrender.so.1.3.0
+│   │   │   ├── libXrender.so.1 -> libXrender.so.1.3.0
+│   │   │   ├── libXrender.so.1.3.0
+│   │   │   ├── libxvidcore.so.4 -> libxvidcore.so.4.3
+│   │   │   ├── libxvidcore.so.4.3
+│   │   │   ├── libz.so -> libz.so.1
+│   │   │   ├── libz.so.1 -> libz.so.1.3.1.zlib-ng
+│   │   │   ├── libz.so.1.3.1.zlib-ng
+│   │   │   ├── libzvbi-chains.so.0 -> libzvbi-chains.so.0.0.0
+│   │   │   ├── libzvbi-chains.so.0.0.0
+│   │   │   ├── libzvbi.so.0 -> libzvbi.so.0.13.2
+│   │   │   ├── libzvbi.so.0.13.2
+│   │   │   ├── opencv4.pc
+│   │   │   ├── pkgconfig
+│   │   │   │   ├── libavcodec.pc
+│   │   │   │   ├── libavdevice.pc
+│   │   │   │   ├── libavfilter.pc
+│   │   │   │   ├── libavformat.pc
+│   │   │   │   ├── libavutil.pc
+│   │   │   │   ├── libpostproc.pc
+│   │   │   │   ├── libswresample.pc
+│   │   │   │   ├── libswscale.pc
+│   │   │   │   ├── libv4l2.pc
+│   │   │   │   ├── opencv4.pc
+│   │   │   │   ├── sdl2.pc
+│   │   │   │   ├── wayland-client.pc
+│   │   │   │   ├── wayland-egl.pc
+│   │   │   │   ├── x11.pc
+│   │   │   │   ├── xcb.pc
+│   │   │   │   └── xkbcommon.pc
+│   │   │   ├── sdl2.pc
+│   │   │   ├── wayland-client.pc
+│   │   │   ├── wayland-egl.pc
+│   │   │   ├── x11.pc
+│   │   │   ├── xcb.pc
+│   │   │   └── xkbcommon.pc
+│   │   └── Scrt1.o
+│   ├── libexec
+│   │   └── getconf
+│   │       ├── POSIX_V6_LP64_OFF64
+│   │       ├── POSIX_V7_LP64_OFF64
+│   │       └── XBS5_LP64_OFF64
+│   ├── sbin
+│   │   ├── iconvconfig
+│   │   ├── nscd
+│   │   └── zic
+│   └── share
+│       ├── i18n
+│       │   ├── charmaps
+│       │   │   ├── ANSI_X3.110-1983.gz
+│       │   │   ├── ANSI_X3.4-1968.gz
+│       │   │   ├── ARMSCII-8.gz
+│       │   │   ├── ASMO_449.gz
+│       │   │   ├── BIG5.gz
+│       │   │   ├── BIG5-HKSCS.gz
+│       │   │   ├── BRF.gz
+│       │   │   ├── BS_4730.gz
+│       │   │   ├── BS_VIEWDATA.gz
+│       │   │   ├── CP10007.gz
+│       │   │   ├── CP1125.gz
+│       │   │   ├── CP1250.gz
+│       │   │   ├── CP1251.gz
+│       │   │   ├── CP1252.gz
+│       │   │   ├── CP1253.gz
+│       │   │   ├── CP1254.gz
+│       │   │   ├── CP1255.gz
+│       │   │   ├── CP1256.gz
+│       │   │   ├── CP1257.gz
+│       │   │   ├── CP1258.gz
+│       │   │   ├── CP737.gz
+│       │   │   ├── CP770.gz
+│       │   │   ├── CP771.gz
+│       │   │   ├── CP772.gz
+│       │   │   ├── CP773.gz
+│       │   │   ├── CP774.gz
+│       │   │   ├── CP775.gz
+│       │   │   ├── CP949.gz
+│       │   │   ├── CSA_Z243.4-1985-1.gz
+│       │   │   ├── CSA_Z243.4-1985-2.gz
+│       │   │   ├── CSA_Z243.4-1985-GR.gz
+│       │   │   ├── CSN_369103.gz
+│       │   │   ├── CWI.gz
+│       │   │   ├── DEC-MCS.gz
+│       │   │   ├── DIN_66003.gz
+│       │   │   ├── DS_2089.gz
+│       │   │   ├── EBCDIC-AT-DE-A.gz
+│       │   │   ├── EBCDIC-AT-DE.gz
+│       │   │   ├── EBCDIC-CA-FR.gz
+│       │   │   ├── EBCDIC-DK-NO-A.gz
+│       │   │   ├── EBCDIC-DK-NO.gz
+│       │   │   ├── EBCDIC-ES-A.gz
+│       │   │   ├── EBCDIC-ES.gz
+│       │   │   ├── EBCDIC-ES-S.gz
+│       │   │   ├── EBCDIC-FI-SE-A.gz
+│       │   │   ├── EBCDIC-FI-SE.gz
+│       │   │   ├── EBCDIC-FR.gz
+│       │   │   ├── EBCDIC-IS-FRISS.gz
+│       │   │   ├── EBCDIC-IT.gz
+│       │   │   ├── EBCDIC-PT.gz
+│       │   │   ├── EBCDIC-UK.gz
+│       │   │   ├── EBCDIC-US.gz
+│       │   │   ├── ECMA-CYRILLIC.gz
+│       │   │   ├── ES2.gz
+│       │   │   ├── ES.gz
+│       │   │   ├── EUC-JISX0213.gz
+│       │   │   ├── EUC-JP.gz
+│       │   │   ├── EUC-JP-MS.gz
+│       │   │   ├── EUC-KR.gz
+│       │   │   ├── EUC-TW.gz
+│       │   │   ├── GB18030.gz
+│       │   │   ├── GB_1988-80.gz
+│       │   │   ├── GB2312.gz
+│       │   │   ├── GBK.gz
+│       │   │   ├── GEORGIAN-ACADEMY.gz
+│       │   │   ├── GEORGIAN-PS.gz
+│       │   │   ├── GOST_19768-74.gz
+│       │   │   ├── GREEK7.gz
+│       │   │   ├── GREEK7-OLD.gz
+│       │   │   ├── GREEK-CCITT.gz
+│       │   │   ├── HP-GREEK8.gz
+│       │   │   ├── HP-ROMAN8.gz
+│       │   │   ├── HP-ROMAN9.gz
+│       │   │   ├── HP-THAI8.gz
+│       │   │   ├── HP-TURKISH8.gz
+│       │   │   ├── IBM037.gz
+│       │   │   ├── IBM038.gz
+│       │   │   ├── IBM1004.gz
+│       │   │   ├── IBM1026.gz
+│       │   │   ├── IBM1047.gz
+│       │   │   ├── IBM1124.gz
+│       │   │   ├── IBM1129.gz
+│       │   │   ├── IBM1132.gz
+│       │   │   ├── IBM1133.gz
+│       │   │   ├── IBM1160.gz
+│       │   │   ├── IBM1161.gz
+│       │   │   ├── IBM1162.gz
+│       │   │   ├── IBM1163.gz
+│       │   │   ├── IBM1164.gz
+│       │   │   ├── IBM256.gz
+│       │   │   ├── IBM273.gz
+│       │   │   ├── IBM274.gz
+│       │   │   ├── IBM275.gz
+│       │   │   ├── IBM277.gz
+│       │   │   ├── IBM278.gz
+│       │   │   ├── IBM280.gz
+│       │   │   ├── IBM281.gz
+│       │   │   ├── IBM284.gz
+│       │   │   ├── IBM285.gz
+│       │   │   ├── IBM290.gz
+│       │   │   ├── IBM297.gz
+│       │   │   ├── IBM420.gz
+│       │   │   ├── IBM423.gz
+│       │   │   ├── IBM424.gz
+│       │   │   ├── IBM437.gz
+│       │   │   ├── IBM500.gz
+│       │   │   ├── IBM850.gz
+│       │   │   ├── IBM851.gz
+│       │   │   ├── IBM852.gz
+│       │   │   ├── IBM855.gz
+│       │   │   ├── IBM856.gz
+│       │   │   ├── IBM857.gz
+│       │   │   ├── IBM858.gz
+│       │   │   ├── IBM860.gz
+│       │   │   ├── IBM861.gz
+│       │   │   ├── IBM862.gz
+│       │   │   ├── IBM863.gz
+│       │   │   ├── IBM864.gz
+│       │   │   ├── IBM865.gz
+│       │   │   ├── IBM866.gz
+│       │   │   ├── IBM866NAV.gz
+│       │   │   ├── IBM868.gz
+│       │   │   ├── IBM869.gz
+│       │   │   ├── IBM870.gz
+│       │   │   ├── IBM871.gz
+│       │   │   ├── IBM874.gz
+│       │   │   ├── IBM875.gz
+│       │   │   ├── IBM880.gz
+│       │   │   ├── IBM891.gz
+│       │   │   ├── IBM903.gz
+│       │   │   ├── IBM904.gz
+│       │   │   ├── IBM905.gz
+│       │   │   ├── IBM918.gz
+│       │   │   ├── IBM922.gz
+│       │   │   ├── IEC_P27-1.gz
+│       │   │   ├── INIS-8.gz
+│       │   │   ├── INIS-CYRILLIC.gz
+│       │   │   ├── INIS.gz
+│       │   │   ├── INVARIANT.gz
+│       │   │   ├── ISIRI-3342.gz
+│       │   │   ├── ISO_10367-BOX.gz
+│       │   │   ├── ISO_10646.gz
+│       │   │   ├── ISO_11548-1.gz
+│       │   │   ├── ISO_2033-1983.gz
+│       │   │   ├── ISO_5427-EXT.gz
+│       │   │   ├── ISO_5427.gz
+│       │   │   ├── ISO_5428.gz
+│       │   │   ├── ISO_646.BASIC.gz
+│       │   │   ├── ISO_646.IRV.gz
+│       │   │   ├── ISO_6937-2-25.gz
+│       │   │   ├── ISO_6937-2-ADD.gz
+│       │   │   ├── ISO_6937.gz
+│       │   │   ├── ISO-8859-10.gz
+│       │   │   ├── ISO-8859-11.gz
+│       │   │   ├── ISO-8859-13.gz
+│       │   │   ├── ISO-8859-14.gz
+│       │   │   ├── ISO-8859-15.gz
+│       │   │   ├── ISO-8859-16.gz
+│       │   │   ├── ISO_8859-1,GL.gz
+│       │   │   ├── ISO-8859-1.gz
+│       │   │   ├── ISO-8859-2.gz
+│       │   │   ├── ISO-8859-3.gz
+│       │   │   ├── ISO-8859-4.gz
+│       │   │   ├── ISO-8859-5.gz
+│       │   │   ├── ISO-8859-6.gz
+│       │   │   ├── ISO-8859-7.gz
+│       │   │   ├── ISO-8859-8.gz
+│       │   │   ├── ISO-8859-9E.gz
+│       │   │   ├── ISO-8859-9.gz
+│       │   │   ├── ISO_8859-SUPP.gz
+│       │   │   ├── ISO-IR-197.gz
+│       │   │   ├── ISO-IR-209.gz
+│       │   │   ├── ISO-IR-90.gz
+│       │   │   ├── IT.gz
+│       │   │   ├── JIS_C6220-1969-JP.gz
+│       │   │   ├── JIS_C6220-1969-RO.gz
+│       │   │   ├── JIS_C6229-1984-A.gz
+│       │   │   ├── JIS_C6229-1984-B-ADD.gz
+│       │   │   ├── JIS_C6229-1984-B.gz
+│       │   │   ├── JIS_C6229-1984-HAND-ADD.gz
+│       │   │   ├── JIS_C6229-1984-HAND.gz
+│       │   │   ├── JIS_C6229-1984-KANA.gz
+│       │   │   ├── JIS_X0201.gz
+│       │   │   ├── JOHAB.gz
+│       │   │   ├── JUS_I.B1.002.gz
+│       │   │   ├── JUS_I.B1.003-MAC.gz
+│       │   │   ├── JUS_I.B1.003-SERB.gz
+│       │   │   ├── KOI-8.gz
+│       │   │   ├── KOI8-R.gz
+│       │   │   ├── KOI8-RU.gz
+│       │   │   ├── KOI8-T.gz
+│       │   │   ├── KOI8-U.gz
+│       │   │   ├── KSC5636.gz
+│       │   │   ├── LATIN-GREEK-1.gz
+│       │   │   ├── LATIN-GREEK.gz
+│       │   │   ├── MAC-CENTRALEUROPE.gz
+│       │   │   ├── MAC-CYRILLIC.gz
+│       │   │   ├── MACINTOSH.gz
+│       │   │   ├── MAC-IS.gz
+│       │   │   ├── MAC-SAMI.gz
+│       │   │   ├── MAC-UK.gz
+│       │   │   ├── MIK.gz
+│       │   │   ├── MSZ_7795.3.gz
+│       │   │   ├── NATS-DANO-ADD.gz
+│       │   │   ├── NATS-DANO.gz
+│       │   │   ├── NATS-SEFI-ADD.gz
+│       │   │   ├── NATS-SEFI.gz
+│       │   │   ├── NC_NC00-10.gz
+│       │   │   ├── NEXTSTEP.gz
+│       │   │   ├── NF_Z_62-010_1973.gz
+│       │   │   ├── NF_Z_62-010.gz
+│       │   │   ├── NS_4551-1.gz
+│       │   │   ├── NS_4551-2.gz
+│       │   │   ├── PT154.gz
+│       │   │   ├── PT2.gz
+│       │   │   ├── PT.gz
+│       │   │   ├── RK1048.gz
+│       │   │   ├── SAMI.gz
+│       │   │   ├── SAMI-WS2.gz
+│       │   │   ├── SEN_850200_B.gz
+│       │   │   ├── SEN_850200_C.gz
+│       │   │   ├── SHIFT_JIS.gz
+│       │   │   ├── SHIFT_JISX0213.gz
+│       │   │   ├── T.101-G2.gz
+│       │   │   ├── T.61-7BIT.gz
+│       │   │   ├── T.61-8BIT.gz
+│       │   │   ├── TCVN5712-1.gz
+│       │   │   ├── TIS-620.gz
+│       │   │   ├── TSCII.gz
+│       │   │   ├── UTF-8.gz
+│       │   │   ├── VIDEOTEX-SUPPL.gz
+│       │   │   ├── VISCII.gz
+│       │   │   └── WINDOWS-31J.gz
+│       │   └── locales
+│       │       ├── aa_DJ
+│       │       ├── aa_ER
+│       │       ├── aa_ET
+│       │       ├── ab_GE
+│       │       ├── af_ZA
+│       │       ├── agr_PE
+│       │       ├── ak_GH
+│       │       ├── am_ET
+│       │       ├── an_ES
+│       │       ├── anp_IN
+│       │       ├── ar_AE
+│       │       ├── ar_BH
+│       │       ├── ar_DZ
+│       │       ├── ar_EG
+│       │       ├── ar_IN
+│       │       ├── ar_IQ
+│       │       ├── ar_JO
+│       │       ├── ar_KW
+│       │       ├── ar_LB
+│       │       ├── ar_LY
+│       │       ├── ar_MA
+│       │       ├── ar_OM
+│       │       ├── ar_QA
+│       │       ├── ar_SA
+│       │       ├── ar_SD
+│       │       ├── ar_SS
+│       │       ├── ar_SY
+│       │       ├── ar_TN
+│       │       ├── ar_YE
+│       │       ├── as_IN
+│       │       ├── ast_ES
+│       │       ├── ayc_PE
+│       │       ├── az_AZ
+│       │       ├── az_IR
+│       │       ├── be_BY
+│       │       ├── be_BY@latin
+│       │       ├── bem_ZM
+│       │       ├── ber_DZ
+│       │       ├── ber_MA
+│       │       ├── bg_BG
+│       │       ├── bhb_IN
+│       │       ├── bho_IN
+│       │       ├── bho_NP
+│       │       ├── bi_VU
+│       │       ├── bn_BD
+│       │       ├── bn_IN
+│       │       ├── bo_CN
+│       │       ├── bo_IN
+│       │       ├── br_FR
+│       │       ├── br_FR@euro
+│       │       ├── brx_IN
+│       │       ├── bs_BA
+│       │       ├── byn_ER
+│       │       ├── C
+│       │       ├── ca_AD
+│       │       ├── ca_ES
+│       │       ├── ca_ES@euro
+│       │       ├── ca_ES@valencia
+│       │       ├── ca_FR
+│       │       ├── ca_IT
+│       │       ├── ce_RU
+│       │       ├── chr_US
+│       │       ├── ckb_IQ
+│       │       ├── cmn_TW
+│       │       ├── cns11643_stroke
+│       │       ├── crh_RU
+│       │       ├── crh_UA
+│       │       ├── csb_PL
+│       │       ├── cs_CZ
+│       │       ├── cv_RU
+│       │       ├── cy_GB
+│       │       ├── da_DK
+│       │       ├── de_AT
+│       │       ├── de_AT@euro
+│       │       ├── de_BE
+│       │       ├── de_BE@euro
+│       │       ├── de_CH
+│       │       ├── de_DE
+│       │       ├── de_DE@euro
+│       │       ├── de_IT
+│       │       ├── de_LI
+│       │       ├── de_LU
+│       │       ├── de_LU@euro
+│       │       ├── doi_IN
+│       │       ├── dsb_DE
+│       │       ├── dv_MV
+│       │       ├── dz_BT
+│       │       ├── el_CY
+│       │       ├── el_GR
+│       │       ├── el_GR@euro
+│       │       ├── en_AG
+│       │       ├── en_AU
+│       │       ├── en_BW
+│       │       ├── en_CA
+│       │       ├── en_DK
+│       │       ├── en_GB
+│       │       ├── en_HK
+│       │       ├── en_IE
+│       │       ├── en_IE@euro
+│       │       ├── en_IL
+│       │       ├── en_IN
+│       │       ├── en_NG
+│       │       ├── en_NZ
+│       │       ├── en_PH
+│       │       ├── en_SC
+│       │       ├── en_SG
+│       │       ├── en_US
+│       │       ├── en_ZA
+│       │       ├── en_ZM
+│       │       ├── en_ZW
+│       │       ├── eo
+│       │       ├── es_AR
+│       │       ├── es_BO
+│       │       ├── es_CL
+│       │       ├── es_CO
+│       │       ├── es_CR
+│       │       ├── es_CU
+│       │       ├── es_DO
+│       │       ├── es_EC
+│       │       ├── es_ES
+│       │       ├── es_ES@euro
+│       │       ├── es_GT
+│       │       ├── es_HN
+│       │       ├── es_MX
+│       │       ├── es_NI
+│       │       ├── es_PA
+│       │       ├── es_PE
+│       │       ├── es_PR
+│       │       ├── es_PY
+│       │       ├── es_SV
+│       │       ├── es_US
+│       │       ├── es_UY
+│       │       ├── es_VE
+│       │       ├── et_EE
+│       │       ├── eu_ES
+│       │       ├── eu_ES@euro
+│       │       ├── fa_IR
+│       │       ├── ff_SN
+│       │       ├── fi_FI
+│       │       ├── fi_FI@euro
+│       │       ├── fil_PH
+│       │       ├── fo_FO
+│       │       ├── fr_BE
+│       │       ├── fr_BE@euro
+│       │       ├── fr_CA
+│       │       ├── fr_CH
+│       │       ├── fr_FR
+│       │       ├── fr_FR@euro
+│       │       ├── fr_LU
+│       │       ├── fr_LU@euro
+│       │       ├── fur_IT
+│       │       ├── fy_DE
+│       │       ├── fy_NL
+│       │       ├── ga_IE
+│       │       ├── ga_IE@euro
+│       │       ├── gbm_IN
+│       │       ├── gd_GB
+│       │       ├── gez_ER
+│       │       ├── gez_ER@abegede
+│       │       ├── gez_ET
+│       │       ├── gez_ET@abegede
+│       │       ├── gl_ES
+│       │       ├── gl_ES@euro
+│       │       ├── gu_IN
+│       │       ├── gv_GB
+│       │       ├── hak_TW
+│       │       ├── ha_NG
+│       │       ├── he_IL
+│       │       ├── hif_FJ
+│       │       ├── hi_IN
+│       │       ├── hne_IN
+│       │       ├── hr_HR
+│       │       ├── hsb_DE
+│       │       ├── ht_HT
+│       │       ├── hu_HU
+│       │       ├── hy_AM
+│       │       ├── i18n
+│       │       ├── i18n_ctype
+│       │       ├── ia_FR
+│       │       ├── id_ID
+│       │       ├── ig_NG
+│       │       ├── ik_CA
+│       │       ├── is_IS
+│       │       ├── iso14651_t1
+│       │       ├── iso14651_t1_common
+│       │       ├── iso14651_t1_pinyin
+│       │       ├── it_CH
+│       │       ├── it_IT
+│       │       ├── it_IT@euro
+│       │       ├── iu_CA
+│       │       ├── ja_JP
+│       │       ├── kab_DZ
+│       │       ├── ka_GE
+│       │       ├── kk_KZ
+│       │       ├── kl_GL
+│       │       ├── km_KH
+│       │       ├── kn_IN
+│       │       ├── kok_IN
+│       │       ├── ko_KR
+│       │       ├── ks_IN
+│       │       ├── ks_IN@devanagari
+│       │       ├── ku_TR
+│       │       ├── kv_RU
+│       │       ├── kw_GB
+│       │       ├── ky_KG
+│       │       ├── lb_LU
+│       │       ├── lg_UG
+│       │       ├── li_BE
+│       │       ├── lij_IT
+│       │       ├── li_NL
+│       │       ├── ln_CD
+│       │       ├── lo_LA
+│       │       ├── lt_LT
+│       │       ├── lv_LV
+│       │       ├── lzh_TW
+│       │       ├── mag_IN
+│       │       ├── mai_IN
+│       │       ├── mai_NP
+│       │       ├── mfe_MU
+│       │       ├── mg_MG
+│       │       ├── mhr_RU
+│       │       ├── mi_NZ
+│       │       ├── miq_NI
+│       │       ├── mjw_IN
+│       │       ├── mk_MK
+│       │       ├── ml_IN
+│       │       ├── mni_IN
+│       │       ├── mn_MN
+│       │       ├── mnw_MM
+│       │       ├── mr_IN
+│       │       ├── ms_MY
+│       │       ├── mt_MT
+│       │       ├── my_MM
+│       │       ├── nan_TW
+│       │       ├── nan_TW@latin
+│       │       ├── nb_NO
+│       │       ├── nds_DE
+│       │       ├── nds_NL
+│       │       ├── ne_NP
+│       │       ├── nhn_MX
+│       │       ├── niu_NU
+│       │       ├── niu_NZ
+│       │       ├── nl_AW
+│       │       ├── nl_BE
+│       │       ├── nl_BE@euro
+│       │       ├── nl_NL
+│       │       ├── nl_NL@euro
+│       │       ├── nn_NO
+│       │       ├── nr_ZA
+│       │       ├── nso_ZA
+│       │       ├── oc_FR
+│       │       ├── om_ET
+│       │       ├── om_KE
+│       │       ├── or_IN
+│       │       ├── os_RU
+│       │       ├── pa_IN
+│       │       ├── pap_AW
+│       │       ├── pap_CW
+│       │       ├── pa_PK
+│       │       ├── pl_PL
+│       │       ├── POSIX
+│       │       ├── ps_AF
+│       │       ├── pt_BR
+│       │       ├── pt_PT
+│       │       ├── pt_PT@euro
+│       │       ├── quz_PE
+│       │       ├── raj_IN
+│       │       ├── rif_MA
+│       │       ├── ro_RO
+│       │       ├── ru_RU
+│       │       ├── ru_UA
+│       │       ├── rw_RW
+│       │       ├── sah_RU
+│       │       ├── sa_IN
+│       │       ├── sat_IN
+│       │       ├── sc_IT
+│       │       ├── sd_IN
+│       │       ├── sd_IN@devanagari
+│       │       ├── se_NO
+│       │       ├── sgs_LT
+│       │       ├── shn_MM
+│       │       ├── shs_CA
+│       │       ├── sid_ET
+│       │       ├── si_LK
+│       │       ├── sk_SK
+│       │       ├── sl_SI
+│       │       ├── sm_WS
+│       │       ├── so_DJ
+│       │       ├── so_ET
+│       │       ├── so_KE
+│       │       ├── so_SO
+│       │       ├── sq_AL
+│       │       ├── sq_MK
+│       │       ├── sr_ME
+│       │       ├── sr_RS
+│       │       ├── sr_RS@latin
+│       │       ├── ssy_ER
+│       │       ├── ss_ZA
+│       │       ├── st_ZA
+│       │       ├── su_ID
+│       │       ├── sv_FI
+│       │       ├── sv_FI@euro
+│       │       ├── sv_SE
+│       │       ├── sw_KE
+│       │       ├── sw_TZ
+│       │       ├── syr
+│       │       ├── szl_PL
+│       │       ├── ta_IN
+│       │       ├── ta_LK
+│       │       ├── tcy_IN
+│       │       ├── te_IN
+│       │       ├── tg_TJ
+│       │       ├── the_NP
+│       │       ├── th_TH
+│       │       ├── ti_ER
+│       │       ├── ti_ET
+│       │       ├── tig_ER
+│       │       ├── tk_TM
+│       │       ├── tl_PH
+│       │       ├── tn_ZA
+│       │       ├── tok
+│       │       ├── to_TO
+│       │       ├── tpi_PG
+│       │       ├── translit_circle
+│       │       ├── translit_cjk_compat
+│       │       ├── translit_cjk_variants
+│       │       ├── translit_combining
+│       │       ├── translit_compat
+│       │       ├── translit_emojis
+│       │       ├── translit_font
+│       │       ├── translit_fraction
+│       │       ├── translit_hangul
+│       │       ├── translit_narrow
+│       │       ├── translit_neutral
+│       │       ├── translit_small
+│       │       ├── translit_wide
+│       │       ├── tr_CY
+│       │       ├── tr_TR
+│       │       ├── ts_ZA
+│       │       ├── tt_RU
+│       │       ├── tt_RU@iqtelif
+│       │       ├── ug_CN
+│       │       ├── uk_UA
+│       │       ├── unm_US
+│       │       ├── ur_IN
+│       │       ├── ur_PK
+│       │       ├── uz_UZ
+│       │       ├── uz_UZ@cyrillic
+│       │       ├── ve_ZA
+│       │       ├── vi_VN
+│       │       ├── wa_BE
+│       │       ├── wa_BE@euro
+│       │       ├── wae_CH
+│       │       ├── wal_ET
+│       │       ├── wo_SN
+│       │       ├── xh_ZA
+│       │       ├── yi_US
+│       │       ├── yo_NG
+│       │       ├── yue_HK
+│       │       ├── yuw_PG
+│       │       ├── zgh_MA
+│       │       ├── zh_CN
+│       │       ├── zh_HK
+│       │       ├── zh_SG
+│       │       ├── zh_TW
+│       │       └── zu_ZA
+│       ├── info
+│       │   ├── dir
+│       │   ├── libc.info
+│       │   ├── libc.info-1
+│       │   ├── libc.info-10
+│       │   ├── libc.info-11
+│       │   ├── libc.info-12
+│       │   ├── libc.info-13
+│       │   ├── libc.info-14
+│       │   ├── libc.info-15
+│       │   ├── libc.info-16
+│       │   ├── libc.info-17
+│       │   ├── libc.info-18
+│       │   ├── libc.info-19
+│       │   ├── libc.info-2
+│       │   ├── libc.info-3
+│       │   ├── libc.info-4
+│       │   ├── libc.info-5
+│       │   ├── libc.info-6
+│       │   ├── libc.info-7
+│       │   ├── libc.info-8
+│       │   └── libc.info-9
+│       ├── locale
+│       │   ├── be
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── bg
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── ca
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── cs
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── da
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── de
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── el
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── en_GB
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── eo
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── es
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── fi
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── fr
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── gl
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── hr
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── hu
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── ia
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── id
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── it
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── ja
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── ka
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── ko
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── locale.alias
+│       │   ├── lt
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── nb
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── nl
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── pl
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── pt
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── pt_BR
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── ro
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── ru
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── rw
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── sk
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── sl
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── sr
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── sv
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── tr
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── uk
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── vi
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   ├── zh_CN
+│       │   │   └── LC_MESSAGES
+│       │   │       └── libc.mo
+│       │   └── zh_TW
+│       │       └── LC_MESSAGES
+│       │           └── libc.mo
+│       └── pkgconfig
+└── var
+    └── db
+        └── Makefile
+
+267 directories, 4198 files

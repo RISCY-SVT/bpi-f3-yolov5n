@@ -1,0 +1,12 @@
+build/
+artifacts/*
+!artifacts/README.md
+*.mp4
+*.avi
+*.mkv
+*.run.log
+*.tar.gz
+cpu_model/*.o
+*.o
+*.lo
+*.a
