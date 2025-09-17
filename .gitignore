@@ -1,4 +1,5 @@
 build/
+dist/
 artifacts/*
 !artifacts/README.md
 *.mp4

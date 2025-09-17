@@ -174,9 +174,12 @@ struct PerfMetrics {
     
     // Queue sizes
     std::map<std::string, int> queue_sizes;
-    
+
     // Worker utilization percentages
     std::vector<float> worker_busy_pct;
+
+    // Heap usage snapshot in bytes (mallinfo2.uordblks)
+    size_t heap_bytes{0};
 };
 
 // Model dimensions - CRITICAL: 384x640, not 640x640!

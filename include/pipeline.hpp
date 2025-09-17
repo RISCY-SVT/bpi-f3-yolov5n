@@ -217,6 +217,11 @@ public:
      * @brief Wake waiters and prevent further blocking operations.
      */
     void stop();
+
+    /**
+     * @brief Number of frames currently buffered awaiting reorder.
+     */
+    size_t pendingCount() const;
     
 private:
     std::map<uint64_t, ProcessedFrame> buffer_;

@@ -61,6 +61,8 @@ else
     CXXFLAGS := $(CXXFLAGS_BASE) $(OPT_FLAGS) -DNDEBUG
 endif
 
+SAN ?= none
+
 # CSI-NN2 install root and CPU model (fallback defaults)
 CPU_MODEL ?= c920v2
 INSTALL_NN2_PREFIX ?= /opt/csi-nn2/install_nn2
@@ -113,6 +115,21 @@ OPENCV_LIBS := -lopencv_core -lopencv_imgproc
 FFMPEG_LIBS := -lavformat -lavcodec -lavutil -lswscale -lpthread -ldl -lm -lz -latomic
 LIBS_SYS := -lpthread -ldl -lm -latomic
 LIBS_STATIC := -static-libgcc -static-libstdc++
+
+ifeq ($(SAN),asan)
+  SAN_FLAGS := -fsanitize=address -fno-omit-frame-pointer -g3
+  CFLAGS := $(filter-out -O0 -O1 -O2 -O3,$(CFLAGS))
+  CXXFLAGS := $(filter-out -O0 -O1 -O2 -O3,$(CXXFLAGS))
+  CFLAGS := $(filter-out -ffast-math,$(CFLAGS))
+  CXXFLAGS := $(filter-out -ffast-math,$(CXXFLAGS))
+  CFLAGS += -O1 $(SAN_FLAGS)
+  CXXFLAGS += -O1 $(SAN_FLAGS)
+  LDFLAGS += -fsanitize=address
+  LIBS_STATIC :=
+endif
+
+ASAN_LOG_DIR ?= /data/bpi-f3-yolov5n/asan
+ASAN_OPTIONS_DEFAULT ?= detect_leaks=1,abort_on_error=0,alloc_dealloc_mismatch=1,handle_segv=1,log_path=$(ASAN_LOG_DIR)
 
 LDFLAGS := --sysroot=$(SYSROOT) \
            -Wl,-rpath-link=/opt/spacemit/sysroot/usr/lib/riscv64-linux-gnu \
@@ -294,9 +311,22 @@ run-file-fast: $(BUILD_DIR)/$(PIPELINE_TARGET)
     --max-frames 120 \
     --perf-json $(DEVICE_PROJECT_DIR)/metrics.jsonl"
 
+run-file-asan:
+	@echo "[RUN] file input with ASan on device"
+	@$(MAKE) --no-print-directory pipeline SAN=asan ENABLE_SDL=1
+	@$(MAKE) --no-print-directory deploy
+	@$(MAKE) --no-print-directory clean-remote-procs || true
+	@ssh $(SSH_TARGET) "cd $(DEVICE_PROJECT_DIR) && ASAN_OPTIONS_DEFAULT=$(ASAN_OPTIONS_DEFAULT) ASAN_LOG_DIR=$(ASAN_LOG_DIR) ./tools/run_file_asan.sh"
+	@mkdir -p artifacts/asan_logs
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-file-asan.jsonl artifacts/run-file-asan.jsonl >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/asan_logs/run-file-asan.log artifacts/asan_logs/run-file-asan.log >/dev/null || true
+	@scp $(SSH_TARGET):$(ASAN_LOG_DIR).* artifacts/asan_logs/ >/dev/null 2>&1 || true
+	@$(MAKE) --no-print-directory cleanup-all || true
+
 .PHONY: run-file-sdl-sw run-cam-yuyv-sdl-sw run-cam-yuyv-sdl-rvv \
         run-file-sdl-sw-local run-file-sdl-rvv-local \
-        run-cam-yuyv-sdl-sw-local run-cam-yuyv-sdl-rvv-local
+        run-cam-yuyv-sdl-sw-local run-cam-yuyv-sdl-rvv-local \
+        run-file-asan run-cam-yuyv-asan run-cam-yuyv-sdl-rvv-long stop-remote
 
 run-file-sdl-sw-local: $(BUILD_DIR)/$(PIPELINE_TARGET)
 	@echo "[RUN-LOCAL] file input with SDL (sw)"
@@ -524,6 +554,27 @@ run-cam-yuyv-sdl-rvv: $(BUILD_DIR)/$(PIPELINE_TARGET)
 	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-sdl-rvv.avi artifacts/run-cam-yuyv-sdl-rvv.avi >/dev/null || true
 	@$(MAKE) --no-print-directory cleanup-all || true
 
+run-cam-yuyv-asan:
+	@echo "[RUN] camera YUYV SDL (rvv) with ASan on device"
+	@$(MAKE) --no-print-directory pipeline SAN=asan ENABLE_SDL=1
+	@$(MAKE) --no-print-directory deploy
+	@$(MAKE) --no-print-directory clean-remote-procs || true
+	@ssh $(SSH_TARGET) "cd $(DEVICE_PROJECT_DIR) && ASAN_OPTIONS_DEFAULT=$(ASAN_OPTIONS_DEFAULT) ASAN_LOG_DIR=$(ASAN_LOG_DIR) ./tools/run_cam_asan.sh"
+	@mkdir -p artifacts/asan_logs
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-asan.jsonl artifacts/run-cam-yuyv-asan.jsonl >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-asan.avi artifacts/run-cam-yuyv-asan.avi >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/display_probe_last_cam_yuyv_asan.ppm artifacts/display_probe_last_cam_yuyv_asan.ppm >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/asan_logs/run-cam-yuyv-asan.log artifacts/asan_logs/run-cam-yuyv-asan.log >/dev/null || true
+	@scp $(SSH_TARGET):$(ASAN_LOG_DIR).* artifacts/asan_logs/ >/dev/null 2>&1 || true
+	@$(MAKE) --no-print-directory cleanup-all || true
+
+run-cam-yuyv-sdl-rvv-long: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN] camera YUYV SDL (rvv) long-run on device"
+	@$(MAKE) --no-print-directory pipeline ENABLE_SDL=1
+	@$(MAKE) --no-print-directory deploy
+	@$(MAKE) --no-print-directory clean-remote-procs || true
+	@ssh $(SSH_TARGET) "cd $(DEVICE_PROJECT_DIR) && ./tools/start_cam_long.sh"
+
 run-v4l2-yuyv: $(BUILD_DIR)/$(PIPELINE_TARGET)
 	@echo "[RUN] v4l2:yuyv on device"
 	@ssh $(SSH_TARGET) "$(REMOTE_CD) && \
@@ -664,7 +715,7 @@ run-cam-yuyv-rvv: $(BUILD_DIR)/$(PIPELINE_TARGET)
 	@$(MAKE) --no-print-directory cleanup-all || true
 
 # Benchmarks on device (file source, max 120 frames)
-.PHONY: run-bench-raw run-bench-mjpeg run-bench-h264 run-bench clean-remote-procs clean-local-procs cleanup-all
+.PHONY: run-bench-raw run-bench-mjpeg run-bench-h264 run-bench clean-remote-procs clean-local-procs cleanup-all stop-remote
 
 clean-remote-procs:
 	@echo "[CLEAN] remote processes"
@@ -676,6 +727,10 @@ clean-remote-procs:
 	    pkill -KILL -f "$$p" >/dev/null 2>&1 || true; \
 	  done; \
 	  exit 0' || true
+
+stop-remote:
+	@echo "[STOP] remote long-run pipeline"
+	@ssh $(SSH_TARGET) "cd $(DEVICE_PROJECT_DIR) && ./tools/stop_pipeline.sh"
 
 .PHONY: clean-local-procs
 clean-local-procs:

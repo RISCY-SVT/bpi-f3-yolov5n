@@ -139,7 +139,17 @@ Recent bench runs (Banana Pi BPI-F3, 2024-09 builds, 4 inference workers):
 
 > FFmpeg prints `using cpu capabilities: none!` when libx264 is built without NEON optimizations on this toolchain. This is expected and does not affect functional output.
 
-# 9. Troubleshooting
+# 9. Sanitized Builds & Leak Hunting
+- Build with sanitizers via `make pipeline SAN=asan ENABLE_SDL=1`. This profile enables Address/LeakSanitizer, forces `-O1 -g3`, and links dynamically so sanitizer runtimes load correctly.
+- Deploy the instrumented binary (`make deploy`) before running leak checks.
+- Convenience wrappers:
+  - `make run-file-asan` executes the file pipeline under ASan, exporting `ASAN_OPTIONS="detect_leaks=1,abort_on_error=0,alloc_dealloc_mismatch=1,handle_segv=1,log_path=/data/bpi-f3-yolov5n/asan"` on the device and copying logs into `artifacts/asan_logs/`.
+  - `make run-cam-yuyv-asan` covers the camera + SDL + encoder path under the same sanitizer options, collecting metrics, probes, and `/data/bpi-f3-yolov5n/asan.*` artifacts back to the host.
+- Capture RSS trends with `tools/memsnap.sh <pid> <interval_sec> <duration_sec> <outfile>` while a pipeline PID runs. The helper writes CSV lines with timestamp, RSS/VM size, and page-fault counters for quick plotting.
+- For long endurance tests use `make run-cam-yuyv-sdl-rvv-long`; it launches the camera pipeline under `nohup`, prints the remote PID, and streams metrics to `artifacts/`. Stop it cleanly via `make stop-remote` once measurements finish.
+- After sanitizer sessions rebuild a release binary (`make clean && make pipeline ENABLE_SDL=1`) before gathering performance numbers.
+
+# 10. Troubleshooting
 - **V4L2 camera**
   - Enumerate devices: `v4l2-ctl --list-devices`, `v4l2-ctl -d /dev/video0 --list-formats-ext`.
   - If the probe selects the wrong node, pass `--src v4l2:/dev/video2` and/or `--cam-fmt fmt=mjpeg`.
@@ -155,7 +165,7 @@ Recent bench runs (Banana Pi BPI-F3, 2024-09 builds, 4 inference workers):
   - High drop percentage: raise `--queue-cap`, reduce `--nn-workers`, or adjust `--drop front:wm=N` to shed earlier.
   - To compare RVV vs SW, re-run `make run-bench-summary -- pp={sw,rvv}` and inspect the generated JSONL under `artifacts/`.
 
-# 10. Repository Layout
+# 11. Repository Layout
 - `include/` – Public headers for capture, display, engine, pipeline, metrics, preprocessing, and shared types.
 - `src/` – Stage implementations, CLI, SDL renderer, FFmpeg encoder, and helper tools.
 - `cpu_model/` – HHB-generated `model.c` and `hhb.bm` artifacts (read-only except integration notes).
@@ -165,5 +175,5 @@ Recent bench runs (Banana Pi BPI-F3, 2024-09 builds, 4 inference workers):
 - `Work_Logs/` – Session reports produced after each development task.
 - `Makefile` – Sole build and deployment entry point.
 
-# 11. License & Acknowledgments
+# 12. License & Acknowledgments
 Project-specific licensing is TBD. HHB/CSI-NN2 binaries and third-party libraries remain under their respective licenses; consult vendor documentation when redistributing.

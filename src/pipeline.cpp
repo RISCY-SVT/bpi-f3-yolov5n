@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <sched.h>
 #include <iostream>
+#include <malloc.h>
 #include <numeric>
 #include <thread>
 #include <vector>
@@ -78,6 +79,22 @@ static std::shared_ptr<DisplayState> get_state(const Pipeline* p) {
     auto it = g_display_state.find(p);
     if (it != g_display_state.end()) return it->second;
     return nullptr;
+}
+
+static bool skip_infer() {
+    static const bool skip = []() {
+        const char* env = std::getenv("SKIP_INFER");
+        return env && env[0] != '\0' && env[0] != '0';
+    }();
+    return skip;
+}
+
+static bool skip_postprocess_flag() {
+    static const bool skip = []() {
+        const char* env = std::getenv("SKIP_POSTPROCESS");
+        return env && env[0] != '\0' && env[0] != '0';
+    }();
+    return skip;
 }
 
 static void set_state(const Pipeline* p, const std::shared_ptr<DisplayState>& state) {
@@ -196,6 +213,11 @@ void FrameReorderer::stop() {
     std::lock_guard<std::mutex> lock(mutex_);
     stopped_ = true;
     cv_.notify_all();
+}
+
+size_t FrameReorderer::pendingCount() const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return buffer_.size();
 }
 
 // Helper: bind current thread to specific CPU list
@@ -652,7 +674,15 @@ void Pipeline::captureThread() {
         if (f.timestamp.time_since_epoch().count() == 0) {
             f.timestamp = t0;
         }
+        const uint64_t fid = f.frame_id;
         capture_queue_.push(std::move(f));
+        if (config_.log_level == "debug") {
+            if (fid % 50 == 0) {
+                struct mallinfo2 mi = mallinfo2();
+                std::cout << "[heap] stage=capture frame=" << fid
+                          << " heap_mb=" << (mi.uordblks / (1024.0 * 1024.0)) << std::endl;
+            }
+        }
         {
             std::lock_guard<std::mutex> lk(metrics_mutex_);
             cap_lat_.push_back(std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0);
@@ -692,7 +722,13 @@ void Pipeline::preprocessThread() {
         f.model_input = utils::alignedAlloc(in_size, 64);
         pp.preprocess(f, f.model_input, f.scale, f.dx, f.dy);
         auto t1 = std::chrono::steady_clock::now();
+        const uint64_t fid = f.frame_id;
         preprocess_queue_.push(std::move(f));
+        if (config_.log_level == "debug" && fid % 50 == 0) {
+            struct mallinfo2 mi = mallinfo2();
+            std::cout << "[heap] stage=preprocess frame=" << fid
+                      << " heap_mb=" << (mi.uordblks / (1024.0 * 1024.0)) << std::endl;
+        }
         {
             std::lock_guard<std::mutex> lk(metrics_mutex_);
             pp_lat_.push_back(std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0);
@@ -735,7 +771,27 @@ void Pipeline::inferenceWorker(int worker_id) {
         if (!inference_queue_.pop(f)) break;
         if (f.eos) { ProcessedFrame pf; pf.frame = std::move(f); postprocess_queue_.push(std::move(pf)); postprocess_queue_.stop(); break; }
         auto t0 = std::chrono::steady_clock::now();
-        std::vector<Detection> det = engine->infer(f.model_input);
+        size_t infer_heap_before = 0;
+        std::vector<Detection> det;
+        if (!skip_infer()) {
+            if (config_.log_level == "debug" && f.frame_id % 50 == 0) {
+                infer_heap_before = mallinfo2().uordblks;
+            }
+            det = engine->infer(f.model_input);
+            if (config_.log_level == "debug" && f.frame_id % 50 == 0) {
+                struct mallinfo2 mi = mallinfo2();
+                double delta_mb = (mi.uordblks - infer_heap_before) / (1024.0 * 1024.0);
+                std::cout << "[heap] stage=inference_call frame=" << f.frame_id
+                          << " delta_mb=" << delta_mb
+                          << " heap_mb=" << (mi.uordblks / (1024.0 * 1024.0)) << std::endl;
+            }
+            if (config_.log_level == "debug" && (f.frame_id % 50 == 0)) {
+                malloc_trim(0);
+            }
+        }
+        if (skip_infer() || skip_postprocess_flag()) {
+            det.clear();
+        }
         auto t1 = std::chrono::steady_clock::now();
         utils::alignedFree(f.model_input); f.model_input = nullptr;
         // Rescale detections
@@ -747,7 +803,13 @@ void Pipeline::inferenceWorker(int worker_id) {
         }
         ProcessedFrame pf; pf.frame = std::move(f); pf.detections = std::move(det);
         pf.inference_start = t0; pf.inference_end = t1;
+        const uint64_t fid = pf.frame.frame_id;
         postprocess_queue_.push(std::move(pf));
+        if (config_.log_level == "debug" && fid % 50 == 0) {
+            struct mallinfo2 mi = mallinfo2();
+            std::cout << "[heap] stage=inference frame=" << fid
+                      << " heap_mb=" << (mi.uordblks / (1024.0 * 1024.0)) << std::endl;
+        }
         {
             std::lock_guard<std::mutex> lk(metrics_mutex_);
             double d = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
@@ -778,7 +840,13 @@ void Pipeline::postprocessThread() {
         }
         auto t0 = std::chrono::steady_clock::now();
         // Postprocess is minimal here; measure routing overhead
+        const uint64_t fid = pf.frame.frame_id;
         reorderer_->addFrame(pf);
+        if (config_.log_level == "debug" && fid % 50 == 0) {
+            struct mallinfo2 mi = mallinfo2();
+            std::cout << "[heap] stage=postprocess frame=" << fid
+                      << " heap_mb=" << (mi.uordblks / (1024.0 * 1024.0)) << std::endl;
+        }
         auto t1 = std::chrono::steady_clock::now();
         {
             std::lock_guard<std::mutex> lk(metrics_mutex_);
@@ -804,7 +872,13 @@ void Pipeline::overlayThread() {
             std::lock_guard<std::mutex> lk(metrics_mutex_);
             overlay_lat_.push_back(std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0);
         }
+        const uint64_t fid = pf.frame.frame_id;
         overlay_queue_.push(std::move(pf));
+        if (config_.log_level == "debug" && fid % 50 == 0) {
+            struct mallinfo2 mi = mallinfo2();
+            std::cout << "[heap] stage=overlay frame=" << fid
+                      << " heap_mb=" << (mi.uordblks / (1024.0 * 1024.0)) << std::endl;
+        }
     }
 }
 
@@ -902,6 +976,11 @@ void Pipeline::outputThread() {
             }
         }
         ++processed;
+        if (config_.log_level == "debug" && pf.frame.frame_id % 50 == 0) {
+            struct mallinfo2 mi = mallinfo2();
+            std::cout << "[heap] stage=output frame=" << pf.frame.frame_id
+                      << " heap_mb=" << (mi.uordblks / (1024.0 * 1024.0)) << std::endl;
+        }
         {
             std::lock_guard<std::mutex> lk(metrics_mutex_);
             out_count_++;
@@ -969,6 +1048,7 @@ void Pipeline::metricsThread() {
         }
         m.timestamp_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
+        size_t reorder_pending = 0;
         {
             std::lock_guard<std::mutex> lk(metrics_mutex_);
             double in_count = in_count_ - last_in; last_in = in_count_;
@@ -995,13 +1075,17 @@ void Pipeline::metricsThread() {
             m.latency_ms.overlay = (float)percentile(overlay_lat_, 0.5); overlay_lat_.clear();
             m.latency_ms.encode = (float)percentile(enc_lat_, 0.5); enc_lat_.clear();
             m.latency_ms.display = 0.0f;
+            reorder_pending = reorderer_ ? reorderer_->pendingCount() : 0;
             m.queue_sizes = {
                 {"cap_pp", (int)capture_queue_.size()},
                 {"pp_sched", (int)preprocess_queue_.size()},
                 {"sched_inf", (int)inference_queue_.size()},
                 {"inf_post", (int)postprocess_queue_.size()},
-                {"post_reord", (int)overlay_queue_.size()}
+                {"post_reord", (int)overlay_queue_.size()},
+                {"reorder_buf", (int)reorder_pending}
             };
+            struct mallinfo2 mi = mallinfo2();
+            m.heap_bytes = mi.uordblks;
             m.worker_busy_pct.assign(std::max(1, config_.nn_workers), 0.0f);
             if (ms > 0.0) {
                 for (size_t i = 0; i < m.worker_busy_pct.size(); ++i) {
@@ -1034,6 +1118,8 @@ void Pipeline::metricsThread() {
             << " post_ms=" << current_metrics_.latency_ms.postprocess
             << " ovl_ms=" << current_metrics_.latency_ms.overlay
             << " enc_ms=" << current_metrics_.latency_ms.encode
+            << " reord_buf=" << reorder_pending
+            << " heap_mb=" << (current_metrics_.heap_bytes / (1024.0 * 1024.0))
             << " disp_ms=" << current_metrics_.latency_ms.display;
         std::cout << oss.str() << std::endl;
         if (display_state) {

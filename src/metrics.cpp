@@ -79,8 +79,10 @@ void JSONLMetricsWriter::write(const PerfMetrics& m) {
          << "\"pp_sched\":" << qv("pp_sched") << ','
          << "\"sched_inf\":" << qv("sched_inf") << ','
          << "\"inf_post\":" << qv("inf_post") << ','
-         << "\"post_reord\":" << qv("post_reord")
-         << "},";
+         << "\"post_reord\":" << qv("post_reord") << ','
+         << "\"reorder_buf\":" << qv("reorder_buf")
+         << "},"
+         << "\"heap_bytes\":" << m.heap_bytes << ',';
 
     // workers_busy_pct array
     ofs_ << "\"workers_busy_pct\":[";

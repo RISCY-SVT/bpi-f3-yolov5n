@@ -7,6 +7,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
+#include <cstdint>
 
 /**
  * @file engine_csi.cpp
@@ -138,6 +139,86 @@ static void* create_graph(const char* params_path) {
     return nullptr;
 }
 
+static size_t tensorElementCount(const csinn_tensor* t) {
+    size_t count = 1;
+    for (int i = 0; i < t->dim_count; ++i) {
+        count *= static_cast<size_t>(t->dim[i]);
+    }
+    return count;
+}
+
+static float fp16_to_f32(uint16_t h) {
+    const uint32_t sign = static_cast<uint32_t>(h >> 15) & 0x1u;
+    const uint32_t exp = static_cast<uint32_t>(h >> 10) & 0x1fu;
+    const uint32_t frac = static_cast<uint32_t>(h & 0x3ffu);
+
+    uint32_t sign32 = sign << 31;
+    uint32_t exp32;
+    uint32_t frac32;
+
+    if (exp == 0) {
+        if (frac == 0) {
+            exp32 = 0;
+            frac32 = 0;
+        } else {
+            // Normalize subnormal number
+            uint32_t f = frac;
+            int shift = 0;
+            while ((f & 0x400u) == 0u) {
+                f <<= 1;
+                ++shift;
+            }
+            f &= 0x3ffu;
+            exp32 = 127 - 15 - shift + 1;
+            frac32 = f << 13;
+        }
+    } else if (exp == 0x1f) {
+        exp32 = 0xff;
+        frac32 = frac << 13;
+    } else {
+        exp32 = exp - 15 + 127;
+        frac32 = frac << 13;
+    }
+
+    uint32_t bits = sign32 | (exp32 << 23) | frac32;
+    float f;
+    std::memcpy(&f, &bits, sizeof(f));
+    return f;
+}
+
+static void convertTensorToFloat(const csinn_tensor* src, int index, csinn_session* sess,
+                                 std::vector<float>& dst) {
+    const size_t count = tensorElementCount(src);
+    dst.resize(count);
+    std::cout << "[infer] output index=" << index << " count=" << count
+              << " dtype=" << src->dtype << std::endl;
+    switch (src->dtype) {
+        case CSINN_DTYPE_FLOAT32: {
+            const float* data = static_cast<const float*>(src->data);
+            std::memcpy(dst.data(), data, count * sizeof(float));
+            break;
+        }
+        case CSINN_DTYPE_FLOAT16: {
+            const uint16_t* data = static_cast<const uint16_t*>(src->data);
+            for (size_t i = 0; i < count; ++i) {
+                dst[i] = fp16_to_f32(data[i]);
+            }
+            break;
+        }
+        default: {
+            static bool warned = false;
+            if (!warned) {
+                std::cerr << "[WARN] convertTensorToFloat fallback for dtype=" << src->dtype << std::endl;
+                warned = true;
+            }
+            float* tmp = static_cast<float*>(shl_c920v2_output_to_f32_dtype(index, src->data, sess));
+            std::memcpy(dst.data(), tmp, count * sizeof(float));
+            shl_mem_free(tmp);
+            break;
+        }
+    }
+}
+
 /**
  * @brief Wraps CSI-NN2 session lifecycle and YOLOv5 post-processing.
  *
@@ -210,6 +291,13 @@ public:
             csinn_free_session(session_);
             session_ = nullptr;
         }
+        output_buffers_.clear();
+        for (auto* tensor : cached_outputs_) {
+            if (tensor) {
+                csinn_free_tensor(tensor);
+            }
+        }
+        cached_outputs_.clear();
         initialized_ = false;
     }
     
@@ -247,45 +335,35 @@ public:
         
         // Get outputs and convert to FP32
         int output_num = csinn_get_output_number(session_);
-        struct csinn_tensor** outputs = new struct csinn_tensor*[output_num];
-        
+        if (output_buffers_.size() < static_cast<size_t>(output_num)) {
+            output_buffers_.resize(output_num);
+        }
+        std::vector<struct csinn_tensor*> outputs;
+        outputs.reserve(output_num);
         for (int i = 0; i < output_num; i++) {
-            // Get original output tensor
             struct csinn_tensor* output = csinn_alloc_tensor(nullptr);
             csinn_get_output(i, output, session_);
-            
-            // Create new tensor for float32 conversion
+
             struct csinn_tensor* ret = csinn_alloc_tensor(nullptr);
             csinn_tensor_copy(ret, output);
-            
-            // Remove quantization info and set to float32
             if (ret->qinfo) {
                 shl_mem_free(ret->qinfo);
                 ret->qinfo = nullptr;
             }
-            ret->quant_channel = 0;
+            convertTensorToFloat(output, i, session_, output_buffers_[i]);
             ret->dtype = CSINN_DTYPE_FLOAT32;
-            
-            // Convert data to float32
-            ret->data = shl_c920v2_output_to_f32_dtype(i, output->data, session_);
-            outputs[i] = ret;
-            
-            // Free original output tensor
+            ret->quant_channel = 0;
+            ret->data = output_buffers_[i].data();
+            outputs.push_back(ret);
             csinn_free_tensor(output);
         }
-        
-        // Post-process
-        std::vector<Detection> detections = postprocess(outputs, output_num, conf_thresh, nms_thresh);
-        
-        // Free outputs
-        for (int i = 0; i < output_num; i++) {
-            if (outputs[i]->data) {
-                shl_mem_free(outputs[i]->data);
-            }
-            csinn_free_tensor(outputs[i]);
+
+        std::vector<Detection> detections = postprocess(outputs.data(), output_num, conf_thresh, nms_thresh);
+
+        for (auto* tensor : outputs) {
+            csinn_free_tensor(tensor);
         }
-        delete[] outputs;
-        
+
         return detections;
     }
     
@@ -343,6 +421,8 @@ private:
     bool initialized_;
     float conf_thresh_;
     float nms_thresh_;
+    std::vector<std::vector<float>> output_buffers_;
+    std::vector<struct csinn_tensor*> cached_outputs_;
 };
 
 // EngineCSI implementation
