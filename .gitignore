@@ -10,3 +10,4 @@ cpu_model/*.o
 *.o
 *.lo
 *.a
+*.log

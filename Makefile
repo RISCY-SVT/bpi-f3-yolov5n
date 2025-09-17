@@ -3,6 +3,9 @@
 # Cross-compilation for RISC-V with SpaceMIT toolchain
 # ======================================================================
 
+# Use bash for advanced shell features in recipes
+SHELL := /bin/bash
+
 # --- Project & device paths (auto-detected) ----------------------------------
 # Absolute path to *this* Makefile (robust even if run with -C or from elsewhere)
 THIS_MAKEFILE := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -58,6 +61,9 @@ else
     CXXFLAGS := $(CXXFLAGS_BASE) $(OPT_FLAGS) -DNDEBUG
 endif
 
+# CSI-NN2 install root and CPU model (fallback defaults)
+CPU_MODEL ?= c920v2
+INSTALL_NN2_PREFIX ?= /opt/csi-nn2/install_nn2
 CSI_INC_PREFIX := ${INSTALL_NN2_PREFIX}/${CPU_MODEL}
 # Include directories
 INC_CSI := -I${CSI_INC_PREFIX}/include \
@@ -69,31 +75,32 @@ INC_FF := -I/opt/spacemit/sysroot/usr/include -I/opt/spacemit/sysroot/usr/includ
 INC_SDL := -I/opt/spacemit/sysroot/usr/include/SDL2
 INC_LOCAL := -I./include
 
+ENABLE_SDL ?= 0
 PKG_CONFIG ?= pkg-config
+PKG_CONFIG_PATH_SYSROOT := $(SYSROOT)/usr/lib/riscv64-linux-gnu/pkgconfig:$(SYSROOT)/usr/lib/pkgconfig:$(SYSROOT)/usr/share/pkgconfig
+PKG_CONFIG_LIBDIR_SYSROOT := $(SYSROOT)/usr/lib/pkgconfig:$(SYSROOT)/usr/lib/riscv64-linux-gnu/pkgconfig
+PKG_CONFIG_ENV := PKG_CONFIG_PATH=$(PKG_CONFIG_PATH_SYSROOT) PKG_CONFIG_LIBDIR=$(PKG_CONFIG_LIBDIR_SYSROOT) PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) $(PKG_CONFIG)
 PC_CORE_PKGS := libavformat libavcodec libavutil libswscale
-PC_SDL_PKG := sdl2
-PC_OK_CORE := $(shell $(PKG_CONFIG) --exists $(PC_CORE_PKGS) opencv4 && echo yes || echo no)
-PC_HAS_SDL := $(shell $(PKG_CONFIG) --exists $(PC_SDL_PKG) && echo yes || echo no)
-SDL_LINKABLE := $(shell [ -e /opt/spacemit/sysroot/usr/lib/riscv64-linux-gnu/libSDL2.so ] && echo yes || echo no)
+PC_OK_CORE := $(shell $(PKG_CONFIG_ENV) --exists $(PC_CORE_PKGS) opencv4 && echo yes || echo no)
 
 ifeq ($(PC_OK_CORE),yes)
-    # CFLAGS only from pkg-config (no pkg-config --libs)
-    OPENCV_CFLAGS := $(shell $(PKG_CONFIG) --cflags opencv4)
-    FFMPEG_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(PC_CORE_PKGS))
-    SDL_CFLAGS := $(if $(filter yes,$(and $(PC_HAS_SDL),$(SDL_LINKABLE))),$(shell $(PKG_CONFIG) --cflags $(PC_SDL_PKG)),)
-    PC_CFLAGS := $(OPENCV_CFLAGS) $(FFMPEG_CFLAGS) $(SDL_CFLAGS)
-    # Define HAVE_SDL2 only when SDL cflags are present and linkable
-    ifneq ($(SDL_CFLAGS),)
-      CXXFLAGS += -DHAVE_SDL2
-    endif
+    OPENCV_CFLAGS := $(shell $(PKG_CONFIG_ENV) --cflags opencv4 2>/dev/null || echo "")
+    FFMPEG_CFLAGS := $(shell $(PKG_CONFIG_ENV) --cflags $(PC_CORE_PKGS) 2>/dev/null || echo "")
+    PC_CFLAGS := $(OPENCV_CFLAGS) $(FFMPEG_CFLAGS)
     INCLUDES := $(INC_CSI) $(INC_LOCAL) $(PC_CFLAGS)
 else
     INCLUDES := $(INC_CSI) $(INC_OCV) $(INC_FF) $(INC_SDL) $(INC_LOCAL)
 endif
 
-# Exclude SDL display source when SDL CFLAGS are not present
-ifeq ($(SDL_CFLAGS),)
-PIPELINE_SRCS := $(filter-out $(SRC_DIR)/display_sdl.cpp, $(PIPELINE_SRCS))
+SDL_CFLAGS := $(strip $(shell $(PKG_CONFIG_ENV) --cflags sdl2 2>/dev/null || true))
+SDL2_LIBS := $(strip $(shell $(PKG_CONFIG_ENV) --libs sdl2 2>/dev/null || true))
+
+SDL_ENABLED :=
+ifeq ($(ENABLE_SDL),1)
+  SDL_ENABLED := 1
+endif
+ifneq ($(SDL_CFLAGS),)
+  SDL_ENABLED := 1
 endif
 
 # Library directories and libraries
@@ -104,8 +111,6 @@ LIB_DIR := -L/opt/spacemit/sysroot/usr/lib/riscv64-linux-gnu \
 LIBS_CSI := -lshl
 OPENCV_LIBS := -lopencv_core -lopencv_imgproc
 FFMPEG_LIBS := -lavformat -lavcodec -lavutil -lswscale -lpthread -ldl -lm -lz -latomic
-# SDL2 via pkg-config when available (optional) — disabled by default to avoid heavy deps
-SDL2_LIBS :=
 LIBS_SYS := -lpthread -ldl -lm -latomic
 LIBS_STATIC := -static-libgcc -static-libstdc++
 
@@ -118,7 +123,7 @@ ifeq ($(COMPILER),clang)
 endif
 
 # Prefer pkg-config link flags when available
-LIBS := $(LIBS_CSI) $(OPENCV_LIBS) $(FFMPEG_LIBS) $(SDL2_LIBS) $(LIBS_SYS) $(LIBS_STATIC)
+LIBS := $(LIBS_CSI) $(OPENCV_LIBS) $(FFMPEG_LIBS) $(LIBS_SYS) $(LIBS_STATIC)
 
 # Minimal libs for simple tests (avoid heavy deps from imgcodecs/videoio)
 LIBS_MIN := $(LIBS_CSI) -lopencv_core -lopencv_imgproc $(LIBS_SYS) $(LIBS_STATIC)
@@ -142,6 +147,12 @@ CSI_TEST_SRCS := yolov5n_csi.cpp
 
 # Pipeline sources (exclude standalone test mains)
 PIPELINE_SRCS := $(filter-out $(SRC_DIR)/test_simple_pipeline.cpp, $(wildcard $(SRC_DIR)/*.cpp))
+ifneq ($(SDL_ENABLED),)
+  CXXFLAGS += $(SDL_CFLAGS) -DHAVE_SDL2
+  LIBS += $(SDL2_LIBS)
+else
+  PIPELINE_SRCS := $(filter-out $(SRC_DIR)/display_sdl.cpp, $(PIPELINE_SRCS))
+endif
 
 # Model object (always needed)
 MODEL_OBJ := $(BUILD_DIR)/model.o
@@ -283,6 +294,236 @@ run-file-fast: $(BUILD_DIR)/$(PIPELINE_TARGET)
     --max-frames 120 \
     --perf-json $(DEVICE_PROJECT_DIR)/metrics.jsonl"
 
+.PHONY: run-file-sdl-sw run-cam-yuyv-sdl-sw run-cam-yuyv-sdl-rvv \
+        run-file-sdl-sw-local run-file-sdl-rvv-local \
+        run-cam-yuyv-sdl-sw-local run-cam-yuyv-sdl-rvv-local
+
+run-file-sdl-sw-local: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN-LOCAL] file input with SDL (sw)"
+	@mkdir -p artifacts
+	@PROBE=$(DEVICE_PROJECT_DIR)/artifacts/display_probe_last_file_sdl_sw.ppm; \
+	OUT=$(DEVICE_PROJECT_DIR)/artifacts/run-file-sdl-sw-local.avi; \
+	MET=$(DEVICE_PROJECT_DIR)/artifacts/run-file-sdl-sw-local.jsonl; \
+	rm -f "$$PROBE"; \
+	SDL_VIDEODRIVER=wayland ./build/yolov5n_pipeline \
+	  --src file:$(DEVICE_PROJECT_DIR)/input_video.mp4 \
+	  --out "$$OUT" \
+	  --enc raw \
+	  --display sdl \
+	  --sdl-driver wayland \
+	  --display-probe "$$PROBE" \
+	  --weights cpu_model/hhb.bm \
+	  --nn-cpus auto --io-cpus auto \
+	  --pp sw \
+	  --perf-json "$$MET"
+
+run-file-sdl-rvv-local: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN-LOCAL] file input with SDL (rvv)"
+	@mkdir -p artifacts
+	@PROBE=$(DEVICE_PROJECT_DIR)/artifacts/display_probe_last_file_sdl_rvv.ppm; \
+	OUT=$(DEVICE_PROJECT_DIR)/artifacts/run-file-sdl-rvv-local.avi; \
+	MET=$(DEVICE_PROJECT_DIR)/artifacts/run-file-sdl-rvv-local.jsonl; \
+	rm -f "$$PROBE"; \
+	SDL_VIDEODRIVER=wayland ./build/yolov5n_pipeline \
+	  --src file:$(DEVICE_PROJECT_DIR)/input_video.mp4 \
+	  --out "$$OUT" \
+	  --enc raw \
+	  --display sdl \
+	  --sdl-driver wayland \
+	  --display-probe "$$PROBE" \
+	  --weights cpu_model/hhb.bm \
+	  --nn-cpus auto --io-cpus auto \
+	  --pp rvv \
+	  --perf-json "$$MET"
+
+run-cam-yuyv-sdl-sw-local: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN-LOCAL] camera YUYV with SDL (sw)"
+	@mkdir -p artifacts
+	@PROBE=$(DEVICE_PROJECT_DIR)/artifacts/display_probe_last_cam_yuyv_sdl_sw.ppm; \
+	OUT=$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-sdl-sw-local.avi; \
+	MET=$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-sdl-sw-local.jsonl; \
+	rm -f "$$PROBE"; \
+	SDL_VIDEODRIVER=wayland ./build/yolov5n_pipeline \
+	  --src "v4l2:auto?fmt=yuyv" \
+	  --out "$$OUT" \
+	  --enc raw \
+	  --display sdl \
+	  --sdl-driver wayland \
+	  --display-probe "$$PROBE" \
+	  --weights cpu_model/hhb.bm \
+	  --nn-cpus auto --io-cpus auto \
+	  --pp sw \
+	  --perf-json "$$MET"
+
+run-cam-yuyv-sdl-rvv-local: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN-LOCAL] camera YUYV with SDL (rvv)"
+	@mkdir -p artifacts
+	@PROBE=$(DEVICE_PROJECT_DIR)/artifacts/display_probe_last_cam_yuyv_sdl_rvv.ppm; \
+	OUT=$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-sdl-rvv-local.avi; \
+	MET=$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-sdl-rvv-local.jsonl; \
+	rm -f "$$PROBE"; \
+	SDL_VIDEODRIVER=wayland ./build/yolov5n_pipeline \
+	  --src "v4l2:auto?fmt=yuyv" \
+	  --out "$$OUT" \
+	  --enc raw \
+	  --display sdl \
+	  --sdl-driver wayland \
+	  --display-probe "$$PROBE" \
+	  --weights cpu_model/hhb.bm \
+	  --nn-cpus auto --io-cpus auto \
+	  --pp rvv \
+	  --perf-json "$$MET"
+run-file-sdl-sw: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN] file input with SDL (sw) on device"
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@echo "mode|driver|in_fps|out_fps|disp_ms|file_size"
+	@ssh $(SSH_TARGET) bash -lc 'set -Eeuo pipefail; cd $(DEVICE_PROJECT_DIR); \
+	  mkdir -p artifacts; \
+	  OUT=artifacts/run-file-sdl-sw.avi; \
+	  MET=artifacts/run-file-sdl-sw.jsonl; \
+	  LOG=artifacts/run-file-sdl-sw.log; \
+	  PROBE=artifacts/display_probe_last_file_sdl_sw.ppm; \
+	  rm -f "$$OUT" "$$MET" "$$LOG" "$$PROBE"; \
+	  timeout 180s ./build/yolov5n_pipeline \
+	    --src file:$(DEVICE_PROJECT_DIR)/input_video.mp4 \
+	    --out "$$OUT" \
+	    --enc raw \
+	    --display sdl \
+	    --sdl-driver auto \
+	    --display-probe "$$PROBE" \
+	    --weights cpu_model/hhb.bm \
+	    --nn-cpus auto --io-cpus auto \
+	    --pp sw \
+	    --max-frames 120 \
+	    --perf-json "$$MET" > "$$LOG" 2>&1; \
+	  test -s "$$PROBE"; \
+	  DRIVER=$$(grep -m1 "\\[display\\] SDL driver=" "$$LOG" | sed -E "s/.*SDL driver=([^ ]+) .*/\\1/" || echo null); \
+	  METRIC=$$(grep "\\[metrics\\]" "$$LOG" | tail -n1 || echo ""); \
+	  IN_FPS=$$(echo "$$METRIC" | sed -n "s/.*in_fps=\([0-9.]*\).*/\\1/p"); \
+	  OUT_FPS=$$(echo "$$METRIC" | sed -n "s/.*out_fps=\([0-9.]*\).*/\\1/p"); \
+	  DISP=$$(echo "$$METRIC" | sed -n "s/.*disp_ms=\([0-9.]*\).*/\\1/p"); \
+	  SIZE=$$(stat -c%s "$$OUT" 2>/dev/null || echo 0); \
+	  echo "file-sdl-sw|$$DRIVER|$$IN_FPS|$$OUT_FPS|$$DISP|$$SIZE"'
+	@mkdir -p artifacts
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/display_probe_last_file_sdl_sw.ppm artifacts/display_probe_last_file_sdl_sw.ppm >/dev/null || echo "[WARN] missing display probe"
+	@[ -s artifacts/display_probe_last_file_sdl_sw.ppm ] || echo "[WARN] display probe artifact empty"
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-file-sdl-sw.log artifacts/run-file-sdl-sw.log >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-file-sdl-sw.jsonl artifacts/run-file-sdl-sw.jsonl >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-file-sdl-sw.avi artifacts/run-file-sdl-sw.avi >/dev/null || true
+	@$(MAKE) --no-print-directory cleanup-all || true
+
+run-cam-yuyv-sdl-sw: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN] camera YUYV SDL (sw) on device"
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@echo "mode|driver|in_fps|out_fps|disp_ms|file_size"
+	@ssh $(SSH_TARGET) bash -lc 'set -Eeuo pipefail; cd $(DEVICE_PROJECT_DIR); \
+	  if ! command -v v4l2-ctl >/dev/null 2>&1; then echo NO_CAMERA; exit 0; fi; \
+	  mkdir -p artifacts; \
+	  CAM=""; \
+	  for link in /dev/v4l/by-id/*-video-index0; do \
+	    [ -e "$$link" ] || continue; \
+	    real_path=$$(readlink -f "$$link" 2>/dev/null || true); \
+	    [ -n "$$real_path" ] || continue; \
+	    CAM="$$real_path"; \
+	    break; \
+	  done; \
+	  if [ -z "$$CAM" ]; then \
+	    for dev in /dev/video{0..63}; do \
+	      [ -e "$$dev" ] || continue; \
+	      CAM="$$dev"; \
+	      break; \
+	    done; \
+	  fi; \
+	  if [ -z "$$CAM" ]; then echo NO_CAMERA; exit 0; fi; \
+	  OUT=artifacts/run-cam-yuyv-sdl-sw.avi; \
+	  MET=artifacts/run-cam-yuyv-sdl-sw.jsonl; \
+	  LOG=artifacts/run-cam-yuyv-sdl-sw.log; \
+	  PROBE=artifacts/display_probe_last_cam_yuyv_sdl_sw.ppm; \
+	  rm -f "$$OUT" "$$MET" "$$LOG" "$$PROBE"; \
+	  timeout 180s ./build/yolov5n_pipeline \
+	    --src "v4l2:$$CAM?fmt=yuyv" \
+	    --out "$$OUT" \
+	    --enc raw \
+	    --display sdl \
+	    --sdl-driver auto \
+	    --display-probe "$$PROBE" \
+	    --weights cpu_model/hhb.bm \
+	    --nn-cpus auto --io-cpus auto \
+	    --pp sw \
+	    --max-frames 120 \
+	    --perf-json "$$MET" > "$$LOG" 2>&1; \
+	  test -s "$$PROBE"; \
+	  DRIVER=$$(grep -m1 "\\[display\\] SDL driver=" "$$LOG" | sed -E "s/.*SDL driver=([^ ]+) .*/\\1/" || echo null); \
+	  METRIC=$$(grep "\\[metrics\\]" "$$LOG" | tail -n1 || echo ""); \
+	  IN_FPS=$$(echo "$$METRIC" | sed -n "s/.*in_fps=\([0-9.]*\).*/\\1/p"); \
+	  OUT_FPS=$$(echo "$$METRIC" | sed -n "s/.*out_fps=\([0-9.]*\).*/\\1/p"); \
+	  DISP=$$(echo "$$METRIC" | sed -n "s/.*disp_ms=\([0-9.]*\).*/\\1/p"); \
+	  SIZE=$$(stat -c%s "$$OUT" 2>/dev/null || echo 0); \
+	  echo "cam-yuyv-sdl-sw|$$DRIVER|$$IN_FPS|$$OUT_FPS|$$DISP|$$SIZE"'
+	@mkdir -p artifacts
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/display_probe_last_cam_yuyv_sdl_sw.ppm artifacts/display_probe_last_cam_yuyv_sdl_sw.ppm >/dev/null || echo "[WARN] missing display probe"
+	@[ -s artifacts/display_probe_last_cam_yuyv_sdl_sw.ppm ] || echo "[WARN] display probe artifact empty"
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-sdl-sw.log artifacts/run-cam-yuyv-sdl-sw.log >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-sdl-sw.jsonl artifacts/run-cam-yuyv-sdl-sw.jsonl >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-sdl-sw.avi artifacts/run-cam-yuyv-sdl-sw.avi >/dev/null || true
+	@$(MAKE) --no-print-directory cleanup-all || true
+
+run-cam-yuyv-sdl-rvv: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN] camera YUYV SDL (rvv) on device"
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@echo "mode|driver|in_fps|out_fps|disp_ms|file_size"
+	@ssh $(SSH_TARGET) bash -lc 'set -Eeuo pipefail; cd $(DEVICE_PROJECT_DIR); \
+	  if ! command -v v4l2-ctl >/dev/null 2>&1; then echo NO_CAMERA; exit 0; fi; \
+	  mkdir -p artifacts; \
+	  CAM=""; \
+	  for link in /dev/v4l/by-id/*-video-index0; do \
+	    [ -e "$$link" ] || continue; \
+	    real_path=$$(readlink -f "$$link" 2>/dev/null || true); \
+	    [ -n "$$real_path" ] || continue; \
+	    CAM="$$real_path"; \
+	    break; \
+	  done; \
+	  if [ -z "$$CAM" ]; then \
+	    for dev in /dev/video{0..63}; do \
+	      [ -e "$$dev" ] || continue; \
+	      CAM="$$dev"; \
+	      break; \
+	    done; \
+	  fi; \
+	  if [ -z "$$CAM" ]; then echo NO_CAMERA; exit 0; fi; \
+	  OUT=artifacts/run-cam-yuyv-sdl-rvv.avi; \
+	  MET=artifacts/run-cam-yuyv-sdl-rvv.jsonl; \
+	  LOG=artifacts/run-cam-yuyv-sdl-rvv.log; \
+	  PROBE=artifacts/display_probe_last_cam_yuyv_sdl_rvv.ppm; \
+	  rm -f "$$OUT" "$$MET" "$$LOG" "$$PROBE"; \
+	  timeout 180s ./build/yolov5n_pipeline \
+	    --src "v4l2:$$CAM?fmt=yuyv" \
+	    --out "$$OUT" \
+	    --enc raw \
+	    --display sdl \
+	    --sdl-driver auto \
+	    --display-probe "$$PROBE" \
+	    --weights cpu_model/hhb.bm \
+	    --nn-cpus auto --io-cpus auto \
+	    --pp rvv \
+	    --max-frames 120 \
+	    --perf-json "$$MET" > "$$LOG" 2>&1; \
+	  test -s "$$PROBE"; \
+	  DRIVER=$$(grep -m1 "\\[display\\] SDL driver=" "$$LOG" | sed -E "s/.*SDL driver=([^ ]+) .*/\\1/" || echo null); \
+	  METRIC=$$(grep "\\[metrics\\]" "$$LOG" | tail -n1 || echo ""); \
+	  IN_FPS=$$(echo "$$METRIC" | sed -n "s/.*in_fps=\([0-9.]*\).*/\\1/p"); \
+	  OUT_FPS=$$(echo "$$METRIC" | sed -n "s/.*out_fps=\([0-9.]*\).*/\\1/p"); \
+	  DISP=$$(echo "$$METRIC" | sed -n "s/.*disp_ms=\([0-9.]*\).*/\\1/p"); \
+	  SIZE=$$(stat -c%s "$$OUT" 2>/dev/null || echo 0); \
+	  echo "cam-yuyv-sdl-rvv|$$DRIVER|$$IN_FPS|$$OUT_FPS|$$DISP|$$SIZE"'
+	@mkdir -p artifacts
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/display_probe_last_cam_yuyv_sdl_rvv.ppm artifacts/display_probe_last_cam_yuyv_sdl_rvv.ppm >/dev/null || echo "[WARN] missing display probe"
+	@[ -s artifacts/display_probe_last_cam_yuyv_sdl_rvv.ppm ] || echo "[WARN] display probe artifact empty"
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-sdl-rvv.log artifacts/run-cam-yuyv-sdl-rvv.log >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-sdl-rvv.jsonl artifacts/run-cam-yuyv-sdl-rvv.jsonl >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-yuyv-sdl-rvv.avi artifacts/run-cam-yuyv-sdl-rvv.avi >/dev/null || true
+	@$(MAKE) --no-print-directory cleanup-all || true
+
 run-v4l2-yuyv: $(BUILD_DIR)/$(PIPELINE_TARGET)
 	@echo "[RUN] v4l2:yuyv on device"
 	@ssh $(SSH_TARGET) "$(REMOTE_CD) && \
@@ -305,6 +546,123 @@ run-v4l2-mjpeg: $(BUILD_DIR)/$(PIPELINE_TARGET)
     --nn-cpus auto --io-cpus auto \
     --perf-json $(DEVICE_PROJECT_DIR)/metrics_v4l2_mjpeg.jsonl"
 
+.PHONY: run-cam-probe run-cam-yuyv-sw run-cam-yuyv-rvv
+run-cam-probe: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN] camera probe on device"
+	@ssh $(SSH_TARGET) bash -lc 'set -Eeuo pipefail; cd $(DEVICE_PROJECT_DIR); \
+	  ls -l /dev/v4l/by-id 2>/dev/null || echo "no /dev/v4l/by-id directory"; \
+	  if command -v v4l2-ctl >/dev/null 2>&1; then \
+	    v4l2-ctl --list-devices 2>/dev/null || true; \
+	    found=0; \
+	    for dev in /dev/video{0..63}; do \
+	      [ -e "$$dev" ] || continue; \
+	      found=1; \
+	      echo "== $$dev =="; \
+	      v4l2-ctl -D -d "$$dev" 2>/dev/null || echo "[WARN] v4l2-ctl -D failed for $$dev"; \
+	      v4l2-ctl --list-formats-ext -d "$$dev" 2>/dev/null | sed -n "1,60p" || true; \
+	    done; \
+	    if [ "$$found" -eq 0 ]; then echo NO_CAMERA; fi; \
+	  else \
+	    echo "[WARN] v4l2-ctl not available"; \
+	    echo NO_CAMERA; \
+	  fi'
+
+run-cam-yuyv-sw: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN] camera (YUYV sw) on device"
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@ssh $(SSH_TARGET) bash -lc 'set -Eeuo pipefail >/dev/null; cd $(DEVICE_PROJECT_DIR); \
+	  if ! command -v v4l2-ctl >/dev/null 2>&1; then echo NO_CAMERA; exit 0; fi; \
+	  cam=""; \
+	  for link in /dev/v4l/by-id/*-video-index0; do \
+	    [ -e "$$link" ] || continue; \
+	    real_path=$$(readlink -f "$$link" 2>/dev/null || true); \
+	    [ -n "$$real_path" ] || continue; \
+	    cam="$$real_path"; \
+	    break; \
+	  done; \
+	  if [ -z "$$cam" ]; then \
+	    for dev in /dev/video{0..63}; do \
+	      [ -e "$$dev" ] || continue; \
+	      cam="$$dev"; \
+	      break; \
+	    done; \
+	  fi; \
+	  if [ -z "$$cam" ]; then echo NO_CAMERA; exit 0; fi; \
+	  echo "[INFO] camera candidate: $$cam"; \
+	  OUT_FILE=out_cam_yuyv_sw.avi; \
+	  METRICS_FILE=metrics_cam_yuyv_sw.jsonl; \
+	  rm -f "$$OUT_FILE" "$$METRICS_FILE"; \
+	  timeout 240s ./build/yolov5n_pipeline \
+	    --src v4l2:auto \
+	    --cam-fmt yuyv \
+	    --pp sw \
+	    --enc raw \
+	    --display off \
+	    --weights cpu_model/hhb.bm \
+	    --nn-cpus auto --io-cpus auto \
+	    --max-frames 120 \
+	    --out "$$OUT_FILE" \
+	    --perf-json "$$METRICS_FILE"; \
+	  if [ ! -s "$$METRICS_FILE" ]; then echo "[ERROR] metrics file empty" >&2; exit 1; fi; \
+	  if command -v ffprobe >/dev/null 2>&1; then \
+	    ffprobe -v error -show_entries format=format_name -of default=nk=1:nw=1 "$$OUT_FILE" | grep -q "avi" || { echo "[ERROR] ffprobe format check failed" >&2; exit 1; }; \
+	    ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=nk=1:nw=1 "$$OUT_FILE" | grep -q "rawvideo" || { echo "[ERROR] ffprobe codec check failed" >&2; exit 1; }; \
+	  else \
+	    echo "[WARN] ffprobe not available, skipping validation"; \
+	  fi'
+	@mkdir -p artifacts
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/out_cam_yuyv_sw.avi artifacts/out_cam_yuyv_sw.avi >/dev/null || echo "[WARN] missing out_cam_yuyv_sw.avi"
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/metrics_cam_yuyv_sw.jsonl artifacts/metrics_cam_yuyv_sw.jsonl >/dev/null || echo "[WARN] missing metrics_cam_yuyv_sw.jsonl"
+	@$(MAKE) --no-print-directory cleanup-all || true
+
+run-cam-yuyv-rvv: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN] camera (YUYV rvv) on device"
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@ssh $(SSH_TARGET) bash -lc 'set -Eeuo pipefail; cd $(DEVICE_PROJECT_DIR); \
+	  if ! command -v v4l2-ctl >/dev/null 2>&1; then echo NO_CAMERA; exit 0; fi; \
+	  cam=""; \
+	  for link in /dev/v4l/by-id/*-video-index0; do \
+	    [ -e "$$link" ] || continue; \
+	    real_path=$$(readlink -f "$$link" 2>/dev/null || true); \
+	    [ -n "$$real_path" ] || continue; \
+	    cam="$$real_path"; \
+	    break; \
+	  done; \
+	  if [ -z "$$cam" ]; then \
+	    for dev in /dev/video{0..63}; do \
+	      [ -e "$$dev" ] || continue; \
+	      cam="$$dev"; \
+	      break; \
+	    done; \
+	  fi; \
+	  if [ -z "$$cam" ]; then echo NO_CAMERA; exit 0; fi; \
+	  echo "[INFO] camera candidate: $$cam"; \
+	  OUT_FILE=out_cam_yuyv_rvv.avi; \
+	  METRICS_FILE=metrics_cam_yuyv_rvv.jsonl; \
+	  rm -f "$$OUT_FILE" "$$METRICS_FILE"; \
+	  timeout 240s ./build/yolov5n_pipeline \
+	    --src v4l2:auto \
+	    --cam-fmt yuyv \
+	    --pp rvv \
+	    --enc raw \
+	    --display off \
+	    --weights cpu_model/hhb.bm \
+	    --nn-cpus auto --io-cpus auto \
+	    --max-frames 120 \
+	    --out "$$OUT_FILE" \
+	    --perf-json "$$METRICS_FILE"; \
+	  if [ ! -s "$$METRICS_FILE" ]; then echo "[ERROR] metrics file empty" >&2; exit 1; fi; \
+	  if command -v ffprobe >/dev/null 2>&1; then \
+	    ffprobe -v error -show_entries format=format_name -of default=nk=1:nw=1 "$$OUT_FILE" | grep -q "avi" || { echo "[ERROR] ffprobe format check failed" >&2; exit 1; }; \
+	    ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=nk=1:nw=1 "$$OUT_FILE" | grep -q "rawvideo" || { echo "[ERROR] ffprobe codec check failed" >&2; exit 1; }; \
+	  else \
+	    echo "[WARN] ffprobe not available, skipping validation"; \
+	  fi'
+	@mkdir -p artifacts
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/out_cam_yuyv_rvv.avi artifacts/out_cam_yuyv_rvv.avi >/dev/null || echo "[WARN] missing out_cam_yuyv_rvv.avi"
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/metrics_cam_yuyv_rvv.jsonl artifacts/metrics_cam_yuyv_rvv.jsonl >/dev/null || echo "[WARN] missing metrics_cam_yuyv_rvv.jsonl"
+	@$(MAKE) --no-print-directory cleanup-all || true
+
 # Benchmarks on device (file source, max 120 frames)
 .PHONY: run-bench-raw run-bench-mjpeg run-bench-h264 run-bench clean-remote-procs clean-local-procs cleanup-all
 
@@ -319,10 +677,11 @@ clean-remote-procs:
 	  done; \
 	  exit 0' || true
 
+.PHONY: clean-local-procs
 clean-local-procs:
 	@echo "[CLEAN] local ssh clients for yolov5n_pipeline"
-	@PIDS=$$(pgrep -af "ssh .*yolov5n_pipeline" | awk '{print $$1}'); \
-	 if [ -n "$$PIDS" ]; then kill -TERM $$PIDS >/dev/null 2>&1 || true; sleep 1; kill -KILL $$PIDS >/dev/null 2>&1 || true; fi; true
+	@pids="$$(pgrep -af 'ssh .*yolov5n_pipeline' | grep -v -E 'make|run-bench' | awk '{print $$1}')" ; \
+	[ -z "$$pids" ] || { echo "  - killing: $$pids"; kill -TERM $$pids || true; sleep 1; kill -KILL $$pids || true; } ; true
 
 cleanup-all: clean-remote-procs clean-local-procs
 run-bench-raw: $(BUILD_DIR)/$(PIPELINE_TARGET)
@@ -332,6 +691,7 @@ run-bench-raw: $(BUILD_DIR)/$(PIPELINE_TARGET)
   ./build/yolov5n_pipeline --src file:$(DEVICE_PROJECT_DIR)/input_video.mp4 \
     --out $(DEVICE_PROJECT_DIR)/out_raw.avi --enc raw --display off \
     --weights cpu_model/hhb.bm --nn-cpus auto --io-cpus auto --max-frames 120 \
+    $(if $(pp),--pp $(pp),) \
     --perf-json $(DEVICE_PROJECT_DIR)/metrics_raw.jsonl; \
   if command -v ffprobe >/dev/null 2>&1; then \
     ffprobe -v error -show_entries format=format_name -of default=nk=1:nw=1 out_raw.avi 2>/dev/null || echo "[WARN] ffprobe format check failed"; \
@@ -358,6 +718,7 @@ run-bench-mjpeg: $(BUILD_DIR)/$(PIPELINE_TARGET)
   ./build/yolov5n_pipeline --src file:$(DEVICE_PROJECT_DIR)/input_video.mp4 \
     --out $(DEVICE_PROJECT_DIR)/out_mjpeg.avi --enc mjpeg --display off \
     --weights cpu_model/hhb.bm --nn-cpus auto --io-cpus auto --max-frames 120 \
+    $(if $(pp),--pp $(pp),) \
     --perf-json $(DEVICE_PROJECT_DIR)/metrics_mjpeg.jsonl; \
   if command -v ffprobe >/dev/null 2>&1; then \
     ffprobe -v error -show_entries format=format_name -of default=nk=1:nw=1 out_mjpeg.avi 2>/dev/null || echo "[WARN] ffprobe format check failed"; \
@@ -384,6 +745,7 @@ run-bench-h264: $(BUILD_DIR)/$(PIPELINE_TARGET)
   ./build/yolov5n_pipeline --src file:$(DEVICE_PROJECT_DIR)/input_video.mp4 \
     --out $(DEVICE_PROJECT_DIR)/out_h264.mp4 --enc h264 --display off \
     --weights cpu_model/hhb.bm --nn-cpus auto --io-cpus auto --max-frames 120 \
+    $(if $(pp),--pp $(pp),) \
     --perf-json $(DEVICE_PROJECT_DIR)/metrics_h264.jsonl; \
   if command -v ffprobe >/dev/null 2>&1; then \
     ffprobe -v error -show_entries format=format_name -of default=nk=1:nw=1 out_h264.mp4 2>/dev/null || echo "[WARN] ffprobe format check failed"; \
@@ -410,14 +772,24 @@ run-bench:
 	@$(MAKE) -j1 --no-print-directory run-bench-h264 || true
 	@echo "[BENCH] done"
 
+ 
+
 # Dependency checks via pkg-config inside sysroot
 .PHONY: deps-check deps-install
 deps-check:
 	@bash -lc '. ./env.sh; \
-	PKG_CONFIG_LIBDIR="$$PKG_CONFIG_LIBDIR" PKG_CONFIG_SYSROOT_DIR="$$PKG_CONFIG_SYSROOT_DIR" \
-	sh -c '\''for p in sdl2 libavformat libavcodec libavutil libswscale opencv4; do \
-	  if pkg-config --exists $$p; then echo "[deps] $$p: PASS"; else echo "[deps] $$p: FAIL"; fi; \
-	done'\''' 
+	PKG_PATH="$(PKG_CONFIG_PATH_SYSROOT)"; \
+	PKG_LIBDIR="$(PKG_CONFIG_LIBDIR_SYSROOT)"; \
+	STATUS=0; \
+	for p in sdl2 libavformat libavcodec libavutil libswscale opencv4; do \
+	  if PKG_CONFIG_PATH="$$PKG_PATH" PKG_CONFIG_LIBDIR="$$PKG_LIBDIR" PKG_CONFIG_SYSROOT_DIR="$(SYSROOT)" pkg-config --exists $$p; then \
+	    echo "[deps] $$p: PASS"; \
+	  else \
+	    echo "[deps] $$p: FAIL"; \
+	    STATUS=1; \
+	  fi; \
+	done; \
+	exit $$STATUS' 
 
 deps-install:
 	@echo "[DEPS] Installing/updating sysroot via install_all_libs_to_spacemit.sh"
@@ -490,3 +862,8 @@ $(TEST_BIN): tests/test_reorderer.cpp $(BUILD_DIR)/pipeline.o
 	@echo "[LINK] $@"
 	@$(CXX) $(LDFLAGS) $(BUILD_DIR)/test_reorderer.o $(BUILD_DIR)/pipeline.o $(LIBS_MIN) -o $@
 	@echo "[SUCCESS] Built $@"
+
+# Override run-bench-summary with a thin wrapper script to avoid complex quoting
+.PHONY: run-bench-summary
+run-bench-summary: pipeline deploy
+	@PP=$(pp) bash tools/run_bench_summary.sh

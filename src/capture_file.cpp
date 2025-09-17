@@ -2,27 +2,41 @@
 #include <iostream>
 #include <chrono>
 
+/**
+ * @file capture_file.cpp
+ * @brief FFmpeg-backed file capture implementation feeding pipeline frames.
+ */
+
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
-#include <libswscale/swscale.h>
 }
 
 namespace yolov5 {
 
+/**
+ * @brief Wraps FFmpeg demux/decoder state for file capture.
+ *
+ * The object lives solely on the capture thread and decodes frames into Frame
+ * structures backed by planar YUV data so preprocessing can handle colorspace.
+ */
 class CaptureFile::Impl {
 public:
-    Impl() : format_ctx_(nullptr), codec_ctx_(nullptr), sws_ctx_(nullptr),
-             video_stream_index_(-1), frame_(nullptr), frame_rgb_(nullptr),
+    Impl() : format_ctx_(nullptr), codec_ctx_(nullptr),
+             video_stream_index_(-1), frame_(nullptr),
              frame_counter_(0), width_(0), height_(0), fps_(0), frame_count_(0) {}
     
     ~Impl() {
         release();
     }
     
+    /**
+     * @brief Open media file and prepare decoder.
+     * @param source CLI-style source string (file:/path or bare path).
+     */
     bool init(const std::string& source) {
-        // Extract filename from file:// URL
+        // Extract filename from file:// URL; bare paths already work.
         std::string filename = source;
         if (filename.substr(0, 5) == "file:") {
             filename = filename.substr(5);
@@ -105,36 +119,24 @@ public:
             }
         }
         
-        // Allocate frames
+        // Allocate frames used for decoder output reuse.
         frame_ = av_frame_alloc();
-        frame_rgb_ = av_frame_alloc();
-        
-        if (!frame_ || !frame_rgb_) {
+
+        if (!frame_) {
             std::cerr << "Failed to allocate frames" << std::endl;
             release();
             return false;
         }
-        
-        // Allocate buffer for RGB frame
-        int num_bytes = av_image_get_buffer_size(AV_PIX_FMT_BGR24, width_, height_, 1);
-        uint8_t* buffer = (uint8_t*)av_malloc(num_bytes);
-        av_image_fill_arrays(frame_rgb_->data, frame_rgb_->linesize, buffer,
-                             AV_PIX_FMT_BGR24, width_, height_, 1);
-        
-        // Create scaling context
-        sws_ctx_ = sws_getContext(width_, height_, codec_ctx_->pix_fmt,
-                                   width_, height_, AV_PIX_FMT_BGR24,
-                                   SWS_BILINEAR, nullptr, nullptr, nullptr);
-        
-        if (!sws_ctx_) {
-            std::cerr << "Failed to create scaling context" << std::endl;
-            release();
-            return false;
-        }
-        
+        // We keep decoder's native pixel format and will handle colorspace in preprocess
         return true;
     }
-    
+
+    /**
+     * @brief Decode next frame and populate Frame object.
+     *
+     * Frames are exported as planar YUV420 when available. Preprocess stage is
+     * responsible for colorspace conversion.
+     */
     bool getFrame(Frame& frame) {
         if (!format_ctx_ || !codec_ctx_) {
             return false;
@@ -157,21 +159,37 @@ public:
                 // Receive frame from decoder
                 ret = avcodec_receive_frame(codec_ctx_, frame_);
                 if (ret == 0) {
-                    // Convert to BGR
-                    sws_scale(sws_ctx_, frame_->data, frame_->linesize, 0, height_,
-                              frame_rgb_->data, frame_rgb_->linesize);
-                    
-                    // Create OpenCV Mat from frame data
-                    cv::Mat bgr_mat(height_, width_, CV_8UC3, frame_rgb_->data[0],
-                                    frame_rgb_->linesize[0]);
-                    
-                    // Fill Frame structure
+                    // Fill Frame structure with YUV420P planes; BGR produced later in preprocess.
                     frame.frame_id = frame_counter_++;
-                    frame.image = bgr_mat.clone();  // Clone to avoid data dependency
-                    frame.timestamp = std::chrono::steady_clock::now();
+                    // Assume YUV420P layout; if not, we silently skip for now
                     frame.source_width = width_;
                     frame.source_height = height_;
-                    
+                    frame.timestamp = std::chrono::steady_clock::now();
+                    if (frame_->format == AV_PIX_FMT_YUV420P || frame_->format == AV_PIX_FMT_YUVJ420P) {
+                        int y_stride = frame_->linesize[0];
+                        int u_stride = frame_->linesize[1];
+                        int v_stride = frame_->linesize[2];
+                        frame.format = PixelFormat::YUV420P;
+                        frame.y_stride = width_;
+                        frame.uv_stride = width_ / 2;
+                        frame.y_plane.resize(width_ * height_);
+                        frame.u_plane.resize((width_/2) * (height_/2));
+                        frame.v_plane.resize((width_/2) * (height_/2));
+                        // Copy with stride handling
+                        for (int j = 0; j < height_; ++j) {
+                            memcpy(&frame.y_plane[j*width_], frame_->data[0] + j * y_stride, width_);
+                        }
+                        for (int j = 0; j < height_/2; ++j) {
+                            memcpy(&frame.u_plane[j*(width_/2)], frame_->data[1] + j * u_stride, width_/2);
+                            memcpy(&frame.v_plane[j*(width_/2)], frame_->data[2] + j * v_stride, width_/2);
+                        }
+                        // Do not set frame.image here to avoid extra conversion work; preprocess will populate if needed
+                    } else {
+                        // Fallback: unsupported pix_fmt; create empty image to avoid downstream crashes.
+                        frame.format = PixelFormat::BGR;
+                        frame.image = cv::Mat(height_, width_, CV_8UC3);
+                        frame.image.setTo(cv::Scalar(0,0,0));
+                    }
                     av_packet_unref(packet);
                     av_packet_free(&packet);
                     return true;
@@ -185,24 +203,15 @@ public:
         return false;
     }
     
+    /**
+     * @brief Tear down FFmpeg objects.
+     */
     void release() {
-        if (frame_rgb_) {
-            if (frame_rgb_->data[0]) {
-                av_free(frame_rgb_->data[0]);
-            }
-            av_frame_free(&frame_rgb_);
-            frame_rgb_ = nullptr;
-        }
-        
         if (frame_) {
             av_frame_free(&frame_);
             frame_ = nullptr;
         }
         
-        if (sws_ctx_) {
-            sws_freeContext(sws_ctx_);
-            sws_ctx_ = nullptr;
-        }
         
         if (codec_ctx_) {
             avcodec_free_context(&codec_ctx_);
@@ -227,10 +236,8 @@ public:
 private:
     AVFormatContext* format_ctx_;
     AVCodecContext* codec_ctx_;
-    SwsContext* sws_ctx_;
     int video_stream_index_;
     AVFrame* frame_;
-    AVFrame* frame_rgb_;
     uint64_t frame_counter_;
     int width_;
     int height_;

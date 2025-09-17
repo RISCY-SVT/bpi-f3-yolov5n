@@ -8,6 +8,11 @@
 #include <cstdio>
 #include <cstdlib>
 
+/**
+ * @file engine_csi.cpp
+ * @brief CSI-NN2 engine integration for HHB-compiled YOLOv5n model.
+ */
+
 extern "C" {
 #include "csi_nn.h"
 #include "shl_utils.h"
@@ -42,6 +47,7 @@ const std::vector<std::string> COCO_CLASSES = {
 };
 
 // Helper function to load binary file
+/** @brief Read entire binary model file into aligned buffer. */
 static char* get_binary_from_file(const char* filename, int* size) {
     std::FILE* fp = std::fopen(filename, "rb");
     if (!fp) {
@@ -76,6 +82,11 @@ static char* get_binary_from_file(const char* filename, int* size) {
 }
 
 // Create graph function - properly loads .bm file
+/**
+ * @brief Load HHB-produced binary model entirely from memory.
+ *
+ * Follows AGENTS.md mandate: never call csinn_* with file paths.
+ */
 static void* create_graph(const char* params_path) {
     int file_size = 0;
     char* params = get_binary_from_file(params_path, &file_size);
@@ -97,7 +108,8 @@ static void* create_graph(const char* params_path) {
         struct shl_bm_sections* section = (struct shl_bm_sections*)(params + 4128);
         
         if (section->graph_offset) {
-            // Import binary model from memory and free buffer after import
+            // HHB integration: import YOLOv5n graph from in-memory BM blob (1x3x384x640 FP16 NCHW).
+            // Model binaries are staged under cpu_model/hhb.bm as mandated by AGENTS.md.
             void* result = csinn_import_binary_model(params);
             if (!result) {
                 std::cerr << "[ERROR] csinn_import_binary_model failed" << std::endl;
@@ -126,7 +138,12 @@ static void* create_graph(const char* params_path) {
     return nullptr;
 }
 
-// Implementation class for CSI-NN2 engine
+/**
+ * @brief Wraps CSI-NN2 session lifecycle and YOLOv5 post-processing.
+ *
+ * One instance lives per inference worker. Manages session init, tensor
+ * conversions, and delegates detection post-process to SHL helpers.
+ */
 class EngineCSI::Impl {
 public:
     Impl() : session_(nullptr), input_tensor_(nullptr), initialized_(false), 
@@ -136,6 +153,10 @@ public:
         release();
     }
     
+    /**
+     * @brief Initialize CSI-NN2 session from HHB weights.
+     * @param weights_path Path to cpu_model/hhb.bm (or .params fallback).
+     */
     bool init(const std::string& weights_path) {
         if (initialized_) {
             return true;
@@ -174,6 +195,7 @@ public:
         return true;
     }
     
+    /** @brief Release session and allocated tensors. */
     void release() {
         if (input_tensor_) {
             if (input_tensor_->data) {
@@ -194,17 +216,31 @@ public:
     bool isInitialized() const {
         return initialized_;
     }
-    
+
+    /**
+     * @brief Run single inference pass and collect detections.
+     * @param input_data Preprocessed tensor (FP16 NCHW for optimal path).
+     * @param conf_thresh Confidence threshold applied before NMS.
+     * @param nms_thresh IOU threshold for NMS.
+     */
     std::vector<Detection> infer(void* input_data, float conf_thresh, float nms_thresh) {
         if (!initialized_ || !session_) {
             return {};
         }
         
-        // Convert input to model format (FP32 -> FP16)
+        // Copy/convert input according to model's expected dtype
         int input_size = csinn_tensor_byte_size(input_tensor_);
-        void* converted_input = shl_c920v2_f32_to_input_dtype(0, (float*)input_data, session_);
-        std::memcpy(input_tensor_->data, converted_input, input_size);
-        shl_mem_free(converted_input);
+        if (input_tensor_->dtype == CSINN_DTYPE_FLOAT16) {
+            // Preprocessor provided FP16 buffer
+            std::memcpy(input_tensor_->data, input_data, input_size);
+        } else if (input_tensor_->dtype == CSINN_DTYPE_FLOAT32) {
+            std::memcpy(input_tensor_->data, input_data, input_size);
+        } else {
+            // Fallback: convert from FP32 buffer
+            void* converted_input = shl_c920v2_f32_to_input_dtype(0, (float*)input_data, session_);
+            std::memcpy(input_tensor_->data, converted_input, input_size);
+            shl_mem_free(converted_input);
+        }
         
         // Run inference
         csinn_update_input_and_run(&input_tensor_, session_);
@@ -254,6 +290,9 @@ public:
     }
     
 private:
+    /**
+     * @brief Convert CSI-NN2 raw outputs into Detection list via SHL helpers.
+     */
     std::vector<Detection> postprocess(struct csinn_tensor** outputs, int output_num,
                                         float conf_thresh, float nms_thresh) {
         // Use CSI-NN2's built-in YOLOv5 postprocessing

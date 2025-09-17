@@ -44,13 +44,16 @@ export RISCV_INCLUDES="-I${INSTALL_NN2_PREFIX}/${CPU_MODEL}/include \
 -I${OUTPUT_DIR}"
 
 # Library paths and libraries
-export RISCV_LIBS="-L${INSTALL_NN2_PREFIX}/${CPU_MODEL}/lib -lshl \
--L${SYSROOT}/usr/lib/riscv64-linux-gnu \
--lopencv_core -lopencv_imgproc \
--lavformat -lavcodec -lavutil -lswscale \
--lSDL2 \
--lpthread -ldl -lm -latomic \
--static-libgcc -static-libstdc++"
+# export RISCV_LIBS="-L${INSTALL_NN2_PREFIX}/${CPU_MODEL}/lib -lshl \
+# -L${SYSROOT}/usr/lib/riscv64-linux-gnu \
+# -lopencv_core -lopencv_imgproc \
+# -lavformat -lavcodec -lavutil -lswscale \
+# -lSDL2 \
+# -lpthread -ldl -lm -latomic \
+# -static-libgcc -static-libstdc++"
+
+# !!! NB! Linker flags are managed by Makefile. Do not use RISCV_LIBS in this project.
+export RISCV_LIBS=""
 
 # PKG-CONFIG setup for cross-compilation (prefer sysroot pkg-config dirs)
 export PATH="$(dirname "${CROSS_PREFIX}"):$PATH"
@@ -108,7 +111,9 @@ check_env() {
 }
 
 # Export functions
-export -f check_env
+if [ -n "${BASH_VERSION:-}" ]; then
+    export -f check_env
+fi
 
 echo "Environment configured for BPI-F3 YOLOv5n project"
 echo "Run 'check_env' to verify configuration"

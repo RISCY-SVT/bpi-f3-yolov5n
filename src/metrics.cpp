@@ -5,8 +5,14 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+/**
+ * @file metrics.cpp
+ * @brief JSONL metrics writer implementation with deterministic schema.
+ */
+
 namespace yolov5 {
 
+/** @brief Escape string for safe inclusion in JSON output. */
 static std::string json_escape(const std::string& s) {
     std::ostringstream o;
     for (auto c : s) {
@@ -28,6 +34,9 @@ static std::string json_escape(const std::string& s) {
     return o.str();
 }
 
+/**
+ * @brief Open JSONL file for append; parent directories should exist already.
+ */
 JSONLMetricsWriter::JSONLMetricsWriter(const std::string& path) {
     ofs_.open(path, std::ios::out | std::ios::app);
 }
@@ -36,6 +45,9 @@ JSONLMetricsWriter::~JSONLMetricsWriter() {
     if (ofs_.is_open()) ofs_.close();
 }
 
+/**
+ * @brief Serialize metrics snapshot to JSONL using fixed key order.
+ */
 void JSONLMetricsWriter::write(const PerfMetrics& m) {
     if (!ofs_.is_open()) return;
     std::lock_guard<std::mutex> lock(mu_);
@@ -81,4 +93,3 @@ void JSONLMetricsWriter::write(const PerfMetrics& m) {
 }
 
 } // namespace yolov5
-

@@ -11,8 +11,16 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include <cctype>
 #include <cstring>
 #include <csignal>
+#include <cstdlib>
+#include <limits>
+
+/**
+ * @file main.cpp
+ * @brief CLI entry point configuring and launching the YOLOv5n pipeline.
+ */
 
 using namespace yolov5;
 
@@ -21,22 +29,27 @@ namespace yolov5 { void draw_detections(cv::Mat& frame_bgr, const std::vector<De
 
 static volatile bool g_stop = false;
 
+/** @brief Catch termination signals and request pipeline shutdown. */
 void signal_handler(int sig) {
     g_stop = true;
     std::cout << "\nReceived signal " << sig << ", stopping..." << std::endl;
 }
 
+/** @brief Print CLI usage with supported flags and defaults. */
 void print_usage(const char* program) {
     std::cout << "Usage: " << program << " [options]\n"
               << "\nInput/Output:\n"
-              << "  --src file:path|v4l2:/dev/videoX  Input source (required)\n"
+              << "  --src file:path|v4l2:/dev/videoX|v4l2:auto  Input source (required)\n"
               << "  --out path                        Output video file (optional)\n"
               << "  --enc h264|mjpeg|raw              Encoder (default: h264)\n"
-              << "  --display auto|sdl|off            Display mode (default: auto)\n"
+              << "  --display off|sdl                 Display mode (default: off)\n"
+              << "  --sdl-driver auto|wayland|kmsdrm|x11|dummy\n"
+              << "  --cam-fmt auto|yuyv|mjpeg         Preferred V4L2 pixel format (default: auto)\n"
               << "\nModel:\n"
               << "  --weights path                    Path to hhb.bm (default: cpu_model/hhb.bm)\n"
               << "  --imgsz 640x384                  Model image size (fixed)\n"
-              << "  --rvv on|off                     Enable RVV preprocessing path (default: off)\n"
+              << "  --pp sw|rvv                      Preprocess backend (default: sw)\n"
+              << "  --rvv on|off                     [Compat] Map to --pp (on=>rvv)\n"
               << "  --conf threshold                  Confidence threshold (default: 0.25)\n"
               << "  --nms threshold                   NMS IOU threshold (default: 0.45)\n"
               << "\nThreading:\n"
@@ -49,13 +62,93 @@ void print_usage(const char* program) {
               << "  --perf-interval ms                Performance interval (default: 1000)\n"
               << "  --perf-json path                  JSONL metrics output\n"
               << "  --rt on|off                       Real-time priority (default: off)\n"
+              << "  --display-probe path.ppm          Save first displayed frame to file\n"
+              << "  --watchdog-sec SEC                Abort if no progress for SEC seconds (0=off)\n"
               << "  --test                           Run simple single-threaded test\n"
               << "\nOther:\n"
               << "  --log-level info|debug|warn|error Log level (default: info)\n"
               << "  --help                            Show this help\n";
 }
 
-std::vector<int> parse_cpu_list(const std::string& str) {
+extern "C" {
+#include <libavutil/log.h>
+}
+
+namespace {
+
+constexpr int kCliUserError = 2;
+
+/** @brief Print error, usage, and exit with CLI failure code. */
+[[noreturn]] void cli_error(const char* program, const std::string& opt, const std::string& message) {
+    if (!message.empty()) {
+        std::cerr << message << std::endl;
+    }
+    print_usage(program);
+    std::exit(kCliUserError);
+}
+
+/** @brief Parse integer argument with bounds checking. */
+int parse_int_option(const char* program, const std::string& opt, const std::string& value,
+                     int min_value, int max_value) {
+    if (value.empty()) {
+        cli_error(program, opt, "Missing value for " + opt);
+    }
+    try {
+        size_t idx = 0;
+        long long parsed = std::stoll(value, &idx, 10);
+        if (idx != value.size()) {
+            cli_error(program, opt, "Invalid integer for " + opt + ": " + value);
+        }
+        if (parsed < static_cast<long long>(min_value) || parsed > static_cast<long long>(max_value)) {
+            std::ostringstream oss;
+            oss << "Value for " << opt << " must be between " << min_value << " and " << max_value;
+            cli_error(program, opt, oss.str());
+        }
+        return static_cast<int>(parsed);
+    } catch (const std::exception&) {
+        cli_error(program, opt, "Invalid integer for " + opt + ": " + value);
+    }
+    return min_value; // Unreachable, keeps compiler happy
+}
+
+/** @brief Parse float argument with bounds checking. */
+float parse_float_option(const char* program, const std::string& opt, const std::string& value,
+                         float min_value, float max_value) {
+    if (value.empty()) {
+        cli_error(program, opt, "Missing value for " + opt);
+    }
+    try {
+        size_t idx = 0;
+        float parsed = std::stof(value, &idx);
+        if (idx != value.size()) {
+            cli_error(program, opt, "Invalid float for " + opt + ": " + value);
+        }
+        if (parsed < min_value || parsed > max_value) {
+            std::ostringstream oss;
+            oss << "Value for " << opt << " must be between " << min_value << " and " << max_value;
+            cli_error(program, opt, oss.str());
+        }
+        return parsed;
+    } catch (const std::exception&) {
+        cli_error(program, opt, "Invalid float for " + opt + ": " + value);
+    }
+    return min_value; // Unreachable, keeps compiler happy
+}
+
+/** @brief Fetch next CLI token, erroring if absent. */
+std::string require_value(int& index, int argc, char* argv[], const std::string& opt, const char* program) {
+    if (index + 1 >= argc) {
+        cli_error(program, opt, "Missing value for " + opt);
+    }
+    return argv[++index];
+}
+
+} // namespace
+
+/**
+ * @brief Parse CPU affinity list (comma-separated) or "auto" sentinel.
+ */
+std::vector<int> parse_cpu_list(const std::string& str, const char* opt, const char* program) {
     std::vector<int> cpus;
     if (str == "auto") {
         return cpus;  // Empty means auto-detect
@@ -64,18 +157,25 @@ std::vector<int> parse_cpu_list(const std::string& str) {
     std::stringstream ss(str);
     std::string token;
     while (std::getline(ss, token, ',')) {
-        try {
-            cpus.push_back(std::stoi(token));
-        } catch (...) {
-            std::cerr << "Invalid CPU number: " << token << std::endl;
-        }
+        cpus.push_back(parse_int_option(program, opt, token, 0, 1023));
     }
     return cpus;
 }
 
+/** @brief Lowercase helper preserving original string immutability. */
+static std::string to_lower_copy(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return static_cast<char>(std::tolower(c)); });
+    return s;
+}
+
+/**
+ * @brief Parse CLI arguments and populate PipelineConfig struct.
+ * @throws Exits process via cli_error on invalid input.
+ */
 PipelineConfig parse_args(int argc, char* argv[]) {
     PipelineConfig config;
     bool test_mode = false;
+    const char* program = argv[0];
     
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
@@ -84,107 +184,140 @@ PipelineConfig parse_args(int argc, char* argv[]) {
             print_usage(argv[0]);
             exit(0);
         }
-        
-        // Get next argument value
-        auto get_value = [&]() -> std::string {
-            if (i + 1 >= argc) {
-                std::cerr << "Missing value for " << arg << std::endl;
-                exit(1);
-            }
-            return argv[++i];
-        };
-        
+
         if (arg == "--src") {
-            config.source = get_value();
+            config.source = require_value(i, argc, argv, arg, program);
             // Treat bare path as file:/path to match CLI contract
             if (config.source.find(":") == std::string::npos && config.source.rfind("/dev/video", 0) != 0) {
                 config.source = std::string("file:") + config.source;
             }
         } else if (arg == "--out") {
-            config.output_path = get_value();
+            config.output_path = require_value(i, argc, argv, arg, program);
         } else if (arg == "--enc") {
-            config.encoder = get_value();
+            config.encoder = require_value(i, argc, argv, arg, program);
         } else if (arg == "--display") {
-            config.display_mode = get_value();
+            std::string v = to_lower_copy(require_value(i, argc, argv, arg, program));
+            if (v != "off" && v != "sdl") {
+                cli_error(program, arg, "Invalid --display value: " + v + " (use off|sdl)");
+            }
+            config.display_mode = v;
+        } else if (arg == "--sdl-driver") {
+            std::string v = to_lower_copy(require_value(i, argc, argv, arg, program));
+            if (v != "auto" && v != "wayland" && v != "kmsdrm" && v != "x11" && v != "dummy") {
+                cli_error(program, arg, "Invalid --sdl-driver value: " + v);
+            }
+            config.sdl_driver = v;
+        } else if (arg == "--cam-fmt") {
+            std::string v = to_lower_copy(require_value(i, argc, argv, arg, program));
+            if (v != "auto" && v != "yuyv" && v != "mjpeg") {
+                cli_error(program, arg, "Invalid --cam-fmt value: " + v + " (use auto|yuyv|mjpeg)");
+            }
+            config.cam_format = v;
         } else if (arg == "--weights") {
-            config.weights_path = get_value();
+            config.weights_path = require_value(i, argc, argv, arg, program);
         } else if (arg == "--imgsz") {
-            std::string val = get_value();
+            std::string val = require_value(i, argc, argv, arg, program);
             auto x = val.find('x');
             if (x == std::string::npos) {
-                std::cerr << "Invalid --imgsz format, expected WxH (e.g., 640x384)" << std::endl;
-                exit(1);
+                cli_error(program, arg, "Invalid --imgsz format, expected WxH (e.g., 640x384)");
             }
-            int w = std::stoi(val.substr(0, x));
-            int h = std::stoi(val.substr(x + 1));
+            int w = parse_int_option(program, arg, val.substr(0, x), 1, std::numeric_limits<int>::max());
+            int h = parse_int_option(program, arg, val.substr(x + 1), 1, std::numeric_limits<int>::max());
             if (w != MODEL_WIDTH || h != MODEL_HEIGHT) {
-                std::cerr << "--imgsz must be exactly 640x384 for this model" << std::endl;
-                exit(1);
+                cli_error(program, arg, "--imgsz must be exactly 640x384 for this model");
             }
             config.img_width = w;
             config.img_height = h;
+        } else if (arg == "--pp") {
+            std::string v = require_value(i, argc, argv, arg, program);
+            if (v == "sw") config.pp_mode = PreprocMode::SW;
+            else if (v == "rvv") config.pp_mode = PreprocMode::RVV;
+            else { cli_error(program, arg, "Invalid --pp value: " + v + " (use sw|rvv)"); }
         } else if (arg == "--rvv") {
-            std::string v = get_value();
+            std::string v = require_value(i, argc, argv, arg, program);
             if (v != "on" && v != "off") {
-                std::cerr << "--rvv must be 'on' or 'off'" << std::endl;
-                exit(1);
+                cli_error(program, arg, "--rvv must be 'on' or 'off'");
             }
             config.rvv = (v == "on");
+            // Map compatibility flag to pp_mode
+            if (config.rvv) config.pp_mode = PreprocMode::RVV; else config.pp_mode = PreprocMode::SW;
         } else if (arg == "--conf") {
-            config.conf_threshold = std::stof(get_value());
+            config.conf_threshold = parse_float_option(program, arg, require_value(i, argc, argv, arg, program), 0.0f, 1.0f);
         } else if (arg == "--nms") {
-            config.nms_threshold = std::stof(get_value());
+            config.nms_threshold = parse_float_option(program, arg, require_value(i, argc, argv, arg, program), 0.0f, 1.0f);
         } else if (arg == "--nn-workers") {
-            config.nn_workers = std::stoi(get_value());
+            config.nn_workers = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 1, 32);
         } else if (arg == "--nn-cpus") {
-            std::string val = get_value();
+            std::string val = require_value(i, argc, argv, arg, program);
             if (val == "auto") {
                 config.auto_cpu_detect = true;
                 config.nn_cpus.clear();
             } else {
                 config.auto_cpu_detect = false;
-                config.nn_cpus = parse_cpu_list(val);
+                config.nn_cpus = parse_cpu_list(val, "--nn-cpus", program);
             }
         } else if (arg == "--io-cpus") {
-            std::string val = get_value();
+            std::string val = require_value(i, argc, argv, arg, program);
             if (val != "auto") {
-                config.io_cpus = parse_cpu_list(val);
+                config.io_cpus = parse_cpu_list(val, "--io-cpus", program);
             }
         } else if (arg == "--queue-cap") {
-            config.queue_capacity = std::stoi(get_value());
+            config.queue_capacity = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 1, 1024);
         } else if (arg == "--drop") {
-            config.drop_policy = get_value();
+            config.drop_policy = require_value(i, argc, argv, arg, program);
             // Parse watermark
             size_t pos = config.drop_policy.find("wm=");
             if (pos != std::string::npos) {
-                config.drop_watermark = std::stoi(config.drop_policy.substr(pos + 3));
+                config.drop_watermark = parse_int_option(program, arg, config.drop_policy.substr(pos + 3), 0, 1024);
             }
         } else if (arg == "--perf-interval") {
-            config.perf_interval_ms = std::stoi(get_value());
+            config.perf_interval_ms = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 10, 600000);
         } else if (arg == "--perf-json") {
-            config.perf_json_path = get_value();
+            config.perf_json_path = require_value(i, argc, argv, arg, program);
         } else if (arg == "--rt") {
-            config.use_rt_priority = (get_value() == "on");
+            std::string val = to_lower_copy(require_value(i, argc, argv, arg, program));
+            if (val != "on" && val != "off") {
+                cli_error(program, arg, "--rt must be on or off");
+            }
+            config.use_rt_priority = (val == "on");
+        } else if (arg == "--display-probe") {
+            config.display_probe_path = require_value(i, argc, argv, arg, program);
+            if (config.display_probe_path.empty()) {
+                cli_error(program, arg, "--display-probe requires a non-empty path");
+            }
+        } else if (arg == "--watchdog-sec") {
+            config.watchdog_sec = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 0, 3600);
         } else if (arg == "--test") {
             test_mode = true;
         } else if (arg == "--max-frames") {
-            config.max_frames = std::stoi(get_value());
+            config.max_frames = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 0, std::numeric_limits<int>::max());
         } else if (arg == "--log-level") {
-            config.log_level = get_value();
+            config.log_level = require_value(i, argc, argv, arg, program);
         } else {
-            std::cerr << "Unknown argument: " << arg << std::endl;
-            print_usage(argv[0]);
-            exit(1);
+            cli_error(program, arg, "Unknown argument: " + arg);
         }
     }
     
     // Validate required arguments
     if (config.source.empty()) {
-        std::cerr << "Error: --src is required\n";
-        print_usage(argv[0]);
-        exit(1);
+        cli_error(program, "--src", "Error: --src is required");
     }
-    
+
+    if (config.source.rfind("v4l2:", 0) == 0 && !config.cam_format.empty() && config.cam_format != "auto") {
+        if (config.source.find('?') == std::string::npos) {
+            config.source += "?fmt=" + config.cam_format;
+        } else {
+            config.source += "&fmt=" + config.cam_format;
+        }
+    }
+
+#ifndef HAVE_SDL2
+    if (config.display_mode == "sdl") {
+        std::cerr << "[display] SDL support not built into this binary; forcing --display=off" << std::endl;
+        config.display_mode = "off";
+    }
+#endif
+
     if (test_mode) {
         // Encode test mode selection via log_level flag to avoid changing struct
         if (config.log_level.empty()) config.log_level = "info";
@@ -194,6 +327,11 @@ PipelineConfig parse_args(int argc, char* argv[]) {
     return config;
 }
 
+/**
+ * @brief Lightweight single-threaded test harness for sanity checks.
+ *
+ * Exercises capture → preprocess → engine without full pipeline fan-out.
+ */
 void run_simple_test(const PipelineConfig& config) {
     std::cout << "Running simple test mode (single-threaded)..." << std::endl;
     
@@ -354,11 +492,16 @@ void run_simple_test(const PipelineConfig& config) {
               << "  Average FPS: " << std::fixed << std::setprecision(2) << avg_fps << std::endl;
 }
 
+/**
+ * @brief Program entry: parse CLI, optionally run test, launch full pipeline.
+ */
 int main(int argc, char* argv[]) {
     // Set up signal handlers
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
     signal(SIGHUP, signal_handler); // handle SSH session termination gracefully
+    // Reduce FFmpeg log verbosity by default
+    av_log_set_level(AV_LOG_ERROR);
     
     // Parse command line arguments
     PipelineConfig config = parse_args(argc, argv);

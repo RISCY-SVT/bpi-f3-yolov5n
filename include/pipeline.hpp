@@ -16,35 +16,74 @@
 
 namespace yolov5 {
 
-// Thread-safe queue for pipeline stages
+/**
+ * @file pipeline.hpp
+ * @brief Declares pipeline queues, frame reorderer, and executor orchestrating threads.
+ *
+ * Each stage in the pipeline trades ownership of frames through bounded queues
+ * while keeping frame order and metrics reporting compliant with TechSpec.
+ */
+
+/**
+ * @brief Thread-safe bounded queue used between pipeline stages.
+ * @threading Multiple producers and consumers push/pop concurrently.
+ * @ownership Queue owns its elements until popped.
+ */
 template<typename T>
 class ThreadSafeQueue {
 public:
+    /**
+     * @brief Construct queue with bounded capacity.
+     * @param capacity Maximum number of elements before producers block.
+     */
     ThreadSafeQueue(size_t capacity = 8);
-    
-    // Push item to queue (may block if full)
+
+    /**
+     * @brief Push an item into the queue.
+     * @param item Element moved into storage.
+     * @param wait Block until capacity frees when true; otherwise fail fast.
+     */
     bool push(T item, bool wait = true);
-    
-    // Pop item from queue (may block if empty)
+
+    /**
+     * @brief Pop next item from queue.
+     * @param item Destination reference populated when available.
+     * @param wait Block for data when true; otherwise fail fast on empty queue.
+     */
     bool pop(T& item, bool wait = true);
-    
-    // Try to push without blocking
+
+    /**
+     * @brief Attempt non-blocking push.
+     */
     bool tryPush(const T& item);
-    
-    // Try to pop without blocking
+
+    /**
+     * @brief Attempt non-blocking pop.
+     */
     bool tryPop(T& item);
-    
-    // Get current size
+
+    /**
+     * @brief Current queue size.
+     */
     size_t size() const;
-    
-    // Check if empty/full
+
+    /**
+     * @brief Whether the queue has no elements.
+     */
     bool empty() const;
+    /**
+     * @brief Whether the queue reached capacity.
+     */
     bool full() const;
-    
-    // Clear queue
+
+    /**
+     * @brief Remove all elements without waking producers/consumers.
+     */
     void clear();
-    
-    // Stop the queue (unblock all waiting threads)
+
+    /**
+     * @brief Stop queue and wake all waiters so they can exit gracefully.
+     */
     void stop();
     
 private:
@@ -141,24 +180,42 @@ void ThreadSafeQueue<T>::stop() {
     not_full_.notify_all();
 }
 
-// Frame reorderer to ensure output order
+/**
+ * @brief Ensures processed frames exit in monotonically increasing order.
+ * @threading Owned by overlay/output thread; fed by postprocess thread.
+ * @ownership Holds `ProcessedFrame` instances until their frame_id is expected.
+ */
 class FrameReorderer {
 public:
     FrameReorderer();
-    
-    // Add processed frame
+
+    /**
+     * @brief Add processed frame awaiting ordered emission.
+     * @param frame Frame tagged with source frame_id.
+     */
     void addFrame(const ProcessedFrame& frame);
-    
-    // Mark frame as dropped
+
+    /**
+     * @brief Mark frame id as intentionally dropped by upstream logic.
+     * @param frame_id Identifier to skip during ordering.
+     */
     void markDropped(uint64_t frame_id);
-    
-    // Get next frame in order (blocks if not ready)
+
+    /**
+     * @brief Get next frame in monotonically increasing order.
+     * @param frame Output container receiving the frame.
+     * @return True when a frame is returned, false after stop().
+     */
     bool getNextFrame(ProcessedFrame& frame);
-    
-    // Reset reorderer
+
+    /**
+     * @brief Reset internal buffers and expected id to zero.
+     */
     void reset();
-    
-    // Stop reorderer
+
+    /**
+     * @brief Wake waiters and prevent further blocking operations.
+     */
     void stop();
     
 private:
@@ -170,22 +227,35 @@ private:
     std::atomic<bool> stopped_;
 };
 
-// Video processing pipeline
+/**
+ * @brief Orchestrates capture → preprocess → inference → post → overlay → output.
+ * @threading Owns multiple stage threads plus N inference workers.
+ * @ownership Owns capture engines, queues, metrics writer, and display.
+ */
 class Pipeline {
 public:
     Pipeline(const PipelineConfig& config);
     ~Pipeline();
-    
-    // Start pipeline processing
+
+    /**
+     * @brief Start all pipeline threads and enqueue first actions.
+     * @return True when all stages initialize successfully.
+     */
     bool start();
-    
-    // Stop pipeline
+
+    /**
+     * @brief Signal all stages to exit and wake blocked threads.
+     */
     void stop();
-    
-    // Wait for pipeline to complete
+
+    /**
+     * @brief Join stage threads; safe to call multiple times.
+     */
     void join();
-    
-    // Get performance metrics
+
+    /**
+     * @brief Fetch latest metrics snapshot (protected by mutex).
+     */
     PerfMetrics getMetrics() const;
     uint64_t processedCount() const { return out_count_.load(); }
     uint64_t inCount() const { return in_count_.load(); }
@@ -194,20 +264,31 @@ public:
     
 private:
     // Pipeline stages (run in separate threads)
+    /** @brief Capture thread pulling frames from FFmpeg/V4L2 sources. */
     void captureThread();
+    /** @brief Preprocess thread executing resize/letterbox and RVV conversions. */
     void preprocessThread();
+    /** @brief Scheduler assigns preprocessed frames to inference workers. */
     void schedulerThread();
+    /** @brief Inference worker executing CSI-NN2 session. */
     void inferenceWorker(int worker_id);
+    /** @brief Postprocess thread aggregates detections and prepares overlays. */
     void postprocessThread();
+    /** @brief Overlay thread draws bounding boxes and composes display frames. */
     void overlayThread();
+    /** @brief Output thread handles encoding, file sink, and display submission. */
     void outputThread();
+    /** @brief Metrics thread samples queues and writes JSONL metrics. */
     void metricsThread();
     
     // CPU affinity helpers
+    /** @brief Apply pthread affinity mask for current stage. */
     void setCPUAffinity(const std::vector<int>& cpus);
+    /** @brief Run micro-benchmark to select faster CPU cluster when auto. */
     void runCPUBenchmark();
-    
+
     // Frame dropping logic
+    /** @brief Evaluate drop policy against current queue pressure. */
     bool shouldDropFrame(uint64_t frame_id);
     
     // Configuration

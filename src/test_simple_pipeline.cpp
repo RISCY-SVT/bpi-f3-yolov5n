@@ -9,9 +9,16 @@
 #include <chrono>
 #include <iomanip>
 
+/**
+ * @file test_simple_pipeline.cpp
+ * @brief CLI utility exercising capture-less pipeline for regression tests.
+ */
+
 using namespace yolov5;
 
-// Simple PPM image reader
+/**
+ * @brief Load binary P6 PPM file and convert to BGR Mat.
+ */
 bool readPPM(const std::string& filename, cv::Mat& image) {
     std::ifstream file(filename, std::ios::binary);
     if (!file) {
@@ -39,7 +46,9 @@ bool readPPM(const std::string& filename, cv::Mat& image) {
     return true;
 }
 
-// Simple PPM writer
+/**
+ * @brief Write BGR Mat into binary P6 PPM file.
+ */
 bool writePPM(const std::string& filename, const cv::Mat& image) {
     std::ofstream file(filename, std::ios::binary);
     if (!file) {
@@ -59,7 +68,9 @@ bool writePPM(const std::string& filename, const cv::Mat& image) {
     return true;
 }
 
-// Draw bounding box
+/**
+ * @brief Draw detection bounding box onto original-resolution image.
+ */
 void drawBox(cv::Mat& image, const Detection& det, float scale, int dx, int dy) {
     // Scale back to original image coordinates
     int x1 = (det.x1 - dx) / scale;
@@ -92,6 +103,9 @@ void drawBox(cv::Mat& image, const Detection& det, float scale, int dx, int dy) 
     }
 }
 
+/**
+ * @brief Test entry: preprocess single PPM, run inference, and dump annotated output.
+ */
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         std::cout << "Usage: " << argv[0] << " <input.ppm> <output.ppm>" << std::endl;

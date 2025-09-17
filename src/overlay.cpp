@@ -1,8 +1,14 @@
 #include "engine.hpp"
 #include <opencv2/imgproc.hpp>
 
+/**
+ * @file overlay.cpp
+ * @brief Rendering helpers drawing detection overlays onto BGR frames.
+ */
+
 namespace yolov5 {
 
+/** @brief Deterministic palette cycling by class id. */
 static cv::Scalar color_for(int id) {
     static const cv::Scalar palette[] = {
         {255, 0, 0}, {0,255,0}, {0,0,255}, {255,255,0}, {255,0,255}, {0,255,255}
@@ -10,6 +16,11 @@ static cv::Scalar color_for(int id) {
     return palette[id % (sizeof(palette)/sizeof(palette[0]))];
 }
 
+/**
+ * @brief Draw bounding boxes and labels onto BGR frame.
+ *
+ * Coordinates are assumed to already be de-letterboxed back in capture space.
+ */
 void draw_detections(cv::Mat& frame_bgr, const std::vector<Detection>& dets) {
     for (const auto& d : dets) {
         cv::Rect r(cv::Point((int)d.x1, (int)d.y1), cv::Point((int)d.x2, (int)d.y2));
@@ -23,4 +34,3 @@ void draw_detections(cv::Mat& frame_bgr, const std::vector<Detection>& dets) {
 }
 
 } // namespace yolov5
-

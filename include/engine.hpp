@@ -12,55 +12,79 @@ struct csinn_tensor;
 
 namespace yolov5 {
 
-// Abstract inference engine interface
+/**
+ * @file engine.hpp
+ * @brief Declares the inference engine abstraction and CSI-NN2 implementation.
+ *
+ * Engines convert preprocessed model inputs into detection vectors and are
+ * owned by dedicated inference worker threads. CSI-NN2 bridges to HHB-generated
+ * YOLOv5n networks running entirely from in-memory binaries.
+ */
+
+/**
+ * @brief Abstract inference engine used by pipeline workers.
+ * @threading One instance per inference worker thread.
+ * @lifecycle init(weights) → repeated infer() → release().
+ */
 class IEngine {
 public:
     virtual ~IEngine() = default;
-    
-    // Initialize model from weights file
+
+    /**
+     * @brief Initialize engine state from compiled HHB weights.
+     * @param weights_path Path to `cpu_model/hhb.bm` staged on device/host.
+     * @return True if the session is ready for inference.
+     */
     virtual bool init(const std::string& weights_path) = 0;
-    
-    // Run inference on preprocessed input
-    // Input: NCHW FP16 data (1x3x384x640)
-    // Output: Vector of detections
+
+    /**
+     * @brief Run inference on a single preprocessed tensor.
+     * @param input_data Pointer to FP16/FP32 NCHW buffer sized for 1x3x384x640.
+     * @return Vector of filtered detections (already NMSed).
+     */
     virtual std::vector<Detection> infer(void* input_data) = 0;
-    
-    // Get model input dimensions
+
+    /**
+     * @brief Report static model input dimensions.
+     */
     virtual void getInputDims(int& batch, int& channels, int& height, int& width) const = 0;
-    
-    // Release resources
+
+    /**
+     * @brief Release engine-owned buffers and sessions.
+     */
     virtual void release() = 0;
-    
-    // Check if engine is initialized
+
+    /**
+     * @brief Signal whether init() succeeded and resources are live.
+     */
     virtual bool isInitialized() const = 0;
 };
 
-// CSI-NN2 implementation of inference engine
+/**
+ * @brief CSI-NN2 backed engine for YOLOv5n HHB binaries.
+ * @threading One per pipeline worker thread; manages a dedicated `csinn_session`.
+ * @ownership Owns model session, input tensor buffers, and conversions.
+ */
 class EngineCSI : public IEngine {
 public:
     EngineCSI();
     ~EngineCSI() override;
-    
+
     bool init(const std::string& weights_path) override;
     std::vector<Detection> infer(void* input_data) override;
     void getInputDims(int& batch, int& channels, int& height, int& width) const override;
     void release() override;
     bool isInitialized() const override;
-    
+
 private:
-    // CSI-NN2 specific implementation
     class Impl;
-    std::unique_ptr<Impl> pImpl;
-    
-    // YOLOv5 specific post-processing
-    std::vector<Detection> postprocess(void* output_data);
-    
-    // Non-maximum suppression
-    std::vector<Detection> nms(std::vector<Detection>& detections, 
-                                float conf_thresh, float iou_thresh);
+    std::unique_ptr<Impl> pImpl; //!< Hides CSI-NN2 specific state.
 };
 
-// Factory function to create engine
+/**
+ * @brief Factory for engine implementations (currently CSI-NN2 only).
+ * @param type Engine identifier such as "csi".
+ */
 std::unique_ptr<IEngine> createEngine(const std::string& type = "csi");
 
 } // namespace yolov5
