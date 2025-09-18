@@ -190,8 +190,6 @@ static void convertTensorToFloat(const csinn_tensor* src, int index, csinn_sessi
                                  std::vector<float>& dst) {
     const size_t count = tensorElementCount(src);
     dst.resize(count);
-    std::cout << "[infer] output index=" << index << " count=" << count
-              << " dtype=" << src->dtype << std::endl;
     switch (src->dtype) {
         case CSINN_DTYPE_FLOAT32: {
             const float* data = static_cast<const float*>(src->data);
@@ -227,8 +225,8 @@ static void convertTensorToFloat(const csinn_tensor* src, int index, csinn_sessi
  */
 class EngineCSI::Impl {
 public:
-    Impl() : session_(nullptr), input_tensor_(nullptr), initialized_(false), 
-             conf_thresh_(0.25f), nms_thresh_(0.45f) {}
+    Impl() : session_(nullptr), input_tensor_(nullptr), initialized_(false),
+             conf_thresh_(0.25f), nms_thresh_(0.45f), output_count_(0) {}
     
     ~Impl() {
         release();
@@ -271,6 +269,31 @@ public:
         input_tensor_->data = input_data;
         csinn_free_tensor(temp_input);
         
+        output_count_ = csinn_get_output_number(session_);
+        if (output_count_ <= 0) {
+            std::cerr << "[ERROR] Invalid output tensor count" << std::endl;
+            release();
+            return false;
+        }
+        output_buffers_.assign(output_count_, {});
+        cached_outputs_.assign(output_count_, nullptr);
+        float_outputs_.assign(output_count_, nullptr);
+        outputs_configured_.assign(output_count_, false);
+        for (int i = 0; i < output_count_; ++i) {
+            cached_outputs_[i] = csinn_alloc_tensor(nullptr);
+            if (!cached_outputs_[i]) {
+                std::cerr << "[ERROR] Failed to allocate cached output tensor" << std::endl;
+                release();
+                return false;
+            }
+            float_outputs_[i] = csinn_alloc_tensor(nullptr);
+            if (!float_outputs_[i]) {
+                std::cerr << "[ERROR] Failed to allocate float output view" << std::endl;
+                release();
+                return false;
+            }
+        }
+        
         initialized_ = true;
         std::cout << "[INFO] Model initialized successfully" << std::endl;
         return true;
@@ -294,10 +317,27 @@ public:
         output_buffers_.clear();
         for (auto* tensor : cached_outputs_) {
             if (tensor) {
+                if (tensor->data) {
+                    shl_mem_free(tensor->data);
+                    tensor->data = nullptr;
+                }
                 csinn_free_tensor(tensor);
             }
         }
         cached_outputs_.clear();
+        for (auto* tensor : float_outputs_) {
+            if (tensor) {
+                tensor->data = nullptr;
+                if (tensor->qinfo) {
+                    shl_mem_free(tensor->qinfo);
+                    tensor->qinfo = nullptr;
+                }
+                csinn_free_tensor(tensor);
+            }
+        }
+        float_outputs_.clear();
+        outputs_configured_.clear();
+        output_count_ = 0;
         initialized_ = false;
     }
     
@@ -334,35 +374,37 @@ public:
         csinn_update_input_and_run(&input_tensor_, session_);
         
         // Get outputs and convert to FP32
-        int output_num = csinn_get_output_number(session_);
-        if (output_buffers_.size() < static_cast<size_t>(output_num)) {
-            output_buffers_.resize(output_num);
-        }
+        const int output_num = output_count_;
         std::vector<struct csinn_tensor*> outputs;
         outputs.reserve(output_num);
-        for (int i = 0; i < output_num; i++) {
-            struct csinn_tensor* output = csinn_alloc_tensor(nullptr);
+        for (int i = 0; i < output_num; ++i) {
+            struct csinn_tensor* output = cached_outputs_[i];
             csinn_get_output(i, output, session_);
-
-            struct csinn_tensor* ret = csinn_alloc_tensor(nullptr);
-            csinn_tensor_copy(ret, output);
-            if (ret->qinfo) {
-                shl_mem_free(ret->qinfo);
-                ret->qinfo = nullptr;
+            const size_t count = tensorElementCount(output);
+            if (output_buffers_[i].size() != count) {
+                output_buffers_[i].resize(count);
+            }
+            if (!outputs_configured_[i]) {
+                csinn_tensor_copy(float_outputs_[i], output);
+                if (float_outputs_[i]->qinfo) {
+                    shl_mem_free(float_outputs_[i]->qinfo);
+                    float_outputs_[i]->qinfo = nullptr;
+                }
+                float_outputs_[i]->dtype = CSINN_DTYPE_FLOAT32;
+                float_outputs_[i]->quant_channel = 0;
+                outputs_configured_[i] = true;
             }
             convertTensorToFloat(output, i, session_, output_buffers_[i]);
-            ret->dtype = CSINN_DTYPE_FLOAT32;
-            ret->quant_channel = 0;
-            ret->data = output_buffers_[i].data();
-            outputs.push_back(ret);
-            csinn_free_tensor(output);
+            struct csinn_tensor* float_view = float_outputs_[i];
+            float_view->data = output_buffers_[i].data();
+            outputs.push_back(float_view);
+            if (output->data) {
+                shl_mem_free(output->data);
+                output->data = nullptr;
+            }
         }
 
         std::vector<Detection> detections = postprocess(outputs.data(), output_num, conf_thresh, nms_thresh);
-
-        for (auto* tensor : outputs) {
-            csinn_free_tensor(tensor);
-        }
 
         return detections;
     }
@@ -423,6 +465,9 @@ private:
     float nms_thresh_;
     std::vector<std::vector<float>> output_buffers_;
     std::vector<struct csinn_tensor*> cached_outputs_;
+    std::vector<struct csinn_tensor*> float_outputs_;
+    std::vector<bool> outputs_configured_;
+    int output_count_;
 };
 
 // EngineCSI implementation

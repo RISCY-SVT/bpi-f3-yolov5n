@@ -61,6 +61,7 @@ void print_usage(const char* program) {
               << "  --drop front:wm=N|new:wm=N        Drop policy (default: front:wm=3)\n"
               << "  --perf-interval ms                Performance interval (default: 1000)\n"
               << "  --perf-json path                  JSONL metrics output\n"
+              << "  --mem-json path                   RSS sampler JSONL output (optional)\n"
               << "  --rt on|off                       Real-time priority (default: off)\n"
               << "  --display-probe path.ppm          Save first displayed frame to file\n"
               << "  --watchdog-sec SEC                Abort if no progress for SEC seconds (0=off)\n"
@@ -274,6 +275,8 @@ PipelineConfig parse_args(int argc, char* argv[]) {
             config.perf_interval_ms = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 10, 600000);
         } else if (arg == "--perf-json") {
             config.perf_json_path = require_value(i, argc, argv, arg, program);
+        } else if (arg == "--mem-json") {
+            config.mem_json_path = require_value(i, argc, argv, arg, program);
         } else if (arg == "--rt") {
             std::string val = to_lower_copy(require_value(i, argc, argv, arg, program));
             if (val != "on" && val != "off") {

@@ -114,6 +114,7 @@ struct PipelineConfig {
     // Performance
     int perf_interval_ms;         // Performance reporting interval
     std::string perf_json_path;   // JSONL metrics output path
+    std::string mem_json_path;    // Optional RSS logger output path
     
     // Misc
     std::string log_level;        // info, debug, warn, error
@@ -144,6 +145,7 @@ struct PipelineConfig {
         drop_watermark(3),
         perf_interval_ms(1000),
         perf_json_path(""),
+        mem_json_path(""),
         log_level("info"),
         use_rt_priority(false),
         max_frames(-1),

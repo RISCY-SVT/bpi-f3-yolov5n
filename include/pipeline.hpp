@@ -321,6 +321,7 @@ private:
     std::thread overlay_thread_;
     std::thread output_thread_;
     std::thread metrics_thread_;
+    std::thread mem_logger_thread_;
     
     // Control
     std::atomic<bool> running_;
@@ -328,6 +329,7 @@ private:
     std::atomic<uint64_t> inflight_{0};
     std::atomic<uint64_t> frame_counter_;
     std::atomic<uint64_t> dropped_frames_;
+    std::atomic<bool> mem_logger_stop_{false};
     
     // Metrics
     mutable std::mutex metrics_mutex_;

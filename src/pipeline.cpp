@@ -158,6 +158,54 @@ static void save_display_probe(const std::shared_ptr<DisplayState>& state, const
     std::cout << "[display] probe saved to " << state->probe_path << std::endl;
 }
 
+static bool read_self_vm_stats(size_t& rss_kb, size_t& vm_kb) {
+    std::ifstream status("/proc/self/status");
+    if (!status) {
+        return false;
+    }
+    std::string line;
+    bool rss_found = false;
+    bool vm_found = false;
+    while (std::getline(status, line)) {
+        if (!rss_found && line.rfind("VmRSS:", 0) == 0) {
+            std::istringstream iss(line);
+            std::string key;
+            size_t value = 0;
+            std::string unit;
+            if (iss >> key >> value >> unit) {
+                rss_kb = value;
+                rss_found = true;
+            }
+        } else if (!vm_found && line.rfind("VmSize:", 0) == 0) {
+            std::istringstream iss(line);
+            std::string key;
+            size_t value = 0;
+            std::string unit;
+            if (iss >> key >> value >> unit) {
+                vm_kb = value;
+                vm_found = true;
+            }
+        }
+        if (rss_found && vm_found) {
+            break;
+        }
+    }
+    return rss_found && vm_found;
+}
+
+static void ensure_parent_dir(const std::string& path) {
+    if (path.empty()) return;
+    try {
+        std::filesystem::path p(path);
+        auto parent = p.parent_path();
+        if (!parent.empty()) {
+            std::filesystem::create_directories(parent);
+        }
+    } catch (const std::exception& ex) {
+        std::cerr << "[memlog] failed to create directories for '" << path << "': " << ex.what() << std::endl;
+    }
+}
+
 } // namespace
 
 FrameReorderer::FrameReorderer() : expected_id_(0), stopped_(false) {}
@@ -579,6 +627,34 @@ bool Pipeline::start() {
     if (!config_.perf_json_path.empty()) {
         metrics_writer_ = std::make_unique<JSONLMetricsWriter>(config_.perf_json_path);
     }
+    if (!config_.mem_json_path.empty()) {
+        ensure_parent_dir(config_.mem_json_path);
+        mem_logger_stop_.store(false);
+        mem_logger_thread_ = std::thread([this, path = config_.mem_json_path]() {
+            std::ofstream ofs(path, std::ios::out | std::ios::trunc);
+            if (!ofs) {
+                std::cerr << "[memlog] failed to open '" << path << "' for writing" << std::endl;
+                return;
+            }
+            while (!mem_logger_stop_.load()) {
+                size_t rss_kb = 0;
+                size_t vm_kb = 0;
+                if (read_self_vm_stats(rss_kb, vm_kb)) {
+                    auto now = std::chrono::system_clock::now();
+                    int64_t ts_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+                    ofs << "{\"ts_ms\":" << ts_ms
+                        << ",\"rss_kb\":" << rss_kb
+                        << ",\"vm_kb\":" << vm_kb
+                        << ",\"note\":\"rss\"}"
+                        << std::endl;
+                }
+                for (int i = 0; i < 10; ++i) {
+                    if (mem_logger_stop_.load()) break;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                }
+            }
+        });
+    }
     // Launch threads
     capture_thread_ = std::thread(&Pipeline::captureThread, this);
     preprocess_thread_ = std::thread(&Pipeline::preprocessThread, this);
@@ -599,6 +675,7 @@ bool Pipeline::start() {
 void Pipeline::stop() {
     if (!running_) return;
     running_ = false;
+    mem_logger_stop_.store(true);
     capture_queue_.stop();
     preprocess_queue_.stop();
     inference_queue_.stop();
@@ -624,6 +701,7 @@ void Pipeline::join() {
     join_t(preprocess_thread_);
     join_t(capture_thread_);
     join_t(metrics_thread_);
+    join_t(mem_logger_thread_);
     if (auto state = get_state(this)) {
         if (state->watchdog_thread.joinable()) state->watchdog_thread.join();
     }
