@@ -182,6 +182,7 @@ PIPELINE_OBJS := $(PIPELINE_SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 # Targets (build artifacts)
 TARGETS := $(BUILD_DIR)/yolov5n_simple_test $(BUILD_DIR)/yolov5n_csi
 TEST_BIN := $(BUILD_DIR)/test_reorderer
+TEST_V4L2_URI_BIN := $(BUILD_DIR)/test_v4l2_uri
 PIPELINE_TARGET := yolov5n_pipeline
 TEST_PIPELINE_TARGET := test_simple_pipeline
 
@@ -326,7 +327,8 @@ run-file-asan:
 .PHONY: run-file-sdl-sw run-cam-yuyv-sdl-sw run-cam-yuyv-sdl-rvv \
         run-file-sdl-sw-local run-file-sdl-rvv-local \
         run-cam-yuyv-sdl-sw-local run-cam-yuyv-sdl-rvv-local \
-        run-file-asan run-cam-yuyv-asan run-cam-yuyv-sdl-rvv-long stop-remote
+        run-file-asan run-cam-yuyv-asan run-cam-yuyv-sdl-rvv-long \
+        run-cam-live-sw-fast run-cam-live-rvv-fast run-cam-live-sw run-cam-live-rvv run-cam-live-debug stop-remote
 
 run-file-sdl-sw-local: $(BUILD_DIR)/$(PIPELINE_TARGET)
 	@echo "[RUN-LOCAL] file input with SDL (sw)"
@@ -909,16 +911,124 @@ fix-sysroot-sdl:
 	@echo "[FIX] Creating libSDL2.so symlink in sysroot if missing"
 	@[ -e /opt/spacemit/sysroot/usr/lib/riscv64-linux-gnu/libSDL2.so ] || \
 	 (cd /opt/spacemit/sysroot/usr/lib/riscv64-linux-gnu && (ln -sf libSDL2-2.0.so.0 libSDL2.so || sudo ln -sf libSDL2-2.0.so.0 libSDL2.so) && echo "  ✓ libSDL2.so -> libSDL2-2.0.so.0" || echo "  ✗ Permission denied: run installer or use sudo")
-tests: $(TEST_BIN)
+tests: $(TEST_BIN) $(TEST_V4L2_URI_BIN)
 
-$(TEST_BIN): tests/test_reorderer.cpp $(BUILD_DIR)/pipeline.o
+$(TEST_BIN): tests/test_reorderer.cpp $(BUILD_DIR)/reorderer.o
 	@echo "[CXX] $<"
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c tests/test_reorderer.cpp -o $(BUILD_DIR)/test_reorderer.o
 	@echo "[LINK] $@"
-	@$(CXX) $(LDFLAGS) $(BUILD_DIR)/test_reorderer.o $(BUILD_DIR)/pipeline.o $(LIBS_MIN) -o $@
+	@$(CXX) $(LDFLAGS) $(BUILD_DIR)/test_reorderer.o $(BUILD_DIR)/reorderer.o $(LIBS_MIN) -o $@
+	@echo "[SUCCESS] Built $@"
+
+$(TEST_V4L2_URI_BIN): tests/test_v4l2_uri.cpp $(BUILD_DIR)/v4l2_uri.o
+	@echo "[CXX] $<"
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c tests/test_v4l2_uri.cpp -o $(BUILD_DIR)/test_v4l2_uri.o
+	@echo "[LINK] $@"
+	@$(CXX) $(LDFLAGS) $(BUILD_DIR)/test_v4l2_uri.o $(BUILD_DIR)/v4l2_uri.o $(LIBS_MIN) -o $@
 	@echo "[SUCCESS] Built $@"
 
 # Override run-bench-summary with a thin wrapper script to avoid complex quoting
 .PHONY: run-bench-summary
 run-bench-summary: pipeline deploy
 	@PP=$(pp) bash tools/run_bench_summary.sh
+
+run-cam-live-sw-fast: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN] camera live SW fast (SDL, null encoder) on device"
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@LIVE_DURATION=60 LIVE_RUN_LABEL=cam_live_sw_fast LIVE_ENCODER=null LIVE_TTL_MS=600 LIVE_NN_WORKERS=3 bash tools/run_live_remote.sh sw $(SSH_TARGET) $(DEVICE_PROJECT_DIR)
+	@mkdir -p artifacts
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-live-sw-fast.log artifacts/run-cam-live-sw-fast.log >/dev/null || \
+		scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-live-sw.log artifacts/run-cam-live-sw-fast.log >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/metrics_cam_live_sw_fast.jsonl artifacts/metrics_cam_live_sw_fast.jsonl >/dev/null || \
+		scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/metrics_cam_live_sw_fast.jsonl artifacts/metrics_cam_live_sw_fast.jsonl >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/probe_cam_live_sw_fast.ppm artifacts/probe_cam_live_sw_fast.ppm >/dev/null || \
+		scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/probe_cam_live_sw_fast.ppm artifacts/probe_cam_live_sw_fast.ppm >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/ring_cam_live_sw_fast.jsonl artifacts/ring_cam_live_sw_fast.jsonl >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/ringdump_cam_live_sw_fast.log artifacts/ringdump_cam_live_sw_fast.log >/dev/null || true
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@echo "[CLEAN] remote processes"
+	@$(MAKE) --no-print-directory clean-remote-procs || true
+	@echo "[CLEAN] local ssh clients for yolov5n_pipeline"
+	@$(MAKE) --no-print-directory clean-local-procs || true
+
+run-cam-live-rvv-fast: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN] camera live RVV fast (SDL, null encoder) on device"
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@LIVE_DURATION=60 LIVE_RUN_LABEL=cam_live_rvv_fast LIVE_ENCODER=null LIVE_TTL_MS=600 LIVE_NN_WORKERS=4 bash tools/run_live_remote.sh rvv $(SSH_TARGET) $(DEVICE_PROJECT_DIR)
+	@mkdir -p artifacts
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-live-rvv-fast.log artifacts/run-cam-live-rvv-fast.log >/dev/null || \
+		scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-live-rvv.log artifacts/run-cam-live-rvv-fast.log >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/metrics_cam_live_rvv_fast.jsonl artifacts/metrics_cam_live_rvv_fast.jsonl >/dev/null || \
+		scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/metrics_cam_live_rvv_fast.jsonl artifacts/metrics_cam_live_rvv_fast.jsonl >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/probe_cam_live_rvv_fast.ppm artifacts/probe_cam_live_rvv_fast.ppm >/dev/null || \
+		scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/probe_cam_live_rvv_fast.ppm artifacts/probe_cam_live_rvv_fast.ppm >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/ring_cam_live_rvv_fast.jsonl artifacts/ring_cam_live_rvv_fast.jsonl >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/ringdump_cam_live_rvv_fast.log artifacts/ringdump_cam_live_rvv_fast.log >/dev/null || true
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@echo "[CLEAN] remote processes"
+	@$(MAKE) --no-print-directory clean-remote-procs || true
+	@echo "[CLEAN] local ssh clients for yolov5n_pipeline"
+	@$(MAKE) --no-print-directory clean-local-procs || true
+
+run-cam-live-sw: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN] camera live SW (SDL) on device"
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@LIVE_DURATION=60 LIVE_TTL_MS=2500 LIVE_NN_WORKERS=3 bash tools/run_live_remote.sh sw $(SSH_TARGET) $(DEVICE_PROJECT_DIR)
+	@mkdir -p artifacts
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-live-sw.log artifacts/run-cam-live-sw.log >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/metrics_cam_live_sw.jsonl artifacts/metrics_cam_live_sw.jsonl >/dev/null || \
+		scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/metrics_cam_live_sw.jsonl artifacts/metrics_cam_live_sw.jsonl >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/out_cam_live_sw.avi artifacts/out_cam_live_sw.avi >/dev/null || \
+		scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/out_cam_live_sw.avi artifacts/out_cam_live_sw.avi >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/probe_cam_live_sw.ppm artifacts/probe_cam_live_sw.ppm >/dev/null || \
+		scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/probe_cam_live_sw.ppm artifacts/probe_cam_live_sw.ppm >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/ring_cam_live_sw.jsonl artifacts/ring_cam_live_sw.jsonl >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/ringdump_cam_live_sw.log artifacts/ringdump_cam_live_sw.log >/dev/null || true
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@echo "[CLEAN] remote processes"
+	@$(MAKE) --no-print-directory clean-remote-procs || true
+	@echo "[CLEAN] local ssh clients for yolov5n_pipeline"
+	@$(MAKE) --no-print-directory clean-local-procs || true
+
+	@$(MAKE) --no-print-directory cleanup-all || true
+
+run-cam-live-rvv: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN] camera live RVV (SDL) on device"
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@LIVE_DURATION=60 LIVE_TTL_MS=5000 bash tools/run_live_remote.sh rvv $(SSH_TARGET) $(DEVICE_PROJECT_DIR)
+	@mkdir -p artifacts
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-live-rvv.log artifacts/run-cam-live-rvv.log >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/metrics_cam_live_rvv.jsonl artifacts/metrics_cam_live_rvv.jsonl >/dev/null || \
+		scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/metrics_cam_live_rvv.jsonl artifacts/metrics_cam_live_rvv.jsonl >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/out_cam_live_rvv.avi artifacts/out_cam_live_rvv.avi >/dev/null || \
+		scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/out_cam_live_rvv.avi artifacts/out_cam_live_rvv.avi >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/probe_cam_live_rvv.ppm artifacts/probe_cam_live_rvv.ppm >/dev/null || \
+		scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/probe_cam_live_rvv.ppm artifacts/probe_cam_live_rvv.ppm >/dev/null
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/ring_cam_live_rvv.jsonl artifacts/ring_cam_live_rvv.jsonl >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/ringdump_cam_live_rvv.log artifacts/ringdump_cam_live_rvv.log >/dev/null || true
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@echo "[CLEAN] remote processes"
+	@$(MAKE) --no-print-directory clean-remote-procs || true
+	@echo "[CLEAN] local ssh clients for yolov5n_pipeline"
+	@$(MAKE) --no-print-directory clean-local-procs || true
+
+	@$(MAKE) --no-print-directory cleanup-all || true
+
+run-cam-live-debug: $(BUILD_DIR)/$(PIPELINE_TARGET)
+	@echo "[RUN] camera live DEBUG (SDL) on device"
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@LIVE_DURATION=120 LIVE_DEBUG=1 LIVE_RUN_LABEL=cam_live_debug LIVE_TTL_MS=2500 LIVE_NN_WORKERS=1 bash tools/run_live_remote.sh sw $(SSH_TARGET) $(DEVICE_PROJECT_DIR)
+	@mkdir -p artifacts
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/run-cam-live-debug.log artifacts/run-cam-live-debug.log >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/metrics_cam_live_debug.jsonl artifacts/metrics_cam_live_debug.jsonl >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/out_cam_live_debug.avi artifacts/out_cam_live_debug.avi >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/probe_cam_live_debug.ppm artifacts/probe_cam_live_debug.ppm >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/ring_cam_live_debug.jsonl artifacts/ring_cam_live_debug.jsonl >/dev/null || true
+	@scp $(SSH_TARGET):$(DEVICE_PROJECT_DIR)/artifacts/ringdump_cam_live_debug.log artifacts/ringdump_cam_live_debug.log >/dev/null || true
+	@$(MAKE) --no-print-directory cleanup-all || true
+	@echo "[CLEAN] remote processes"
+	@$(MAKE) --no-print-directory clean-remote-procs || true
+	@echo "[CLEAN] local ssh clients for yolov5n_pipeline"
+	@$(MAKE) --no-print-directory clean-local-procs || true
+
+	@$(MAKE) --no-print-directory cleanup-all || true

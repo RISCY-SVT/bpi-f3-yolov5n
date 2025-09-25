@@ -1,4 +1,5 @@
 #include "engine.hpp"
+#include "ringlog.hpp"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -245,6 +246,7 @@ public:
         void* sess = create_graph(weights_path.c_str());
         if (!sess) {
             std::cerr << "[ERROR] Failed to load model from: " << weights_path << std::endl;
+            LOG_STAGE(RingStage::CUSTOM, -1, "model_load_fail");
             return false;
         }
         
@@ -296,6 +298,7 @@ public:
         
         initialized_ = true;
         std::cout << "[INFO] Model initialized successfully" << std::endl;
+        LOG_STAGE(RingStage::CUSTOM, 0, "engine_init");
         return true;
     }
     
@@ -369,10 +372,11 @@ public:
             std::memcpy(input_tensor_->data, converted_input, input_size);
             shl_mem_free(converted_input);
         }
-        
+
         // Run inference
+        LOG_STAGE(RingStage::CUSTOM, 0, "csinn_run");
         csinn_update_input_and_run(&input_tensor_, session_);
-        
+
         // Get outputs and convert to FP32
         const int output_num = output_count_;
         std::vector<struct csinn_tensor*> outputs;

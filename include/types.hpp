@@ -7,6 +7,8 @@
 #include <string>
 #include <map>
 
+#include "v4l2_uri.hpp"
+
 namespace yolov5 {
 
 /**
@@ -28,6 +30,14 @@ enum class PreprocMode {
 enum class PixelFormat {
     BGR,
     YUV420P
+};
+
+/**
+ * @brief End-to-end latency operating mode for the pipeline.
+ */
+enum class LatencyMode {
+    Normal, //!< Throughput-oriented default behaviour.
+    Live    //!< Low-latency mode with aggressive queue trimming.
 };
 
 /**
@@ -115,6 +125,20 @@ struct PipelineConfig {
     int perf_interval_ms;         // Performance reporting interval
     std::string perf_json_path;   // JSONL metrics output path
     std::string mem_json_path;    // Optional RSS logger output path
+    LatencyMode latency_mode;     // Throughput vs low-latency behaviour
+    int live_ttl_ms;              // Frame timeout in live mode before drop
+    int cam_buffers;              // Requested V4L2 buffer count in live mode
+    int q_cap_capture;            // Capture→preprocess queue capacity override
+    int q_cap_preprocess;         // Preprocess→scheduler queue capacity override
+    int q_cap_infer;              // Scheduler→inference queue capacity override
+    int q_cap_reorder;            // Reorder buffer capacity hint
+    bool display_vsync;           // SDL vsync preference
+    bool display_vsync_overridden;// True when CLI explicitly sets vsync
+    bool display_allow_null;      // Allow fallback to null renderer without abort
+    bool display_allow_null_overridden; // CLI toggled display_allow_null
+
+    V4L2UriOptions v4l2_uri;      // Parsed V4L2 URI options (when applicable)
+
     
     // Misc
     std::string log_level;        // info, debug, warn, error
@@ -146,6 +170,18 @@ struct PipelineConfig {
         perf_interval_ms(1000),
         perf_json_path(""),
         mem_json_path(""),
+        latency_mode(LatencyMode::Normal),
+        live_ttl_ms(300),
+        cam_buffers(3),
+        q_cap_capture(0),
+        q_cap_preprocess(0),
+        q_cap_infer(0),
+        q_cap_reorder(0),
+        display_vsync(true),
+        display_vsync_overridden(false),
+        display_allow_null(false),
+        display_allow_null_overridden(false),
+        v4l2_uri(),
         log_level("info"),
         use_rt_priority(false),
         max_frames(-1),
@@ -173,12 +209,27 @@ struct PerfMetrics {
         float encode;
         float display;
     } latency_ms;
+    struct {
+        float p50;
+        float p95;
+    } e2e_ms;
     
     // Queue sizes
     std::map<std::string, int> queue_sizes;
+    std::map<std::string, int> queue_capacity;
 
     // Worker utilization percentages
     std::vector<float> worker_busy_pct;
+
+    // Live-mode drop counters
+    uint64_t drop_backlog{0};
+    uint64_t drop_ttl{0};
+    uint64_t gap_skips{0};
+    uint64_t ttl_drops{0};
+    int live_gate_block{0};
+    std::map<std::string, uint64_t> drop_counts;
+    size_t reorder_backlog_max{0};
+    bool display_presented{true};
 
     // Heap usage snapshot in bytes (mallinfo2.uordblks)
     size_t heap_bytes{0};

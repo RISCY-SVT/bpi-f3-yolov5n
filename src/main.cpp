@@ -3,7 +3,9 @@
 #include "preprocess.hpp"
 #include "engine.hpp"
 #include "pipeline.hpp"
+#include "ringlog.hpp"
 #include "metrics.hpp"
+#include "v4l2_uri.hpp"
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 #include <iomanip>
@@ -31,6 +33,10 @@ static volatile bool g_stop = false;
 
 /** @brief Catch termination signals and request pipeline shutdown. */
 void signal_handler(int sig) {
+    if (sig == SIGUSR1) {
+        ring_dump_artifacts("sigusr1");
+        return;
+    }
     g_stop = true;
     std::cout << "\nReceived signal " << sig << ", stopping..." << std::endl;
 }
@@ -41,9 +47,10 @@ void print_usage(const char* program) {
               << "\nInput/Output:\n"
               << "  --src file:path|v4l2:/dev/videoX|v4l2:auto  Input source (required)\n"
               << "  --out path                        Output video file (optional)\n"
-              << "  --enc h264|mjpeg|raw              Encoder (default: h264)\n"
+              << "  --enc h264|mjpeg|raw|null         Encoder (default: h264; null=no file)\n"
               << "  --display off|sdl                 Display mode (default: off)\n"
               << "  --sdl-driver auto|wayland|kmsdrm|x11|dummy\n"
+              << "  --display-allow-null on|off      Allow fallback to null display (live default: on)\n"
               << "  --cam-fmt auto|yuyv|mjpeg         Preferred V4L2 pixel format (default: auto)\n"
               << "\nModel:\n"
               << "  --weights path                    Path to hhb.bm (default: cpu_model/hhb.bm)\n"
@@ -58,10 +65,19 @@ void print_usage(const char* program) {
               << "  --io-cpus auto|4,5,6,7            CPU cores for I/O (default: auto)\n"
               << "\nPerformance:\n"
               << "  --queue-cap N                     Queue capacity (default: 8)\n"
+              << "  --q-cap-cap N                   Capture→preprocess queue cap (live default: 2)\n"
+              << "  --q-cap-pp N                    Preprocess→scheduler queue cap (live default: 2)\n"
+              << "  --q-cap-infer N                 Scheduler→inference queue cap (live default: 2)\n"
+              << "  --q-cap-reorder N               Reorder buffer cap hint (live default: 1)\n"
               << "  --drop front:wm=N|new:wm=N        Drop policy (default: front:wm=3)\n"
               << "  --perf-interval ms                Performance interval (default: 1000)\n"
               << "  --perf-json path                  JSONL metrics output\n"
               << "  --mem-json path                   RSS sampler JSONL output (optional)\n"
+              << "  --live                            Enable low-latency live mode\n"
+              << "  --latency-mode normal|live       Select latency profile (default: normal)\n"
+              << "  --live-ttl-ms ms                Drop frames older than ms in live mode (default: 300)\n"
+              << "  --cam-bufs N                    Requested V4L2 buffer count in live mode (default: 3)\n"
+              << "  --display-vsync on|off          Force SDL present vsync (default: on; off when live)\n"
               << "  --rt on|off                       Real-time priority (default: off)\n"
               << "  --display-probe path.ppm          Save first displayed frame to file\n"
               << "  --watchdog-sec SEC                Abort if no progress for SEC seconds (0=off)\n"
@@ -176,6 +192,8 @@ static std::string to_lower_copy(std::string s) {
 PipelineConfig parse_args(int argc, char* argv[]) {
     PipelineConfig config;
     bool test_mode = false;
+    bool ttl_cli_override = false;
+    bool cam_bufs_cli_override = false;
     const char* program = argv[0];
     
     for (int i = 1; i < argc; i++) {
@@ -195,7 +213,11 @@ PipelineConfig parse_args(int argc, char* argv[]) {
         } else if (arg == "--out") {
             config.output_path = require_value(i, argc, argv, arg, program);
         } else if (arg == "--enc") {
-            config.encoder = require_value(i, argc, argv, arg, program);
+            std::string v = to_lower_copy(require_value(i, argc, argv, arg, program));
+            if (v != "h264" && v != "mjpeg" && v != "raw" && v != "null") {
+                cli_error(program, arg, "Invalid --enc value: " + v + " (use h264|mjpeg|raw|null)");
+            }
+            config.encoder = v;
         } else if (arg == "--display") {
             std::string v = to_lower_copy(require_value(i, argc, argv, arg, program));
             if (v != "off" && v != "sdl") {
@@ -208,6 +230,17 @@ PipelineConfig parse_args(int argc, char* argv[]) {
                 cli_error(program, arg, "Invalid --sdl-driver value: " + v);
             }
             config.sdl_driver = v;
+        } else if (arg == "--display-allow-null") {
+            std::string v = to_lower_copy(require_value(i, argc, argv, arg, program));
+            if (v == "on") {
+                config.display_allow_null = true;
+                config.display_allow_null_overridden = true;
+            } else if (v == "off") {
+                config.display_allow_null = false;
+                config.display_allow_null_overridden = true;
+            } else {
+                cli_error(program, arg, "Invalid --display-allow-null value: " + v + " (use on|off)");
+            }
         } else if (arg == "--cam-fmt") {
             std::string v = to_lower_copy(require_value(i, argc, argv, arg, program));
             if (v != "auto" && v != "yuyv" && v != "mjpeg") {
@@ -264,6 +297,14 @@ PipelineConfig parse_args(int argc, char* argv[]) {
             }
         } else if (arg == "--queue-cap") {
             config.queue_capacity = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 1, 1024);
+        } else if (arg == "--q-cap-cap") {
+            config.q_cap_capture = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 1, 64);
+        } else if (arg == "--q-cap-pp") {
+            config.q_cap_preprocess = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 1, 64);
+        } else if (arg == "--q-cap-infer") {
+            config.q_cap_infer = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 1, 128);
+        } else if (arg == "--q-cap-reorder") {
+            config.q_cap_reorder = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 1, 256);
         } else if (arg == "--drop") {
             config.drop_policy = require_value(i, argc, argv, arg, program);
             // Parse watermark
@@ -277,6 +318,34 @@ PipelineConfig parse_args(int argc, char* argv[]) {
             config.perf_json_path = require_value(i, argc, argv, arg, program);
         } else if (arg == "--mem-json") {
             config.mem_json_path = require_value(i, argc, argv, arg, program);
+        } else if (arg == "--live") {
+            config.latency_mode = LatencyMode::Live;
+        } else if (arg == "--latency-mode") {
+            std::string v = to_lower_copy(require_value(i, argc, argv, arg, program));
+            if (v == "live") {
+                config.latency_mode = LatencyMode::Live;
+            } else if (v == "normal") {
+                config.latency_mode = LatencyMode::Normal;
+            } else {
+                cli_error(program, arg, "Invalid --latency-mode value: " + v + " (use normal|live)");
+            }
+        } else if (arg == "--live-ttl-ms") {
+            config.live_ttl_ms = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 50, 5000);
+            ttl_cli_override = true;
+        } else if (arg == "--cam-bufs") {
+            config.cam_buffers = parse_int_option(program, arg, require_value(i, argc, argv, arg, program), 2, 8);
+            cam_bufs_cli_override = true;
+        } else if (arg == "--display-vsync") {
+            std::string v = to_lower_copy(require_value(i, argc, argv, arg, program));
+            if (v == "on") {
+                config.display_vsync = true;
+                config.display_vsync_overridden = true;
+            } else if (v == "off") {
+                config.display_vsync = false;
+                config.display_vsync_overridden = true;
+            } else {
+                cli_error(program, arg, "Invalid --display-vsync value: " + v + " (use on|off)");
+            }
         } else if (arg == "--rt") {
             std::string val = to_lower_copy(require_value(i, argc, argv, arg, program));
             if (val != "on" && val != "off") {
@@ -312,6 +381,30 @@ PipelineConfig parse_args(int argc, char* argv[]) {
         } else {
             config.source += "&fmt=" + config.cam_format;
         }
+    }
+    if (config.source.rfind("v4l2:", 0) == 0) {
+        std::string uri_error;
+        config.v4l2_uri = parse_v4l2_uri(config.source, &uri_error);
+        if (!uri_error.empty()) {
+            std::cerr << "[WARN] --src v4l2 URI: " << uri_error << std::endl;
+        }
+        if (config.v4l2_uri.fmt_specified) {
+            config.cam_format = config.v4l2_uri.fmt;
+        }
+        if (config.v4l2_uri.buffers_specified && !cam_bufs_cli_override) {
+            config.cam_buffers = config.v4l2_uri.buffers;
+        }
+        if (config.v4l2_uri.ttl_specified && !ttl_cli_override) {
+            config.live_ttl_ms = config.v4l2_uri.ttl_ms;
+        }
+    } else {
+        config.v4l2_uri = {};
+    }
+    if (config.latency_mode == LatencyMode::Live && !config.display_vsync_overridden) {
+        config.display_vsync = false;
+    }
+    if (config.latency_mode == LatencyMode::Live && !config.display_allow_null_overridden) {
+        config.display_allow_null = true;
     }
 
 #ifndef HAVE_SDL2
@@ -503,6 +596,7 @@ int main(int argc, char* argv[]) {
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
     signal(SIGHUP, signal_handler); // handle SSH session termination gracefully
+    signal(SIGUSR1, signal_handler);
     // Reduce FFmpeg log verbosity by default
     av_log_set_level(AV_LOG_ERROR);
     

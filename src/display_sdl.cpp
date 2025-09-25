@@ -1,5 +1,6 @@
 #ifdef HAVE_SDL2
 #include "display.hpp"
+#include "ringlog.hpp"
 #include <SDL.h>
 #include <unistd.h>
 
@@ -457,7 +458,7 @@ public:
         const std::string fallback = chooseDriver("auto");
         bool fallback_notified = false;
 
-        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
         SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
         SDL_setenv("SDL_VIDEO_ALLOW_SCREENSAVER", "1", 1);
 
@@ -494,27 +495,36 @@ public:
                                    width_, height_, SDL_WINDOW_SHOWN);
         if (!window_) {
             std::cerr << "[display] SDL_CreateWindow failed: " << SDL_GetError() << std::endl;
+            LOG_STAGE(RingStage::DISP_CREATE_FAIL, -1, "create_window");
             close();
             return false;
         }
-        renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        SDL_SetHint(SDL_HINT_RENDER_VSYNC, cfg.enable_vsync ? "1" : "0");
+        Uint32 renderer_flags = SDL_RENDERER_ACCELERATED;
+        if (cfg.enable_vsync) {
+            renderer_flags |= SDL_RENDERER_PRESENTVSYNC;
+        }
+        renderer_ = SDL_CreateRenderer(window_, -1, renderer_flags);
         if (!renderer_) {
             std::cerr << "[display] SDL_CreateRenderer failed: " << SDL_GetError() << std::endl;
+            LOG_STAGE(RingStage::DISP_CREATE_FAIL, -2, "create_renderer");
             close();
             return false;
         }
-        vsync_enabled_ = true;
 #if SDL_VERSION_ATLEAST(2,0,18)
-        if (SDL_RenderSetVSync(renderer_, 0) == 0) {
+        if (SDL_RenderSetVSync(renderer_, cfg.enable_vsync ? 1 : 0) == 0) {
+            vsync_enabled_ = cfg.enable_vsync;
+        } else {
             vsync_enabled_ = false;
         }
 #else
-        vsync_enabled_ = false;
+        vsync_enabled_ = (renderer_flags & SDL_RENDERER_PRESENTVSYNC) != 0 && cfg.enable_vsync;
 #endif
         texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_BGR24, SDL_TEXTUREACCESS_STREAMING,
                                      width_, height_);
         if (!texture_) {
             std::cerr << "[display] SDL_CreateTexture failed: " << SDL_GetError() << std::endl;
+            LOG_STAGE(RingStage::DISP_CREATE_FAIL, -3, "create_texture");
             close();
             return false;
         }
@@ -537,8 +547,10 @@ public:
         }
         last_present_ = std::chrono::steady_clock::now();
         std::cout << "[display] SDL driver=" << driver_selected_ << " size="
-                  << width_ << "x" << height_ << " (window created)" << std::endl;
+                  << width_ << "x" << height_ << " vsync=" << (vsync_enabled_ ? "on" : "off")
+                  << " (window created)" << std::endl;
         std::cout << "[display] vsync=" << (vsync_enabled_ ? "on" : "off") << std::endl;
+        LOG_STAGE(RingStage::DISP_CREATE_OK, 0, driver_selected_.c_str());
         return true;
     }
 
@@ -546,7 +558,13 @@ public:
      * @brief Present annotated frame to SDL texture and run watchdog bookkeeping.
      */
     bool present(const DisplayFrameInfo& frame) override {
-        if (!renderer_ || !texture_) return true;
+        if (!renderer_ || !texture_) {
+            if (frame.presented) {
+                *frame.presented = false;
+            }
+            LOG_STAGE_F(RingStage::DISP_PRESENT_FAIL, frame.frame_id, -1, "no_renderer");
+            return !pending_quit_;
+        }
         SDL_Event ev;
         while (SDL_PollEvent(&ev)) {
             handleEvent(ev);
@@ -555,21 +573,50 @@ public:
             updateMetrics(*frame.metrics);
         }
         if (pending_quit_) return false;
+        bool success = true;
+        std::string failure_reason;
         if (SDL_UpdateTexture(texture_, nullptr, frame.image.data, frame.image.step) != 0) {
-            static bool warned = false;
-            if (!warned) {
-                std::cerr << "[display] SDL_UpdateTexture failed: " << SDL_GetError() << std::endl;
-                warned = true;
-            }
+            success = false;
+            failure_reason = "update_texture:";
+            failure_reason += SDL_GetError();
+            SDL_ClearError();
         }
-        SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
-        SDL_RenderClear(renderer_);
-        SDL_RenderCopy(renderer_, texture_, nullptr, nullptr);
+        if (SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255) != 0) {
+            success = false;
+            if (!failure_reason.empty()) failure_reason += "|";
+            failure_reason += "set_draw_color:";
+            failure_reason += SDL_GetError();
+            SDL_ClearError();
+        }
+        if (SDL_RenderClear(renderer_) != 0) {
+            success = false;
+            if (!failure_reason.empty()) failure_reason += "|";
+            failure_reason += "render_clear:";
+            failure_reason += SDL_GetError();
+            SDL_ClearError();
+        }
+        if (SDL_RenderCopy(renderer_, texture_, nullptr, nullptr) != 0) {
+            success = false;
+            if (!failure_reason.empty()) failure_reason += "|";
+            failure_reason += "render_copy:";
+            failure_reason += SDL_GetError();
+            SDL_ClearError();
+        }
         if (osd_enabled_) {
             renderOSD();
         }
         SDL_RenderPresent(renderer_);
-        last_present_ = std::chrono::steady_clock::now();
+        if (success) {
+            last_present_ = std::chrono::steady_clock::now();
+            LOG_STAGE_F(RingStage::DISP_PRESENT_OK, frame.frame_id, 0, "present_ok");
+        } else {
+            std::cerr << "[display] present failed frame=" << frame.frame_id
+                      << " reason=" << failure_reason << std::endl;
+            LOG_STAGE_F(RingStage::DISP_PRESENT_FAIL, frame.frame_id, -2, "present_fail");
+        }
+        if (frame.presented) {
+            *frame.presented = success;
+        }
         return !pending_quit_;
     }
 

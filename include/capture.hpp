@@ -83,6 +83,8 @@ public:
     bool getFrame(Frame& frame) override;
     void release() override;
 
+    void setLowLatencyMode(bool live_mode, int buffer_count);
+
     int getWidth() const override;
     int getHeight() const override;
     double getFPS() const override;
@@ -107,6 +109,8 @@ public:
     bool init(const std::string& source) override;
     bool getFrame(Frame& frame) override;
     void release() override;
+
+    void setLowLatencyMode(bool live_mode, int buffer_count);
 
     int getWidth() const override;
     int getHeight() const override;

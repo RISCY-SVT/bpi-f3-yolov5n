@@ -24,6 +24,7 @@ struct DisplayConfig {
     int height;             //!< Frame height in pixels.
     std::string title;      //!< Window title or identifier string.
     std::string driver;     //!< SDL driver hint (auto, wayland, kmsdrm, x11, dummy).
+    bool enable_vsync;      //!< Whether vsync should be requested.
 };
 
 /**
@@ -35,6 +36,7 @@ struct DisplayFrameInfo {
     uint64_t frame_id;              //!< Monotonic frame identifier for diagnostics.
     const PerfMetrics* metrics;     //!< Pointer to latest metrics snapshot (may be null).
     bool metrics_valid;             //!< Indicates that `metrics` points to fresh data.
+    bool* presented = nullptr;      //!< Optional out-flag updated with present success.
 };
 
 /**

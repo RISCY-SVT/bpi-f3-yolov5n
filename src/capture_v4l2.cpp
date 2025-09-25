@@ -1,4 +1,6 @@
 #include "capture.hpp"
+#include "v4l2_uri.hpp"
+#include "ringlog.hpp"
 
 #include <algorithm>
 #include <cerrno>
@@ -50,39 +52,13 @@ enum class CamFormatPreference {
 constexpr int kDefaultWidth = 1280;
 constexpr int kDefaultHeight = 720;
 constexpr int kDefaultFPS = 30;
-constexpr int kBufferCount = 4;
+constexpr int kDefaultPollMs = 50;
+constexpr int kBufferCount = 3;
 
 /** @brief Lowercase helper used for query string parsing. */
 std::string toLowerCopy(std::string value) {
     std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c){ return static_cast<char>(std::tolower(c)); });
     return value;
-}
-
-/**
- * @brief Parse CLI query string to select desired camera format.
- * @param opts Query string after '?'.
- * @param current Existing preference which acts as default.
- */
-CamFormatPreference parseFormatPreference(const std::string& opts, CamFormatPreference current) {
-    if (opts.empty()) return current;
-    std::stringstream ss(opts);
-    std::string kv;
-    while (std::getline(ss, kv, '&')) {
-        auto eq = kv.find('=');
-        if (eq == std::string::npos) continue;
-        std::string key = toLowerCopy(kv.substr(0, eq));
-        std::string val = toLowerCopy(kv.substr(eq + 1));
-        if (key == "fmt" || key == "format" || key == "cam_fmt") {
-            if (val == "yuyv" || val == "yuyv422") {
-                return CamFormatPreference::YUYV;
-            }
-            if (val == "mjpeg" || val == "jpeg") {
-                return CamFormatPreference::MJPEG;
-            }
-            return CamFormatPreference::Auto;
-        }
-    }
-    return current;
 }
 
 /** @brief Convert V4L2 fourcc to printable string. */
@@ -340,7 +316,16 @@ public:
     Impl() : fd_(-1), streaming_(false), width_(kDefaultWidth), height_(kDefaultHeight),
              fps_(kDefaultFPS), frame_counter_(0), sws_ctx_(nullptr), selected_device_(),
              stride_(kDefaultWidth * 2), requested_format_(CamFormatPreference::Auto),
-             active_format_fourcc_(0), mjpeg_decoder_ctx_(nullptr), mjpeg_frame_(nullptr) {}
+             active_format_fourcc_(0), mjpeg_decoder_ctx_(nullptr), mjpeg_frame_(nullptr),
+             requested_buffers_(kBufferCount), poll_timeout_ms_(kDefaultPollMs),
+             live_mode_(false), active_buffer_count_(0), uri_opts_() {}
+
+    void setLowLatencyMode(bool live_mode, int buffer_count) {
+        live_mode_ = live_mode;
+        int requested = (buffer_count > 0) ? buffer_count : kBufferCount;
+        requested_buffers_ = static_cast<uint32_t>(std::clamp(requested, 2, 8));
+        poll_timeout_ms_ = live_mode_ ? 5 : 500;
+    }
 
     ~Impl() {
         release();
@@ -360,17 +345,43 @@ public:
         height_ = kDefaultHeight;
         fps_ = kDefaultFPS;
 
-        std::string base = source;
-        std::string opts;
-        auto qpos = base.find('?');
-        if (qpos != std::string::npos) {
-            opts = base.substr(qpos + 1);
-            base = base.substr(0, qpos);
+        std::string parse_error;
+        uri_opts_ = parse_v4l2_uri(source, &parse_error);
+        if (!parse_error.empty()) {
+            std::cerr << "[WARN] v4l2: " << parse_error << std::endl;
         }
         requested_format_ = CamFormatPreference::Auto;
-        requested_format_ = parseFormatPreference(opts, requested_format_);
+        if (uri_opts_.is_v4l2 && uri_opts_.fmt_specified) {
+            if (uri_opts_.fmt == "yuyv") {
+                requested_format_ = CamFormatPreference::YUYV;
+            } else if (uri_opts_.fmt == "mjpeg") {
+                requested_format_ = CamFormatPreference::MJPEG;
+            }
+        }
+        if (uri_opts_.is_v4l2) {
+            width_ = std::clamp(uri_opts_.width, 16, 7680);
+            height_ = std::clamp(uri_opts_.height, 16, 4320);
+            fps_ = std::clamp(uri_opts_.fps, 1, 120);
+            requested_buffers_ = static_cast<uint32_t>(std::clamp(uri_opts_.buffers, 1, 16));
+            poll_timeout_ms_ = std::clamp(uri_opts_.poll_ms, 1, 1000);
+        }
         active_format_fourcc_ = 0;
-        std::string source_base = base;
+        std::string source_base;
+        if (uri_opts_.is_v4l2) {
+            source_base = uri_opts_.device.empty() ? std::string("auto") : uri_opts_.device;
+        } else {
+            source_base = source;
+            if (source_base.rfind("v4l2:", 0) == 0) {
+                source_base = source_base.substr(5);
+            }
+            auto qpos = source_base.find('?');
+            if (qpos != std::string::npos) {
+                source_base = source_base.substr(0, qpos);
+            }
+        }
+        if (source_base.empty()) {
+            source_base = "auto";
+        }
 
         auto candidates = buildCandidates(source_base);
         if (candidates.empty()) {
@@ -412,7 +423,7 @@ public:
         struct pollfd pfd { fd_, POLLIN, 0 };
         int pret;
         for (;;) {
-            pret = poll(&pfd, 1, 500);
+            pret = poll(&pfd, 1, poll_timeout_ms_);
             if (pret < 0 && errno == EINTR) {
                 continue;
             }
@@ -424,13 +435,16 @@ public:
             return false;
         }
         if (pret == 0) {
+            LOG_STAGE(RingStage::CAP_TIMEOUT, 0, "poll_timeout");
             return false;
         }
         if (pfd.revents & POLLERR) {
             std::cerr << "[ERROR] v4l2: poll reported error" << std::endl;
+            LOG_STAGE(RingStage::CAP_TIMEOUT, -1, "poll_err");
             return false;
         }
         if (!(pfd.revents & POLLIN)) {
+            LOG_STAGE(RingStage::CAP_TIMEOUT, -2, "no_pollin");
             return false;
         }
 
@@ -511,6 +525,7 @@ public:
             std::cerr << "[ERROR] v4l2: VIDIOC_QBUF failed (" << strerror(err) << ")" << std::endl;
             return false;
         }
+        LOG_STAGE_F(RingStage::CAP_ENQ, frame.frame_id, 0, "cap_ready");
         return true;
     }
 
@@ -527,6 +542,7 @@ public:
             }
         }
         buffers_.clear();
+        active_buffer_count_ = 0;
         if (fd_ >= 0) {
             close(fd_);
             fd_ = -1;
@@ -558,7 +574,14 @@ private:
      */
     bool tryStartDevice(const std::string& dev) {
         try {
-            fd_ = open(dev.c_str(), O_RDWR | O_NONBLOCK, 0);
+            int flags = O_RDWR | (live_mode_ ? O_NONBLOCK : 0);
+            fd_ = open(dev.c_str(), flags, 0);
+            if (!live_mode_ && fd_ >= 0) {
+                int cur = fcntl(fd_, F_GETFL, 0);
+                if (cur >= 0) {
+                    fcntl(fd_, F_SETFL, cur & ~O_NONBLOCK);
+                }
+            }
             if (fd_ < 0) {
                 int err = errno;
                 std::cerr << "[ERROR] v4l2: " << dev << ": open failed (" << strerror(err) << ")" << std::endl;
@@ -691,7 +714,7 @@ private:
 
             struct v4l2_requestbuffers req;
             memset(&req, 0, sizeof(req));
-            req.count = kBufferCount;
+            req.count = requested_buffers_;
             req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             req.memory = V4L2_MEMORY_MMAP;
             if (ioctl(fd_, VIDIOC_REQBUFS, &req) < 0) {
@@ -712,6 +735,9 @@ private:
             } catch (const std::exception&) {
                 return fail("buffer allocation failed", 0);
             }
+            active_buffer_count_ = alloc_count;
+            std::cout << "[INFO] v4l2: buffer_count requested=" << requested_buffers_
+                      << " allocated=" << alloc_count << " live_mode=" << (live_mode_ ? "on" : "off") << std::endl;
             for (uint32_t i = 0; i < alloc_count; ++i) {
             struct v4l2_buffer buf;
             memset(&buf, 0, sizeof(buf));
@@ -791,6 +817,11 @@ private:
     uint32_t active_format_fourcc_;
     AVCodecContext* mjpeg_decoder_ctx_;
     AVFrame* mjpeg_frame_;
+    uint32_t requested_buffers_;
+    int poll_timeout_ms_;
+    bool live_mode_;
+    uint32_t active_buffer_count_;
+    V4L2UriOptions uri_opts_;
 };
 
 /** @brief Prepare FFmpeg MJPEG decoder for camera payloads. */
@@ -890,6 +921,10 @@ CaptureV4L2::~CaptureV4L2() = default;
 
 bool CaptureV4L2::init(const std::string& source) {
     return pImpl->init(source);
+}
+
+void CaptureV4L2::setLowLatencyMode(bool live_mode, int buffer_count) {
+    pImpl->setLowLatencyMode(live_mode, buffer_count);
 }
 
 bool CaptureV4L2::getFrame(Frame& frame) {

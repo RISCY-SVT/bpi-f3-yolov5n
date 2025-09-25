@@ -19,7 +19,10 @@ public:
         last_present_ = std::chrono::steady_clock::now();
         return true;
     }
-    bool present(const DisplayFrameInfo&) override {
+    bool present(const DisplayFrameInfo& info) override {
+        if (info.presented) {
+            *info.presented = true;
+        }
         last_present_ = std::chrono::steady_clock::now();
         return true;
     }

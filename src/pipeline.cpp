@@ -1,4 +1,5 @@
 #include "pipeline.hpp"
+#include "ringlog.hpp"
 #include "capture.hpp"
 #include "preprocess.hpp"
 #include "engine.hpp"
@@ -54,7 +55,9 @@ struct DisplayState {
     std::atomic<bool> stop_requested{false};
     std::atomic<bool> watchdog_triggered{false};
     std::atomic<bool> probe_saved{false};
+    std::atomic<int64_t> last_probe_save_ns{0};
     int watchdog_sec{0};
+    bool probe_repeat{false};
     std::string driver_name{"null"};
     std::string probe_path;
     std::mutex display_mutex;
@@ -95,6 +98,54 @@ static bool skip_postprocess_flag() {
         return env && env[0] != '\0' && env[0] != '0';
     }();
     return skip;
+}
+
+static int worker_count(const PipelineConfig& cfg) {
+    return std::max(1, cfg.nn_workers);
+}
+
+static size_t choose_capacity(const PipelineConfig& cfg, int override_value, size_t live_default) {
+    if (override_value > 0) {
+        return static_cast<size_t>(override_value);
+    }
+    if (cfg.latency_mode == LatencyMode::Live) {
+        return live_default;
+    }
+    return static_cast<size_t>(std::max(1, cfg.queue_capacity));
+}
+
+static size_t live_capture_capacity(const PipelineConfig&) {
+    return 1;
+}
+
+static size_t live_preprocess_capacity(const PipelineConfig&) {
+    return 1;
+}
+
+static size_t live_infer_capacity(const PipelineConfig&) {
+    return 1;
+}
+
+static size_t live_reorder_capacity(const PipelineConfig&) {
+    return 1;
+}
+
+static size_t live_overlay_capacity(const PipelineConfig&) {
+    return 1;
+}
+
+static size_t reorder_backlog_limit(const PipelineConfig& cfg) {
+    if (cfg.q_cap_reorder > 0) {
+        return static_cast<size_t>(cfg.q_cap_reorder);
+    }
+    return 1;
+}
+
+static void release_frame_resources(Frame& f) {
+    if (f.model_input) {
+        utils::alignedFree(f.model_input);
+        f.model_input = nullptr;
+    }
 }
 
 static void set_state(const Pipeline* p, const std::shared_ptr<DisplayState>& state) {
@@ -145,8 +196,17 @@ static bool write_probe_ppm(const cv::Mat& frame, const std::string& path) {
 // Save first displayed frame to CLI-specified path (used for diagnostics).
 static void save_display_probe(const std::shared_ptr<DisplayState>& state, const cv::Mat& frame) {
     if (!state) return;
-    if (state->probe_saved.load()) return;
     if (state->probe_path.empty()) return;
+    const int64_t now = now_ns();
+    int64_t last = 0;
+    if (state->probe_repeat) {
+        last = state->last_probe_save_ns.load();
+        if (last != 0 && (now - last) < 1000000000LL) {
+            return;
+        }
+    } else if (state->probe_saved.load()) {
+        return;
+    }
     if (!ensure_probe_parent_dir(state->probe_path)) {
         return;
     }
@@ -154,8 +214,14 @@ static void save_display_probe(const std::shared_ptr<DisplayState>& state, const
         std::cerr << "[display] probe snapshot failed for path " << state->probe_path << std::endl;
         return;
     }
+    const bool notify = !state->probe_repeat || last == 0;
     state->probe_saved.store(true);
-    std::cout << "[display] probe saved to " << state->probe_path << std::endl;
+    if (state->probe_repeat) {
+        state->last_probe_save_ns.store(now);
+    }
+    if (notify) {
+        std::cout << "[display] probe saved to " << state->probe_path << std::endl;
+    }
 }
 
 static bool read_self_vm_stats(size_t& rss_kb, size_t& vm_kb) {
@@ -207,66 +273,6 @@ static void ensure_parent_dir(const std::string& path) {
 }
 
 } // namespace
-
-FrameReorderer::FrameReorderer() : expected_id_(0), stopped_(false) {}
-
-void FrameReorderer::addFrame(const ProcessedFrame& frame) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    buffer_.emplace(frame.frame.frame_id, frame);
-    cv_.notify_all();
-}
-
-void FrameReorderer::markDropped(uint64_t frame_id) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    dropped_ids_.insert(frame_id);
-    // If we just marked the expected frame as dropped, advance expected_id_
-    while (dropped_ids_.count(expected_id_) > 0) {
-        dropped_ids_.erase(expected_id_);
-        expected_id_++;
-    }
-    cv_.notify_all();
-}
-
-bool FrameReorderer::getNextFrame(ProcessedFrame& out) {
-    std::unique_lock<std::mutex> lock(mutex_);
-    // Wait until the next expected frame arrives or is marked dropped to maintain strict ordering.
-    for (;;) {
-        if (stopped_) return false;
-        // Release dropped frames at head
-        while (dropped_ids_.count(expected_id_) > 0) {
-            dropped_ids_.erase(expected_id_);
-            expected_id_++;
-        }
-        // If the next expected frame is available, return it
-        auto it = buffer_.find(expected_id_);
-        if (it != buffer_.end()) {
-            out = std::move(it->second);
-            buffer_.erase(it);
-            expected_id_++;
-            return true;
-        }
-        // Otherwise wait for new frames or stop
-        cv_.wait(lock);
-    }
-}
-
-void FrameReorderer::reset() {
-    std::lock_guard<std::mutex> lock(mutex_);
-    buffer_.clear();
-    dropped_ids_.clear();
-    expected_id_ = 0;
-}
-
-void FrameReorderer::stop() {
-    std::lock_guard<std::mutex> lock(mutex_);
-    stopped_ = true;
-    cv_.notify_all();
-}
-
-size_t FrameReorderer::pendingCount() const {
-    std::lock_guard<std::mutex> lock(mutex_);
-    return buffer_.size();
-}
 
 // Helper: bind current thread to specific CPU list
 static void bind_to_cpus(const std::vector<int>& cpus) {
@@ -327,15 +333,16 @@ void Pipeline::runCPUBenchmark() {
  */
 class FFmpegEncoder {
 public:
-    FFmpegEncoder() : fmt_(nullptr), oc_(nullptr), st_(nullptr), enc_(nullptr), sws_(nullptr), frame_(nullptr), pkt_(nullptr), opened_(false), drained_pkts_(0) {}
+    FFmpegEncoder() : fmt_(nullptr), oc_(nullptr), st_(nullptr), enc_(nullptr), sws_(nullptr), frame_(nullptr), pkt_(nullptr), opened_(false), drained_pkts_(0), low_latency_(false) {}
     ~FFmpegEncoder() { close(); }
 
     /**
      * @brief Open encoder with requested codec and container derived from CLI.
      */
-    bool open(const std::string& path, const std::string& enc_name, int w, int h, int fps) {
+    bool open(const std::string& path, const std::string& enc_name, int w, int h, int fps, bool low_latency) {
         output_path_.clear();
         width_ = w; height_ = h; fps_ = fps > 0 ? fps : 30;
+        low_latency_ = low_latency;
         // Select container by encoder and auto-rename output extension if needed
         std::string out_path = path;
         std::string selected_mux = (enc_name == "h264") ? "mp4" : "avi";
@@ -382,8 +389,22 @@ public:
         else if (enc_->codec_id == AV_CODEC_ID_MJPEG) enc_->pix_fmt = AV_PIX_FMT_YUVJ420P;
         else if (enc_->codec_id == AV_CODEC_ID_RAWVIDEO) enc_->pix_fmt = AV_PIX_FMT_BGR24;
         if (enc_->codec_id == AV_CODEC_ID_H264) {
-            av_opt_set(enc_->priv_data, "preset", "ultrafast", 0);
-            av_opt_set(enc_->priv_data, "tune", "zerolatency", 0);
+            if (low_latency_) {
+                av_opt_set(enc_->priv_data, "preset", "ultrafast", 0);
+                av_opt_set(enc_->priv_data, "tune", "zerolatency", 0);
+                enc_->max_b_frames = 0;
+                enc_->gop_size = 30;
+                enc_->refs = 1;
+                enc_->has_b_frames = 0;
+                enc_->thread_count = 1;
+                av_opt_set(enc_->priv_data, "bf", "0", 0);
+                av_opt_set(enc_->priv_data, "bframes", "0", 0);
+                av_opt_set(enc_->priv_data, "scenecut", "0", 0);
+                av_opt_set(enc_->priv_data, "rc-lookahead", "0", 0);
+                enc_->flags |= AV_CODEC_FLAG_LOW_DELAY;
+            } else {
+                av_opt_set(enc_->priv_data, "preset", "veryfast", 0);
+            }
         }
         if (oc_->oformat->flags & AVFMT_GLOBALHEADER) enc_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
         int ret = avcodec_open2(enc_, codec, nullptr);
@@ -403,6 +424,9 @@ public:
         if (ret < 0) { std::cerr << "[WARN] encoder: write_header failed: " << err2str(ret) << std::endl; if (mux_opts) av_dict_free(&mux_opts); close(); return false; }
         if (mux_opts) av_dict_free(&mux_opts);
         std::cout << "[INFO] encoder: wrote header" << std::endl;
+        if (low_latency_ && enc_->codec_id == AV_CODEC_ID_H264) {
+            std::cout << "[INFO] encoder: low-latency h264 preset applied (gop=30, max_b=0, refs=1)" << std::endl;
+        }
         // Allocate frame and packet
         frame_ = av_frame_alloc();
         frame_->format = enc_->pix_fmt; frame_->width = width_; frame_->height = height_;
@@ -531,6 +555,7 @@ public:
             }
         }
         output_path_.clear();
+        low_latency_ = false;
     }
 
 private:
@@ -550,6 +575,7 @@ private:
     int64_t pts_ = 0;
     bool opened_;
     int drained_pkts_;
+    bool low_latency_;
     std::string output_path_;
 };
 
@@ -559,14 +585,17 @@ private:
  */
 Pipeline::Pipeline(const PipelineConfig& cfg)
     : config_(cfg),
-      capture_queue_(cfg.queue_capacity),
-      preprocess_queue_(cfg.queue_capacity),
-      inference_queue_(cfg.queue_capacity),
-      postprocess_queue_(cfg.queue_capacity),
-      overlay_queue_(cfg.queue_capacity),
-      output_queue_(cfg.queue_capacity),
+      capture_queue_(choose_capacity(cfg, cfg.q_cap_capture, live_capture_capacity(cfg))),
+      preprocess_queue_(choose_capacity(cfg, cfg.q_cap_preprocess, live_preprocess_capacity(cfg))),
+      inference_queue_(choose_capacity(cfg, cfg.q_cap_infer, live_infer_capacity(cfg))),
+      postprocess_queue_(choose_capacity(cfg, cfg.q_cap_reorder, live_reorder_capacity(cfg))),
+      overlay_queue_(choose_capacity(cfg, 0, live_overlay_capacity(cfg))),
+      output_queue_(choose_capacity(cfg, 0, live_overlay_capacity(cfg))),
       running_(false), frame_counter_(0), dropped_frames_(0) {
     reorderer_ = std::make_unique<FrameReorderer>();
+    reorder_capacity_hint_ = choose_capacity(cfg, cfg.q_cap_reorder, live_reorder_capacity(cfg));
+    const size_t backlog_limit = reorder_backlog_limit(cfg);
+    reorderer_->configureLive(cfg.latency_mode, cfg.live_ttl_ms, reorder_capacity_hint_, backlog_limit);
 }
 
 /** @brief Ensure all threads stop before destruction. */
@@ -582,8 +611,18 @@ bool Pipeline::start() {
     if (config_.auto_cpu_detect && config_.nn_cpus.empty()) runCPUBenchmark();
     // Create capture
     capture_ = createCapture(config_.source);
-    if (!capture_ || !capture_->init(config_.source)) {
-        std::cerr << "[ERROR] Capture init failed" << std::endl; return false;
+    if (!capture_) {
+        std::cerr << "[ERROR] Capture init failed" << std::endl;
+        return false;
+    }
+    if (auto v4l2 = dynamic_cast<CaptureV4L2*>(capture_.get())) {
+        bool live_mode = (config_.latency_mode == LatencyMode::Live);
+        int cam_bufs = live_mode ? config_.cam_buffers : 0;
+        v4l2->setLowLatencyMode(live_mode, cam_bufs);
+    }
+    if (!capture_->init(config_.source)) {
+        std::cerr << "[ERROR] Capture init failed" << std::endl;
+        return false;
     }
     // Create engines
     engines_.clear(); engines_.reserve(std::max(1, config_.nn_workers));
@@ -595,9 +634,31 @@ bool Pipeline::start() {
         engines_.push_back(std::move(e));
     }
     running_ = true;
+    try {
+        std::string ring_label;
+        if (!config_.perf_json_path.empty()) {
+            ring_label = std::filesystem::path(config_.perf_json_path).stem().string();
+        }
+        if (ring_label.empty()) {
+            ring_label = (config_.pp_mode == PreprocMode::RVV) ? "live_rvv" : "live_sw";
+        }
+        ring_set_run_label(ring_label);
+    } catch (...) {
+        ring_set_run_label("live");
+    }
+    std::cout << "[INFO] live_ttl_ms=" << config_.live_ttl_ms << std::endl;
+    std::cout << "[INFO] nn_workers=" << config_.nn_workers << std::endl;
+    drop_cap_.store(0);
+    drop_pp_.store(0);
+    drop_inf_.store(0);
+    drop_post_.store(0);
+    drop_display_.store(0);
+    live_gate_block_.store(0);
+    last_present_ok_.store(true);
     auto state = std::make_shared<DisplayState>();
     state->probe_path = config_.display_probe_path;
     state->watchdog_sec = config_.watchdog_sec;
+    state->probe_repeat = (config_.latency_mode == LatencyMode::Live);
     state->last_metrics_ns.store(now_ns());
     set_state(this, state);
     if (state->watchdog_sec > 0) {
@@ -615,6 +676,8 @@ bool Pipeline::start() {
                     continue;
                 }
                 if (!state->watchdog_triggered.exchange(true)) {
+                    LOG_STAGE(RingStage::WDG_TRIGGER, 0, "watchdog");
+                    ring_dump_artifacts("watchdog");
                     std::cout << "[watchdog] no progress for " << state->watchdog_sec
                               << "s, shutting down..." << std::endl;
                 }
@@ -684,6 +747,7 @@ void Pipeline::stop() {
     output_queue_.stop();
     if (reorderer_) reorderer_->stop();
     metrics_cv_.notify_all();
+    ring_dump_artifacts("stop");
     if (auto state = get_state(this)) {
         state->stop_requested.store(true);
     }
@@ -753,7 +817,25 @@ void Pipeline::captureThread() {
             f.timestamp = t0;
         }
         const uint64_t fid = f.frame_id;
+        if (config_.latency_mode == LatencyMode::Live) {
+            while (capture_queue_.full()) {
+                Frame dropped;
+                if (!capture_queue_.tryPop(dropped)) {
+                    break;
+                }
+                if (reorderer_) {
+                    reorderer_->markDropped(dropped.frame_id);
+                }
+                release_frame_resources(dropped);
+                drop_cap_.fetch_add(1, std::memory_order_relaxed);
+                LOG_STAGE_F(RingStage::CAP_DROP, dropped.frame_id, 0, "cap_drop");
+                if (inflight_.load() > 0) {
+                    inflight_--;
+                }
+            }
+        }
         capture_queue_.push(std::move(f));
+        LOG_STAGE_F(RingStage::CAP_ENQ, fid, 0, "cap_enq");
         if (config_.log_level == "debug") {
             if (fid % 50 == 0) {
                 struct mallinfo2 mi = mallinfo2();
@@ -801,7 +883,24 @@ void Pipeline::preprocessThread() {
         pp.preprocess(f, f.model_input, f.scale, f.dx, f.dy);
         auto t1 = std::chrono::steady_clock::now();
         const uint64_t fid = f.frame_id;
+        if (config_.latency_mode == LatencyMode::Live) {
+            while (preprocess_queue_.full()) {
+                Frame dropped;
+                if (!preprocess_queue_.tryPop(dropped)) {
+                    break;
+                }
+                release_frame_resources(dropped);
+                if (reorderer_) {
+                    reorderer_->markDropped(dropped.frame_id);
+                }
+                drop_pp_.fetch_add(1, std::memory_order_relaxed);
+                if (inflight_.load() > 0) {
+                    inflight_--;
+                }
+            }
+        }
         preprocess_queue_.push(std::move(f));
+        LOG_STAGE_F(RingStage::PP_DONE, fid, 0, "pp_done");
         if (config_.log_level == "debug" && fid % 50 == 0) {
             struct mallinfo2 mi = mallinfo2();
             std::cout << "[heap] stage=preprocess frame=" << fid
@@ -831,6 +930,22 @@ void Pipeline::schedulerThread() {
             inference_queue_.stop();
             break;
         }
+        if (config_.latency_mode == LatencyMode::Live) {
+            while (inference_queue_.full()) {
+                Frame dropped;
+                if (!inference_queue_.tryPop(dropped)) {
+                    break;
+                }
+                release_frame_resources(dropped);
+                if (reorderer_) {
+                    reorderer_->markDropped(dropped.frame_id);
+                }
+                drop_inf_.fetch_add(1, std::memory_order_relaxed);
+                if (inflight_.load() > 0) {
+                    inflight_--;
+                }
+            }
+        }
         inference_queue_.push(std::move(f));
     }
 }
@@ -848,6 +963,7 @@ void Pipeline::inferenceWorker(int worker_id) {
         Frame f;
         if (!inference_queue_.pop(f)) break;
         if (f.eos) { ProcessedFrame pf; pf.frame = std::move(f); postprocess_queue_.push(std::move(pf)); postprocess_queue_.stop(); break; }
+        LOG_STAGE_F(RingStage::INF_START, f.frame_id, 0, "inf_start");
         auto t0 = std::chrono::steady_clock::now();
         size_t infer_heap_before = 0;
         std::vector<Detection> det;
@@ -882,6 +998,23 @@ void Pipeline::inferenceWorker(int worker_id) {
         ProcessedFrame pf; pf.frame = std::move(f); pf.detections = std::move(det);
         pf.inference_start = t0; pf.inference_end = t1;
         const uint64_t fid = pf.frame.frame_id;
+        LOG_STAGE_F(RingStage::INF_DONE, fid, 0, "inf_done");
+        if (config_.latency_mode == LatencyMode::Live) {
+            while (postprocess_queue_.full()) {
+                ProcessedFrame dropped;
+                if (!postprocess_queue_.tryPop(dropped)) {
+                    break;
+                }
+                release_frame_resources(dropped.frame);
+                if (reorderer_) {
+                    reorderer_->markDropped(dropped.frame.frame_id);
+                }
+                drop_post_.fetch_add(1, std::memory_order_relaxed);
+                if (inflight_.load() > 0) {
+                    inflight_--;
+                }
+            }
+        }
         postprocess_queue_.push(std::move(pf));
         if (config_.log_level == "debug" && fid % 50 == 0) {
             struct mallinfo2 mi = mallinfo2();
@@ -920,6 +1053,7 @@ void Pipeline::postprocessThread() {
         // Postprocess is minimal here; measure routing overhead
         const uint64_t fid = pf.frame.frame_id;
         reorderer_->addFrame(pf);
+        LOG_STAGE_F(RingStage::POST_DONE, fid, 0, "post_done");
         if (config_.log_level == "debug" && fid % 50 == 0) {
             struct mallinfo2 mi = mallinfo2();
             std::cout << "[heap] stage=postprocess frame=" << fid
@@ -940,7 +1074,29 @@ void Pipeline::postprocessThread() {
  */
 void Pipeline::overlayThread() {
     while (running_) {
-        ProcessedFrame pf; if (!reorderer_->getNextFrame(pf)) break;
+        ProcessedFrame pf;
+        bool have_frame = false;
+        if (config_.latency_mode == LatencyMode::Live) {
+            have_frame = reorderer_->popLatestNonBlocking(pf);
+            if (!have_frame) {
+                if (!running_.load()) {
+                    break;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                continue;
+            }
+        } else {
+            if (!reorderer_->getNextFrame(pf)) {
+                break;
+            }
+            have_frame = true;
+        }
+        if (!have_frame) {
+            continue;
+        }
+        if (config_.latency_mode == LatencyMode::Live) {
+            pf.frame.timestamp = std::chrono::steady_clock::now();
+        }
         // Draw boxes
         extern void draw_detections(cv::Mat& frame_bgr, const std::vector<Detection>& dets);
         auto t0 = std::chrono::steady_clock::now();
@@ -951,6 +1107,15 @@ void Pipeline::overlayThread() {
             overlay_lat_.push_back(std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0);
         }
         const uint64_t fid = pf.frame.frame_id;
+        if (config_.latency_mode == LatencyMode::Live) {
+            while (overlay_queue_.full()) {
+                ProcessedFrame dropped;
+                if (!overlay_queue_.tryPop(dropped)) {
+                    break;
+                }
+                drop_display_.fetch_add(1, std::memory_order_relaxed);
+            }
+        }
         overlay_queue_.push(std::move(pf));
         if (config_.log_level == "debug" && fid % 50 == 0) {
             struct mallinfo2 mi = mallinfo2();
@@ -967,7 +1132,7 @@ void Pipeline::overlayThread() {
  */
 void Pipeline::outputThread() {
     auto state = get_state(this);
-    const DisplayConfig disp_cfg{capture_->getWidth(), capture_->getHeight(), "YOLOv5n", config_.sdl_driver};
+    const DisplayConfig disp_cfg{capture_->getWidth(), capture_->getHeight(), "YOLOv5n", config_.sdl_driver, config_.display_vsync};
     auto make_display = [&](const std::string& mode) -> std::shared_ptr<IDisplay> {
         std::unique_ptr<IDisplay> raw;
         if (mode == "sdl") {
@@ -995,13 +1160,40 @@ void Pipeline::outputThread() {
     FFmpegEncoder encoder;
     bool enc_ok = false;
     bool encoder_error_reported = false;
-    if (!config_.output_path.empty()) {
-        enc_ok = encoder.open(config_.output_path, config_.encoder, capture_->getWidth(), capture_->getHeight(), (int)capture_->getFPS());
-        if (!enc_ok) std::cerr << "[WARN] Encoder open failed; proceeding without file output" << std::endl;
+    const bool use_file_output = !config_.output_path.empty() && config_.encoder != "null";
+    if (use_file_output) {
+        enc_ok = encoder.open(config_.output_path, config_.encoder, capture_->getWidth(), capture_->getHeight(), (int)capture_->getFPS(), config_.latency_mode == LatencyMode::Live);
+        if (enc_ok) {
+            LOG_STAGE(RingStage::ENC_OPEN, 0, config_.encoder.c_str());
+        } else {
+            LOG_STAGE(RingStage::ENC_OPEN, -1, "enc_open_fail");
+            std::cerr << "[WARN] Encoder open failed; proceeding without file output" << std::endl;
+        }
+    } else {
+        LOG_STAGE(RingStage::ENC_OPEN, 1, "enc_null");
     }
     uint64_t processed = 0;
     while (running_) {
-        ProcessedFrame pf; if (!overlay_queue_.pop(pf)) break;
+        ProcessedFrame pf;
+        bool have_frame = false;
+        if (config_.latency_mode == LatencyMode::Live) {
+            have_frame = overlay_queue_.tryPop(pf);
+            if (!have_frame) {
+                if (!running_.load()) {
+                    break;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                continue;
+            }
+        } else {
+            if (!overlay_queue_.pop(pf)) {
+                break;
+            }
+            have_frame = true;
+        }
+        if (!have_frame) {
+            continue;
+        }
         PerfMetrics metrics_snapshot{};
         bool metrics_valid = false;
         {
@@ -1009,35 +1201,65 @@ void Pipeline::outputThread() {
             metrics_snapshot = current_metrics_;
             metrics_valid = true;
         }
+        bool present_success_backend = true;
         DisplayFrameInfo frame_info{pf.frame.image, pf.frame.frame_id,
                                     metrics_valid ? &metrics_snapshot : nullptr,
-                                    metrics_valid};
+                                    metrics_valid,
+                                    display ? &present_success_backend : nullptr};
         auto disp_start = std::chrono::steady_clock::now();
         bool keep_running = true;
         if (display) {
             keep_running = display->present(frame_info);
+        } else {
+            present_success_backend = false;
         }
         auto disp_end = std::chrono::steady_clock::now();
+        const double e2e_ms = std::chrono::duration_cast<std::chrono::microseconds>(disp_end - pf.frame.timestamp).count() / 1000.0;
         double disp_ms = std::chrono::duration_cast<std::chrono::microseconds>(disp_end - disp_start).count() / 1000.0;
         if (!keep_running) {
-            if (state && display) {
-                state->last_present_ns.store(to_ns(display->lastPresentMono()));
-            }
-            stop();
-            break;
-        }
-        if (state) {
-            if (display) {
-                state->last_present_ns.store(to_ns(display->lastPresentMono()));
-                if (state->driver_name != "null") {
-                    save_display_probe(state, pf.frame.image);
+            if (config_.display_allow_null) {
+                live_gate_block_.store(0, std::memory_order_relaxed);
+                if (state && display) {
+                    state->last_present_ns.store(now_ns());
+                    std::lock_guard<std::mutex> lk(state->display_mutex);
+                    state->display.reset();
+                    state->driver_name = "null";
                 }
+                display.reset();
+                present_success_backend = false;
+            } else {
+                if (state && display) {
+                    state->last_present_ns.store(to_ns(display->lastPresentMono()));
+                }
+                stop();
+                break;
+            }
+        }
+        const bool has_real_display = display && display->driverName() != "null";
+        bool metrics_presented = has_real_display ? present_success_backend : false;
+        if (has_real_display && !present_success_backend) {
+            drop_display_.fetch_add(1, std::memory_order_relaxed);
+        }
+        if (config_.latency_mode == LatencyMode::Live) {
+            live_gate_block_.store(0, std::memory_order_relaxed);
+        } else {
+            live_gate_block_.store(has_real_display && !present_success_backend ? 1 : 0, std::memory_order_relaxed);
+        }
+        last_present_ok_.store(metrics_presented, std::memory_order_relaxed);
+        if (state) {
+            if (display && present_success_backend) {
+                state->last_present_ns.store(to_ns(display->lastPresentMono()));
+                save_display_probe(state, pf.frame.image);
+            } else if (config_.display_allow_null && !pf.frame.image.empty()) {
+                save_display_probe(state, pf.frame.image);
             }
             {
                 std::lock_guard<std::mutex> lat_lk(state->lat_mutex);
                 state->display_lat.push_back(disp_ms);
             }
         }
+        double enc_sample_ms = 0.0;
+        bool enc_sample_valid = false;
         if (enc_ok) {
             auto t0 = std::chrono::steady_clock::now();
             bool write_ok = encoder.write(pf.frame.image);
@@ -1048,10 +1270,20 @@ void Pipeline::outputThread() {
                     encoder_error_reported = true;
                 }
                 enc_ok = false;
+                LOG_STAGE_F(RingStage::ENC_PKT, pf.frame.frame_id, -1, "enc_write_fail");
             } else {
-                std::lock_guard<std::mutex> lk(metrics_mutex_);
-                enc_lat_.push_back(std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0);
+                LOG_STAGE_F(RingStage::ENC_PKT, pf.frame.frame_id, 0, "enc_pkt");
+                enc_sample_ms = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
+                enc_sample_valid = true;
             }
+        }
+
+        {
+            std::lock_guard<std::mutex> lk(metrics_mutex_);
+            if (enc_sample_valid) {
+                enc_lat_.push_back(enc_sample_ms);
+            }
+            e2e_lat_.push_back(e2e_ms);
         }
         ++processed;
         if (config_.log_level == "debug" && pf.frame.frame_id % 50 == 0) {
@@ -1088,7 +1320,10 @@ void Pipeline::outputThread() {
             break;
         }
     }
-    encoder.close();
+    LOG_STAGE(RingStage::ENC_CLOSE, 0, "enc_close");
+    if (enc_ok) {
+        encoder.close();
+    }
     if (display) display->close();
 }
 
@@ -1153,15 +1388,67 @@ void Pipeline::metricsThread() {
             m.latency_ms.overlay = (float)percentile(overlay_lat_, 0.5); overlay_lat_.clear();
             m.latency_ms.encode = (float)percentile(enc_lat_, 0.5); enc_lat_.clear();
             m.latency_ms.display = 0.0f;
+            double e2e_p50 = percentile(e2e_lat_, 0.5);
+            double e2e_p95 = percentile(e2e_lat_, 0.95);
+            e2e_lat_.clear();
+            m.e2e_ms.p50 = (float)e2e_p50;
+            m.e2e_ms.p95 = (float)e2e_p95;
             reorder_pending = reorderer_ ? reorderer_->pendingCount() : 0;
+            int q_cap = (int)capture_queue_.size();
+            int q_pp = (int)preprocess_queue_.size();
+            int q_inf = (int)inference_queue_.size();
+            int q_post = (int)postprocess_queue_.size();
+            int q_overlay = (int)overlay_queue_.size();
             m.queue_sizes = {
-                {"cap_pp", (int)capture_queue_.size()},
-                {"pp_sched", (int)preprocess_queue_.size()},
-                {"sched_inf", (int)inference_queue_.size()},
-                {"inf_post", (int)postprocess_queue_.size()},
-                {"post_reord", (int)overlay_queue_.size()},
-                {"reorder_buf", (int)reorder_pending}
+                {"cap_pp", q_cap},
+                {"pp_sched", q_pp},
+                {"sched_inf", q_inf},
+                {"inf_post", q_post},
+                {"post_reord", q_overlay},
+                {"reorder_buf", (int)reorder_pending},
+                {"q_cap", q_cap},
+                {"q_pp", q_pp},
+                {"q_inf", q_inf},
+                {"q_post", q_post},
+                {"q_ord", (int)reorder_pending}
             };
+            m.queue_capacity = {
+                {"cap_pp", static_cast<int>(capture_queue_.capacity())},
+                {"pp_sched", static_cast<int>(preprocess_queue_.capacity())},
+                {"sched_inf", static_cast<int>(inference_queue_.capacity())},
+                {"inf_post", static_cast<int>(postprocess_queue_.capacity())},
+                {"post_reord", static_cast<int>(overlay_queue_.capacity())},
+                {"reorder_buf", static_cast<int>(reorder_capacity_hint_)},
+                {"q_cap", static_cast<int>(capture_queue_.capacity())},
+                {"q_pp", static_cast<int>(preprocess_queue_.capacity())},
+                {"q_inf", static_cast<int>(inference_queue_.capacity())},
+                {"q_post", static_cast<int>(postprocess_queue_.capacity())},
+                {"q_ord", static_cast<int>(reorder_capacity_hint_)}
+            };
+            uint64_t drop_cap = drop_cap_.load(std::memory_order_relaxed);
+            uint64_t drop_pp = drop_pp_.load(std::memory_order_relaxed);
+            uint64_t drop_inf = drop_inf_.load(std::memory_order_relaxed);
+            uint64_t drop_post = drop_post_.load(std::memory_order_relaxed);
+            uint64_t drop_disp = drop_display_.load(std::memory_order_relaxed);
+            uint64_t reorder_drop_backlog = reorderer_ ? reorderer_->dropBacklogCount() : 0;
+            uint64_t reorder_drop_ttl = reorderer_ ? reorderer_->dropTTLCount() : 0;
+            uint64_t reorder_gap_skips = reorderer_ ? reorderer_->gapSkipCount() : 0;
+            m.drop_counts = {
+                {"drops_cap", drop_cap},
+                {"drops_pp", drop_pp},
+                {"drops_inf", drop_inf},
+                {"drops_post", drop_post},
+                {"drops_ord", reorder_drop_backlog},
+                {"drops_ttl", reorder_drop_ttl},
+                {"drops_disp", drop_disp}
+            };
+            m.drop_backlog = drop_cap + drop_pp + drop_inf + drop_post + reorder_drop_backlog + drop_disp;
+            m.drop_ttl = reorder_drop_ttl;
+            m.gap_skips = reorder_gap_skips;
+            m.ttl_drops = reorder_drop_ttl;
+            m.live_gate_block = live_gate_block_.load(std::memory_order_relaxed);
+            m.reorder_backlog_max = reorderer_ ? reorderer_->backlogMax() : 0;
+            m.display_presented = last_present_ok_.load(std::memory_order_relaxed);
             struct mallinfo2 mi = mallinfo2();
             m.heap_bytes = mi.uordblks;
             m.worker_busy_pct.assign(std::max(1, config_.nn_workers), 0.0f);
@@ -1183,11 +1470,25 @@ void Pipeline::metricsThread() {
             current_metrics_ = m;
         }
         if (metrics_writer_) metrics_writer_->write(current_metrics_);
+        auto qval = [&](const char* k) -> int {
+            auto it = current_metrics_.queue_sizes.find(k);
+            return (it == current_metrics_.queue_sizes.end()) ? 0 : it->second;
+        };
+        auto qcap = [&](const char* k) -> int {
+            auto it = current_metrics_.queue_capacity.find(k);
+            return (it == current_metrics_.queue_capacity.end()) ? 0 : it->second;
+        };
+        auto dropval = [&](const char* k) -> uint64_t {
+            auto it = current_metrics_.drop_counts.find(k);
+            return (it == current_metrics_.drop_counts.end()) ? 0ULL : it->second;
+        };
         std::ostringstream oss;
         oss.setf(std::ios::fixed);
         oss << std::setprecision(2)
             << "[metrics] in_fps=" << current_metrics_.input_fps
             << " out_fps=" << current_metrics_.output_fps
+            << " e2e_p50=" << current_metrics_.e2e_ms.p50
+            << " e2e_p95=" << current_metrics_.e2e_ms.p95
             << " drop_pct=" << current_metrics_.drop_percentage
             << " cap_ms=" << current_metrics_.latency_ms.capture
             << " pp_ms=" << current_metrics_.latency_ms.preprocess
@@ -1196,7 +1497,21 @@ void Pipeline::metricsThread() {
             << " post_ms=" << current_metrics_.latency_ms.postprocess
             << " ovl_ms=" << current_metrics_.latency_ms.overlay
             << " enc_ms=" << current_metrics_.latency_ms.encode
-            << " reord_buf=" << reorder_pending
+            << " q_cap=" << qval("q_cap") << '/' << qcap("q_cap")
+            << " q_pp=" << qval("q_pp") << '/' << qcap("q_pp")
+            << " q_inf=" << qval("q_inf") << '/' << qcap("q_inf")
+            << " q_ord=" << qval("q_ord") << '/' << qcap("q_ord")
+            << " drops_cap=" << dropval("drops_cap")
+            << " drops_pp=" << dropval("drops_pp")
+            << " drops_inf=" << dropval("drops_inf")
+            << " drops_post=" << dropval("drops_post")
+            << " drops_ord=" << dropval("drops_ord")
+            << " drops_ttl=" << dropval("drops_ttl")
+            << " drops_disp=" << dropval("drops_disp")
+            << " drop_total=" << current_metrics_.drop_backlog
+            << " drop_ttl=" << current_metrics_.drop_ttl
+            << " present=" << (current_metrics_.display_presented ? 1 : 0)
+            << " backlog_max=" << current_metrics_.reorder_backlog_max
             << " heap_mb=" << (current_metrics_.heap_bytes / (1024.0 * 1024.0))
             << " disp_ms=" << current_metrics_.latency_ms.display;
         std::cout << oss.str() << std::endl;

@@ -5,6 +5,7 @@
 #include "metrics.hpp"
 #include "capture.hpp"
 #include "engine.hpp"
+#include "ringlog.hpp"
 #include <thread>
 #include <queue>
 #include <mutex>
@@ -13,6 +14,8 @@
 #include <memory>
 #include <map>
 #include <set>
+#include <chrono>
+#include <optional>
 
 namespace yolov5 {
 
@@ -55,7 +58,7 @@ public:
     /**
      * @brief Attempt non-blocking push.
      */
-    bool tryPush(const T& item);
+    bool tryPush(T item);
 
     /**
      * @brief Attempt non-blocking pop.
@@ -75,6 +78,11 @@ public:
      * @brief Whether the queue reached capacity.
      */
     bool full() const;
+
+    /**
+     * @brief Maximum number of elements allowed in the queue.
+     */
+    size_t capacity() const;
 
     /**
      * @brief Remove all elements without waking producers/consumers.
@@ -130,10 +138,10 @@ bool ThreadSafeQueue<T>::pop(T& item, bool wait) {
 }
 
 template<typename T>
-bool ThreadSafeQueue<T>::tryPush(const T& item) {
+bool ThreadSafeQueue<T>::tryPush(T item) {
     std::unique_lock<std::mutex> lock(mutex_);
     if (queue_.size() >= capacity_) return false;
-    queue_.push(item);
+    queue_.push(std::move(item));
     not_empty_.notify_one();
     return true;
 }
@@ -164,6 +172,11 @@ template<typename T>
 bool ThreadSafeQueue<T>::full() const {
     std::lock_guard<std::mutex> lock(mutex_);
     return queue_.size() >= capacity_;
+}
+
+template<typename T>
+size_t ThreadSafeQueue<T>::capacity() const {
+    return capacity_;
 }
 
 template<typename T>
@@ -209,6 +222,26 @@ public:
     bool getNextFrame(ProcessedFrame& frame);
 
     /**
+     * @brief Retrieve the most recent frame without blocking (live mode only).
+     * @param frame Output container receiving the latest frame on success.
+     * @return True when a fresh frame is returned, false when none available.
+     */
+    bool popLatestNonBlocking(ProcessedFrame& frame);
+
+    /**
+     * @brief Configure live-mode behaviour (drop windows, TTLs).
+     */
+    void configureLive(LatencyMode mode, int ttl_ms, size_t cap_hint, size_t backlog_limit);
+
+    /**
+     * @brief Retrieve drop counters for live mode diagnostics.
+     */
+    uint64_t dropBacklogCount() const;
+    uint64_t dropTTLCount() const;
+    uint64_t gapSkipCount() const;
+    size_t backlogMax() const;
+
+    /**
      * @brief Reset internal buffers and expected id to zero.
      */
     void reset();
@@ -227,6 +260,17 @@ private:
     std::map<uint64_t, ProcessedFrame> buffer_;
     std::set<uint64_t> dropped_ids_;
     uint64_t expected_id_;
+    LatencyMode mode_;
+    std::chrono::milliseconds live_ttl_;
+    size_t live_cap_hint_;
+    size_t live_backlog_limit_;
+    std::atomic<uint64_t> drop_backlog_;
+    std::atomic<uint64_t> drop_ttl_;
+    std::atomic<uint64_t> gap_skips_;
+    size_t backlog_max_;
+    std::optional<ProcessedFrame> live_latest_;
+    uint64_t live_latest_id_;
+    uint64_t live_expected_id_;
     mutable std::mutex mutex_;
     std::condition_variable cv_;
     std::atomic<bool> stopped_;
@@ -330,6 +374,14 @@ private:
     std::atomic<uint64_t> frame_counter_;
     std::atomic<uint64_t> dropped_frames_;
     std::atomic<bool> mem_logger_stop_{false};
+    std::atomic<uint64_t> drop_cap_{0};
+    std::atomic<uint64_t> drop_pp_{0};
+    std::atomic<uint64_t> drop_inf_{0};
+    std::atomic<uint64_t> drop_post_{0};
+    size_t reorder_capacity_hint_{0};
+    std::atomic<uint64_t> drop_display_{0};
+    std::atomic<bool> last_present_ok_{true};
+    std::atomic<int> live_gate_block_{0};
     
     // Metrics
     mutable std::mutex metrics_mutex_;
@@ -343,6 +395,7 @@ private:
     std::vector<double> post_lat_;
     std::vector<double> overlay_lat_;
     std::vector<double> enc_lat_;
+    std::vector<double> e2e_lat_;
     std::atomic<uint64_t> in_count_{0};
     std::atomic<uint64_t> out_count_{0};
     std::unique_ptr<JSONLMetricsWriter> metrics_writer_;

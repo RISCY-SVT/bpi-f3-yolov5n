@@ -1,7 +1,9 @@
 build/
 dist/
 artifacts/*
-!artifacts/README.md
+bin/
+release/
+
 *.mp4
 *.avi
 *.mkv
@@ -11,4 +13,9 @@ cpu_model/*.o
 *.o
 *.lo
 *.a
+*.so
+*.debug
+*.tmp
+*.ppm
+*.ppm.gz
 *.log
